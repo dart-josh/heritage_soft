@@ -1,0 +1,97 @@
+name: heritage_soft
+description: The Client Database for Heritage fitness centre.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.1 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.2
+  intl: ^0.19.0
+  data_table_2: ^2.2.1
+  month_year_picker2: ^1.0.0+2
+  table_calendar: ^3.0.0
+  confetti: ^0.7.0
+  slide_to_act: ^2.0.2
+  provider: ^6.1.1
+  flutter_launcher_icons: "^0.13.1"
+  shared_preferences: ^2.2.2
+  firebase_core: ^3.6.0
+  cloud_firestore: ^5.4.4
+  firebase_database: ^11.1.4
+  http: ^1.1.2
+  file_picker: ^6.1.1
+  firebase_storage: ^12.3.3
+  carousel_slider: ^4.2.1
+  audioplayers: ^5.0.0
+  camera: ^0.10.5+9
+  camera_web: ^0.3.3
+  qr_flutter: ^4.1.0
+  universal_html: ^2.2.4
+  widgets_to_image: ^1.0.0
+  collection: ^1.18.0
+  yet_another_date_picker: ^0.2.0
+  fl_toast: ^3.2.0
+  esys_flutter_share_plus: ^2.2.0
+  printing: ^5.13.3
+  int_to_words: ^0.0.4
+
+flutter_launcher_icons:
+  # android: "launcher_icon"
+  # image_path: "assets/app_icon.ico"
+  web:
+    generate: true
+    image_path: "images/logo.jpg"
+    background_color: "#000000"
+    theme_color: "#000000"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - images/
+    - images/icon/
+    - assets/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Regular.ttf
+
+    - family: Century
+      fonts:
+        - asset: fonts/CENTURY.ttf
+        - asset: fonts/Century Bold.ttf
+          weight: 700
+
+    - family: DancingScript
+      fonts:
+        - asset: fonts/DancingScript-Regular.ttf
+    
+    - family: Segoepr
+      fonts:
+        - asset: fonts/segoepr.ttf
+
+    - family: Sitka
+      fonts:
+        - asset: fonts/Sitka-Banner.ttf
+
+    - family: MsLineDraw
+      fonts:
+        - asset: fonts/MLINEDRAW.ttf

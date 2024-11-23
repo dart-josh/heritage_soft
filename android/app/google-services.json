@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "554797960842",
+    "firebase_url": "https://heritage-soft-default-rtdb.firebaseio.com",
+    "project_id": "heritage-soft",
+    "storage_bucket": "heritage-soft.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554797960842:android:0b3dc7a37be8b537abe773",
+        "android_client_info": {
+          "package_name": "com.example.heritage_soft"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXDBockYtIlLTAvWBaMMrByN5oW9OUXKg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
