@@ -10,6 +10,7 @@ import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
+import 'package:heritage_soft/datamodels/income_model.dart';
 import 'package:heritage_soft/datamodels/password_model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
@@ -17,6 +18,8 @@ import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:provider/provider.dart';
 
 class AdminDatabaseHelpers {
+  static final sub_history_ref = FirebaseDatabase.instance.ref('Sub History');
+
   // get all accessory
   static get_accessories(context) {
     FirebaseFirestore.instance
@@ -364,6 +367,50 @@ class AdminDatabaseHelpers {
       }
 
       is_loaded = true;
+    });
+  }
+
+  // get gym income data
+  static Future<List<GymIncomeModel>> old_get_income_data(
+      String key, String date) async {
+    List<GymIncomeModel> gym_incomes = [];
+
+    return GymDatabaseHelpers.ft_client_ref
+        .doc(key)
+        .collection('Sub History')
+        .where('hist_type',
+            whereIn: ['Registration', 'Renewal', 'Personal Training', 'Boxing'])
+        .where('time_stamp',
+            isGreaterThanOrEqualTo: date,
+            isLessThan: date.substring(0, date.length - 1) +
+                String.fromCharCode(date.codeUnitAt(date.length - 1) + 1))
+        .get()
+        .then((hist_onValue) {
+          hist_onValue.docs.forEach((hist_doc) {
+            Map<String, dynamic> new_data = hist_doc.data();
+            new_data.addAll({'client_key': key});
+            // print(new_data);
+            GymIncomeModel inc = GymIncomeModel.fromJson(new_data);
+            gym_incomes.add(inc);
+          });
+
+          return gym_incomes;
+        });
+  }
+
+  static Future<List<GymIncomeModel>> get_income_data() async {
+    List<GymIncomeModel> gym_incomes = [];
+
+    return await sub_history_ref.get().then((snapshot) {
+      if (snapshot.value != null) {
+        Map val = snapshot.value as Map;
+        val.forEach((key, val) {
+          GymIncomeModel inc = GymIncomeModel.fromJson(val);
+          gym_incomes.add(inc);
+        });
+      }
+
+      return gym_incomes;
     });
   }
 

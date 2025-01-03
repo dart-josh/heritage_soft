@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/attendance_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -192,6 +193,8 @@ class GymDatabaseHelpers {
   static Future<bool> add_to_sub_history(
       String client_key, Map<String, dynamic> data) async {
     try {
+      data.addAll({'client_key': client_key});
+      AdminDatabaseHelpers.sub_history_ref.push().set(data);
       await GymDatabaseHelpers.ft_client_ref
           .doc(client_key)
           .collection('Sub History')

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/pages/other/gym_data_report_page.dart';
+import 'package:heritage_soft/pages/other/gym_income_report.dart';
 
 class DataReportPage extends StatefulWidget {
   const DataReportPage({super.key});
@@ -27,6 +28,8 @@ class _DataReportPageState extends State<DataReportPage> {
             // gym
             tile('Gym Data', GymDataReportPage()),
 
+            tile('Gym Income Report', GymIncomeReport()),
+
             // physio
             // tile('Physio Data', GymDataReportPage()),
           ],
@@ -50,7 +53,7 @@ class _DataReportPageState extends State<DataReportPage> {
         },
         child: Container(
           width: 200,
-          height: 220,
+          height: 235,
           decoration: BoxDecoration(
             color: Colors.blue.withOpacity(0.49),
             borderRadius: BorderRadius.circular(15),
