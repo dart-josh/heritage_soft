@@ -1,8 +1,5 @@
 class GymIncomeModel {
   String client_key;
-  String? f_name;
-  String? l_name;
-  String? cl_id;
   String hist_type;
   int amount;
   int amt_b4_dis;
@@ -14,9 +11,6 @@ class GymIncomeModel {
 
   GymIncomeModel({
     required this.client_key,
-    this.f_name,
-    this.l_name,
-    this.cl_id,
     required this.hist_type,
     required this.amount,
     required this.amt_b4_dis,
@@ -27,7 +21,7 @@ class GymIncomeModel {
     required this.extras,
   });
 
-  factory GymIncomeModel.fromJson(Map<String, dynamic> hist_json) =>
+  factory GymIncomeModel.fromJson(Map hist_json) =>
       GymIncomeModel(
         client_key: hist_json['client_key'] ?? '',
         hist_type: hist_json['hist_type'] ?? '',

@@ -37,9 +37,8 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
           .toList();
 
       for (var client in clients) {
-        var res = await AdminDatabaseHelpers.old_get_income_data(
-            client['key'],
-            date);
+        var res =
+            await AdminDatabaseHelpers.old_get_income_data(client['key'], date);
 
         income_list += res;
         setState(() {});
@@ -51,7 +50,7 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
       var e_list = await AdminDatabaseHelpers.get_income_data();
       var res = groupBy(
           e_list,
-          (e) => DateFormat('MMMM, yyyy')
+          (e) => DateFormat('MM/yyyy')
               .format(DateFormat('dd/MM/yyyy').parse(e.sub_date)));
 
       res.forEach((key, value) {
@@ -252,7 +251,9 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
             // name
             Expanded(
               child: Text(
-                (client.isNotEmpty) ? '${client.first.f_name} ${client.first.l_name}' : 'User Not found',
+                (client.isNotEmpty)
+                    ? '${client.first.f_name} ${client.first.l_name}'
+                    : 'User Not found',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
