@@ -57,6 +57,7 @@ class ClientModel {
   int? max_days;
 
   String renew_dates;
+  String registration_dates;
 
   ClientModel({
     required this.key,
@@ -103,6 +104,7 @@ class ClientModel {
     // !
     this.max_days,
     required this.renew_dates,
+    required this.registration_dates,
   });
 
   factory ClientModel.fromMap(String key, Map map) {
@@ -149,6 +151,7 @@ class ClientModel {
       physio_key: map['physio_key'] ?? '',
       indemnity_verified: map['indemnity_verified'] ?? false,
       renew_dates: map['renew_dates'] ?? map['renew_date'] ?? '',
+      registration_dates: map['registration_dates'] ?? '',
     );
   }
 
@@ -218,6 +221,7 @@ class ClientListModel {
 
   String reg_date;
   String renew_dates;
+  String registration_dates;
 
   ClientListModel({
     required this.key,
@@ -241,6 +245,7 @@ class ClientListModel {
     required this.physio_cl,
     required this.reg_date,
     required this.renew_dates,
+    required this.registration_dates,
   });
 
   factory ClientListModel.fromMap(String key, Map map) {
@@ -266,6 +271,7 @@ class ClientListModel {
       physio_cl: map['physio_cl'] ?? false,
       reg_date: map['reg_date'] ?? '',
       renew_dates: map['renew_dates'] ?? map['renew_date'] ?? '',
+      registration_dates: map['registration_dates'] ?? '',
     );
   }
 }
@@ -313,12 +319,14 @@ class RenewalModel {
   int sub_income;
   String program_type;
   String renew_dates;
+  String registration_dates;
   String sub_date;
 
   RenewalModel({
     required this.key,
     required this.id,
     required this.reg_date,
+    required this.registration_dates,
     required this.user_image,
     required this.name,
     required this.sub_plan,
@@ -458,6 +466,7 @@ class Sub_History_Model {
   String sub_date;
   String exp_date;
   int amount;
+  int extras_amount;
 
   bool boxing;
   bool pt_status;
@@ -477,6 +486,7 @@ class Sub_History_Model {
     required this.sub_date,
     required this.exp_date,
     required this.amount,
+    required this.extras_amount,
     required this.boxing,
     required this.pt_status,
     required this.pt_plan,
@@ -494,6 +504,7 @@ class Sub_History_Model {
       sub_date: map['sub_date'],
       exp_date: map['exp_date'],
       amount: map['amount'],
+      extras_amount: map['extras_amount'] ?? 0,
       boxing: map['boxing'],
       pt_status: map['pt_status'],
       pt_plan: map['pt_plan'],
@@ -510,6 +521,7 @@ class Sub_History_Model {
         'sub_date': sub_date,
         'exp_date': exp_date,
         'amount': amount,
+        'extras_amount': extras_amount,
         'boxing': boxing,
         'pt_status': pt_status,
         'pt_plan': pt_plan,

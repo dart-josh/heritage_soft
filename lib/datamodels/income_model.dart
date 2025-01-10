@@ -2,6 +2,7 @@ class GymIncomeModel {
   String client_key;
   String hist_type;
   int amount;
+  int extras_amount;
   int amt_b4_dis;
   String sub_plan;
   String sub_type;
@@ -13,6 +14,7 @@ class GymIncomeModel {
     required this.client_key,
     required this.hist_type,
     required this.amount,
+    required this.extras_amount,
     required this.amt_b4_dis,
     required this.sub_plan,
     required this.sub_type,
@@ -26,6 +28,7 @@ class GymIncomeModel {
         client_key: hist_json['client_key'] ?? '',
         hist_type: hist_json['hist_type'] ?? '',
         amount: hist_json['amount'] ?? 0,
+        extras_amount: hist_json['extras_amount'] ?? 0,
         amt_b4_dis: hist_json['sub_amount_b4_discount'] ?? 0,
         sub_plan: hist_json['sub_plan'] ?? '',
         sub_type: hist_json['sub_type'] ?? '',

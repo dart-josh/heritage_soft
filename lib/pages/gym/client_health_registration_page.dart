@@ -2003,6 +2003,7 @@ class _ClientHealthRegistrationPageState
           sub_income: 0,
           program_type: client!.program_type,
           renew_dates: '',
+          registration_dates: '',
           sub_date: '',
         );
 
@@ -2296,6 +2297,7 @@ class _ClientHealthRegistrationPageState
           sub_income: 0,
           program_type: client!.program_type,
           renew_dates: '',
+          registration_dates: '',
           sub_date: '',
         );
 

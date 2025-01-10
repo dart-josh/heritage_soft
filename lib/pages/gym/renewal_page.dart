@@ -64,16 +64,15 @@ class _RenewalPageState extends State<RenewalPage> {
   ];
 
   bool sp_pt = false;
-  int sp_pt_value = 10000;
+  int sp_pt_value = standard_pt;
 
   bool pp_pt = false;
-  int pp_pt_value = 15000;
+  int pp_pt_value = premium_pt;
 
   bool boxing = false;
-  int boxing_value = 15000;
+  int boxing_value = boxing_fee;
 
   bool registration = false;
-  int registration_value = 5000;
 
   String sub_date = '';
 
@@ -190,6 +189,21 @@ class _RenewalPageState extends State<RenewalPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.details.sub_plan == 'Daily' ||
+        widget.details.sub_plan == 'Boxing' ||
+        widget.details.sub_plan == 'Table Tennis' ||
+        widget.details.sub_plan == 'Dance class') {
+      if (widget.details.sub_plan != package_select &&
+          package_select != 'Select one' &&
+          package_select != '' &&
+          package_select != 'Daily' &&
+          (package_select != 'Boxing' || boxing) &&
+          package_select != 'Table Tennis' &&
+          package_select != 'Dance class') {
+        registration = true;
+      }
+    }
+
     getSubDate(sub_date_select);
     update_func();
     double width = MediaQuery.of(context).size.width * 0.50;
@@ -1070,7 +1084,7 @@ class _RenewalPageState extends State<RenewalPage> {
                   ),
                 ),
 
-          if (widget.register && registration)
+          if (widget.register || registration)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
@@ -1750,7 +1764,9 @@ class _RenewalPageState extends State<RenewalPage> {
                 : 'null';
 
         // cannot subscribe to an active pt plan
-        if (widget.details.pt_status && widget.details.pt_plan == pt_plan && !widget.adv_renewal) {
+        if (widget.details.pt_status &&
+            widget.details.pt_plan == pt_plan &&
+            !widget.adv_renewal) {
           Helpers.showToast(
             context: context,
             color: Colors.redAccent,
@@ -1827,7 +1843,8 @@ class _RenewalPageState extends State<RenewalPage> {
 
         // with pt
         if (pt) {
-          String pt_date = get_pt_date(sub_date_select, widget.details.pt_status);
+          String pt_date =
+              get_pt_date(sub_date_select, widget.details.pt_status);
           ned = {
             'sub_plan': package_select,
             'sub_type': sub_type_select,
@@ -1870,13 +1887,33 @@ class _RenewalPageState extends State<RenewalPage> {
           ned.addAll(t);
         }
 
+        int extras_amount = 0;
+
+        if (sp_pt) {
+          extras_amount += sp_pt_value;
+        }
+
+        if (pp_pt) {
+          extras_amount += pp_pt_value;
+        }
+
+        if (boxing) {
+          extras_amount += boxing_value;
+        }
+
         // add renewal date (if sub type is renewal)
-        if (!widget.register) {
+        if (!widget.register && !registration) {
           ned.addAll({
             'renew_dates': (widget.details.renew_dates.isNotEmpty)
                 ? '${widget.details.renew_dates},${DateFormat('dd/MM/yyyy').format(DateTime.now())}'
                 : DateFormat('dd/MM/yyyy').format(DateTime.now())
           });
+        } else {
+          ned.addAll({
+            'registration_dates': (widget.details.registration_dates.isNotEmpty)
+                ? '${widget.details.registration_dates},${DateFormat('dd/MM/yyyy').format(DateTime.now())}'
+                : DateFormat('dd/MM/yyyy').format(DateTime.now())
+                });
         }
 
         int inc = widget.details.sub_income + sub_amount;
@@ -1892,10 +1929,15 @@ class _RenewalPageState extends State<RenewalPage> {
           sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
           exp_date: setdt,
           amount: sub_amount,
+          extras_amount: extras_amount,
           boxing: boxing,
           pt_status: pt,
           pt_plan: pt_plan,
-          hist_type: widget.register ? 'Registration' : widget.adv_renewal ? 'Advanced Renewal' : 'Renewal',
+          hist_type: (widget.register || registration)
+              ? 'Registration'
+              : widget.adv_renewal
+                  ? 'Advanced Renewal'
+                  : 'Renewal',
           history_id: history_id,
           sub_amount_b4_discount: (sub_amount_b4_discount != sub_amount)
               ? sub_amount_b4_discount
@@ -1917,8 +1959,6 @@ class _RenewalPageState extends State<RenewalPage> {
               ? sub_amount_b4_discount
               : 0,
         );
-
-        
 
         Helpers.showLoadingScreen(context: context);
         bool res = await GymDatabaseHelpers.update_client_details(
@@ -1973,7 +2013,7 @@ class _RenewalPageState extends State<RenewalPage> {
         });
       },
       child: Container(
-        width: widget.adv_renewal? 180 : 160,
+        width: widget.adv_renewal ? 180 : 160,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: Color(0xFF3c5bff),

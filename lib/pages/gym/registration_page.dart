@@ -1309,6 +1309,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       physio_key: '',
       indemnity_verified: false,
       renew_dates: '',
+      registration_dates: '',
     );
 
     var cl_map = newcl.toJson();
@@ -1371,6 +1372,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         sub_income: newcl.sub_income,
         program_type: newcl.program_type_select,
         renew_dates: '',
+        registration_dates: '',
         sub_date: '',
       );
 
@@ -1494,6 +1496,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             sub_income: 0,
             program_type: newcl.program_type_select,
             renew_dates: '',
+            registration_dates: '',
             sub_date: '',
           );
 

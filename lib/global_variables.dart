@@ -176,12 +176,15 @@ int last_st_id = 0;
 // after fetching last from db
 bool is_loaded = false;
 
-int standard_pt = 10000;
-int premium_pt = 15000;
+int standard_pt = 15000;
+int premium_pt = 30000;
 int boxing_fee = 15000;
+int registration_value = 5000;
 
 String indemnity_write_up =
     "I, the undersigned, hereby agree to the following terms and conditions as a user of the gym:\n\n1. Rules and Regulations:\n\nI agree to abide by all posted rules and regulations of the gym, including but not limited to proper use of equipment, following staff instructions, and respecting other gym users.\nI understand that failure to comply with these rules may result in the termination of my membership without refund.\n\n2. Release of Liability:\n\nI understand that participating in physical activity at the gym carries inherent risks, and I release Heritage Fitness & Wellness Centre and its staff from any liability for injury or damage resulting from my use of the facility.\nI agree to indemnify and hold harmless Heritage Fitness & Wellness Centre from any claims, injuries, or damages arising from my use of the gym facilities.\n\n3. Membership Fees:\n\nI agree to pay all membership fees in a timely manner as outlined in my membership agreement.\nI understand that failure to pay fees may result in the suspension or termination of my membership.\n\n4. Personal Belongings:\n\nI understand that Heritage Fitness & Wellness Centre is not responsible for any lost or stolen personal belongings, and I agree to take necessary precautions to secure my items while at the gym.\n\nAcknowledgement:\nBy checking the box below, I acknowledge that I have read and understand the terms and conditions outlined in this user agreement indemnity form. I agree to abide by all rules and regulations of Heritage Fitness & Wellness Centre and release the gym from any liability for injury or damage resulting from my use of the facilities.";
 
 // app current version
 String current_version = '1.3.0';
+
+// flutter build web --web-renderer html

@@ -35,8 +35,10 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
     registration = Provider.of<AppData>(context)
         .clients
         .where((element) =>
-            element.reg_date.isNotEmpty &&
-            (check_date(getDate(element.reg_date)) == check_date(current_date)))
+            (element.reg_date.isNotEmpty &&
+            (check_date(getDate(element.reg_date)) == check_date(current_date))) || element.registration_dates.isNotEmpty &&
+              check_renewal_dates(
+                  element.registration_dates, check_date(current_date)))
         .toList();
 
     renewal = Provider.of<AppData>(context)

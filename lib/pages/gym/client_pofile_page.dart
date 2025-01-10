@@ -1893,6 +1893,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           sub_income: client!.sub_income,
           program_type: client!.program_type_select,
           renew_dates: client!.renew_dates,
+          registration_dates: client!.registration_dates,
           sub_date: client!.sub_date ?? '',
         );
 
@@ -2216,6 +2217,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                 exp_date: client!.sub_date!,
                 amount: 0,
+                extras_amount: 0,
                 boxing: false,
                 pt_status: false,
                 pt_plan: '',
@@ -2281,6 +2283,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                     sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                     exp_date: new_upd['pt_date'],
                     amount: sub_amount,
+                    extras_amount: 0,
                     boxing: false,
                     pt_status: false,
                     pt_plan: '',
@@ -2339,6 +2342,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                 exp_date: client!.pt_date!,
                 amount: 0,
+                extras_amount: 0,
                 boxing: false,
                 pt_status: false,
                 pt_plan: '',
@@ -2417,6 +2421,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                   sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                   exp_date: new_upd['bx_date'],
                   amount: sub_amount,
+                  extras_amount: 0,
                   boxing: false,
                   pt_status: false,
                   pt_plan: '',
@@ -2435,6 +2440,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                   sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                   exp_date: client!.bx_date!,
                   amount: 0,
+                  extras_amount: 0,
                   boxing: false,
                   pt_status: false,
                   pt_plan: '',
@@ -2529,8 +2535,9 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                 exp_date: ned,
                 amount: 0,
-                boxing: client!.boxing!,
-                pt_status: client!.pt_status!,
+                extras_amount: 0,
+                boxing: false,
+                pt_status: false,
                 pt_plan: '',
                 hist_type: 'Subscription Resumed',
                 history_id: Helpers.generate_order_id(),
@@ -2577,8 +2584,9 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                 exp_date: client!.sub_date!,
                 amount: 0,
-                boxing: client!.boxing!,
-                pt_status: client!.pt_status!,
+                extras_amount: 0,
+                boxing: false,
+                pt_status: false,
                 pt_plan: '',
                 hist_type: 'Subscription Paused',
                 history_id: Helpers.generate_order_id(),
@@ -2712,6 +2720,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             sub_income: client!.sub_income,
             program_type: client!.program_type_select,
             renew_dates: client!.renew_dates,
+            registration_dates: client!.registration_dates,
             sub_date: client!.sub_date ?? '',
           );
 
@@ -3184,10 +3193,10 @@ class PT_Dialog extends StatefulWidget {
 
 class _PT_DialogState extends State<PT_Dialog> {
   bool sp_pt = false;
-  int sp_pt_value = 10000;
+  int sp_pt_value = standard_pt;
 
   bool pp_pt = false;
-  int pp_pt_value = 15000;
+  int pp_pt_value = premium_pt;
 
   bool none = false;
 
