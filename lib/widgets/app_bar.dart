@@ -199,9 +199,9 @@ class _MyAppBarState extends State<MyAppBar> {
                       : Container(),
                 ),
               ),
-
+        
               SizedBox(width: 15),
-
+        
               // name
               Text(
                 name,

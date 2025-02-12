@@ -2005,6 +2005,7 @@ class _ClientHealthRegistrationPageState
           renew_dates: '',
           registration_dates: '',
           sub_date: '',
+          registered: false,
         );
 
         Navigator.pop(context);
@@ -2299,6 +2300,7 @@ class _ClientHealthRegistrationPageState
           renew_dates: '',
           registration_dates: '',
           sub_date: '',
+          registered: false,
         );
 
         Navigator.pop(context);

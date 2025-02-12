@@ -1310,6 +1310,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       indemnity_verified: false,
       renew_dates: '',
       registration_dates: '',
+      registered: false,
     );
 
     var cl_map = newcl.toJson();
@@ -1374,6 +1375,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         renew_dates: '',
         registration_dates: '',
         sub_date: '',
+        registered: true,
       );
 
       Navigator.push(
@@ -1498,6 +1500,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             renew_dates: '',
             registration_dates: '',
             sub_date: '',
+            registered: false,
           );
 
           Navigator.push(

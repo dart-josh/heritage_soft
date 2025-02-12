@@ -59,6 +59,8 @@ class ClientModel {
   String renew_dates;
   String registration_dates;
 
+  bool registered;
+
   ClientModel({
     required this.key,
     required this.id,
@@ -105,6 +107,7 @@ class ClientModel {
     this.max_days,
     required this.renew_dates,
     required this.registration_dates,
+    required this.registered,
   });
 
   factory ClientModel.fromMap(String key, Map map) {
@@ -152,6 +155,7 @@ class ClientModel {
       indemnity_verified: map['indemnity_verified'] ?? false,
       renew_dates: map['renew_dates'] ?? map['renew_date'] ?? '',
       registration_dates: map['registration_dates'] ?? '',
+      registered: map['registered'] ?? false,
     );
   }
 
@@ -321,6 +325,7 @@ class RenewalModel {
   String renew_dates;
   String registration_dates;
   String sub_date;
+  bool registered;
 
   RenewalModel({
     required this.key,
@@ -339,6 +344,7 @@ class RenewalModel {
     required this.program_type,
     required this.renew_dates,
     required this.sub_date,
+    required this.registered,
   });
 }
 

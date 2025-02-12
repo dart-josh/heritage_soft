@@ -2198,6 +2198,7 @@ class _RegistrationPageState extends State<BackDateRegistration> {
       max_days: week_days,
       renew_dates: '',
       registration_dates: '',
+      registered: false,
     );
 
     var cl_map = newcl.toJson();

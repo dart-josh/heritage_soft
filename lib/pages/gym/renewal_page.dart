@@ -189,12 +189,8 @@ class _RenewalPageState extends State<RenewalPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.details.sub_plan == 'Daily' ||
-        widget.details.sub_plan == 'Boxing' ||
-        widget.details.sub_plan == 'Table Tennis' ||
-        widget.details.sub_plan == 'Dance class') {
-      if (widget.details.sub_plan != package_select &&
-          package_select != 'Select one' &&
+    if (!widget.details.registered) {
+      if (package_select != 'Select one' &&
           package_select != '' &&
           package_select != 'Daily' &&
           (package_select != 'Boxing' || boxing) &&
@@ -1912,8 +1908,9 @@ class _RenewalPageState extends State<RenewalPage> {
           ned.addAll({
             'registration_dates': (widget.details.registration_dates.isNotEmpty)
                 ? '${widget.details.registration_dates},${DateFormat('dd/MM/yyyy').format(DateTime.now())}'
-                : DateFormat('dd/MM/yyyy').format(DateTime.now())
-                });
+                : DateFormat('dd/MM/yyyy').format(DateTime.now()),
+            'registered': true,
+          });
         }
 
         int inc = widget.details.sub_income + sub_amount;

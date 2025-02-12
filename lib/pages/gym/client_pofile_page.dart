@@ -1895,6 +1895,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           renew_dates: client!.renew_dates,
           registration_dates: client!.registration_dates,
           sub_date: client!.sub_date ?? '',
+          registered: client!.registered,
         );
 
         Navigator.push(
@@ -2722,6 +2723,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             renew_dates: client!.renew_dates,
             registration_dates: client!.registration_dates,
             sub_date: client!.sub_date ?? '',
+            registered: client!.registered,
           );
 
           Navigator.push(
