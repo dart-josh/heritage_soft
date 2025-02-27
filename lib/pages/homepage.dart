@@ -1,4 +1,4 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carousel_slider/carousel_slider.dart' as cs;
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/back_date_gym_client.dart';
 import 'package:heritage_soft/global_variables.dart';
@@ -31,7 +31,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  CarouselController buttonCarouselController = CarouselController();
+  cs.CarouselController buttonCarouselController = cs.CarouselController();
 
   int current_page = 0;
 
@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> {
 
         // slider
         Expanded(
-          child: CarouselSlider(
+          child: cs.CarouselSlider(
             items:
             active_staff!.full_access ? [
               full_access_tab_1(),
@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                     main_page_2(),
                   ] : [],
             carouselController: buttonCarouselController,
-            options: CarouselOptions(
+            options: cs.CarouselOptions(
               viewportFraction: 1,
               initialPage: 0,
               enableInfiniteScroll: true,

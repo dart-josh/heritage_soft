@@ -12,7 +12,7 @@ import 'dart:ui' as ui;
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carousel_slider/carousel_slider.dart' as cs;
 
 class AllData extends StatefulWidget {
   const AllData({super.key});
@@ -22,7 +22,7 @@ class AllData extends StatefulWidget {
 }
 
 class _AllDataState extends State<AllData> {
-  CarouselController buttonCarouselController = CarouselController();
+  cs.CarouselController buttonCarouselController = cs.CarouselController();
 
   List<ClientListModel> all_gym_cl = [];
   List<ClientListModel> active_gym_cl = [];
@@ -182,7 +182,7 @@ class _AllDataState extends State<AllData> {
         Column(
           children: [
             // top data slider
-            CarouselSlider(
+            cs.CarouselSlider(
               items: [
                 top_box_gym(),
                 top_box_physio(),
@@ -190,7 +190,7 @@ class _AllDataState extends State<AllData> {
                 // top_box_finance(),
               ],
               carouselController: buttonCarouselController,
-              options: CarouselOptions(
+              options: cs.CarouselOptions(
                 height: 230,
                 // aspectRatio: 16 / 9,
                 viewportFraction: 1,
