@@ -436,5 +436,15 @@ class GymDatabaseHelpers {
     }
   }
 
+  static fix_db() async {
+    var docs = await ft_client_ref.get();
+    docs.docs.forEach((e) {
+      if (e.data()['registered'] == true) {
+          print('fixing ${e.data()['id']} - ${e.data()['sub_plan']}');
+        
+      }
+    });
+  }
+
   ///
 }

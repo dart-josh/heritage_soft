@@ -1310,7 +1310,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       indemnity_verified: false,
       renew_dates: '',
       registration_dates: '',
-      registered: false,
+      registered: old_cl,
     );
 
     var cl_map = newcl.toJson();

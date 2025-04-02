@@ -303,6 +303,6 @@ class Helpers {
   static String fmt_date(String date) {
     return DateFormat('d MMM, y').format(DateFormat('dd_MM_yyyy').parse(date));
   }
-  
+
   //
 }
