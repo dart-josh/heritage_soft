@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_database/firebase_database.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
@@ -18,215 +18,230 @@ import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:provider/provider.dart';
 
 class AdminDatabaseHelpers {
-  static final sub_history_ref = FirebaseDatabase.instance.ref('Sub History');
+  static final dynamic sub_history_ref = '';
+
+  // create_user[add_update_user]
+  // add_update_equipment
+  // delete_accessory
+  // delete_customer
+
+// delete_case_file
+// delete_equipment
+// delete_patient
+// delete_sales_record
+// delete_health_data
+// delete_all_health_data
+
+  //?
 
   // get all accessory
   static get_accessories(context) {
-    FirebaseFirestore.instance
-        .collection('Accessories')
-        .snapshots()
-        .listen((event) {
-      List<AccessoryModel> list = [];
-      event.docs.forEach((element) {
-        list.add(AccessoryModel.fromMap(element.id, element.data()));
-      });
+    // FirebaseFirestore.instance
+    //     .collection('Accessories')
+    //     .snapshots()
+    //     .listen((event) {
+    //   List<AccessoryModel> list = [];
+    //   event.docs.forEach((element) {
+    //     list.add(AccessoryModel.fromMap(element.id, element.data()));
+    //   });
 
-      Provider.of<AppData>(context, listen: false).update_accessories(list);
-    });
+    //   Provider.of<AppData>(context, listen: false).update_accessories(list);
+    // });
   }
 
   // accessory request stream
   static get_accessory_request_stream(context) {
-    return FirebaseDatabase.instance
-        .ref('Accessory Request')
-        .onValue
-        .listen((event) {
-      if (app_role == 'doctor') return;
+    // return FirebaseDatabase.instance
+    //     .ref('Accessory Request')
+    //     .onValue
+    //     .listen((event) {
+    //   if (app_role == 'doctor') return;
 
-      List<A_ShopModel> requests = [];
-      if (event.snapshot.value != null) {
-        Map map = event.snapshot.value as Map;
+    //   List<A_ShopModel> requests = [];
+    //   if (event.snapshot.value != null) {
+    //     Map map = event.snapshot.value as Map;
 
-        map.forEach((key, value) {
-          requests.add(A_ShopModel.fromMap(key, value));
-        });
-      }
+    //     map.forEach((key, value) {
+    //       requests.add(A_ShopModel.fromMap(value));
+    //     });
+    //   }
 
-      Provider.of<AppData>(context, listen: false)
-          .update_accessory_request(requests);
-    });
+    //   Provider.of<AppData>(context, listen: false)
+    //       .update_accessory_request(requests);
+    // });
   }
 
   // add accessory sales record
-  static Future<bool> add_accessory_sales_record(
+  static Future add_accessory_sales_record(
       String key, Map<String, dynamic> data) async {
-    try {
-      await FirebaseDatabase.instance
-          .ref('Accessory Sales Record')
-          .child(key)
-          .push()
-          .set(data);
+    // try {
+    //   await FirebaseDatabase.instance
+    //       .ref('Accessory Sales Record')
+    //       .child(key)
+    //       .push()
+    //       .set(data);
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // get accessory sales record
-  static Future<DataSnapshot> get_accessory_sales_record(String key) {
-    return FirebaseDatabase.instance
-        .ref('Accessory Sales Record')
-        .child(key)
-        .get();
+  static Future get_accessory_sales_record(String key) async {
+    // return FirebaseDatabase.instance
+    //     .ref('Accessory Sales Record')
+    //     .child(key)
+    //     .get();
   }
 
   // remove accessory request
-  static Future<bool> remove_accessory_request(String key) async {
-    try {
-      await FirebaseDatabase.instance
-          .ref('Accessory Request')
-          .child(key)
-          .remove();
+  static Future remove_accessory_request(String key) async {
+    // try {
+    //   await FirebaseDatabase.instance
+    //       .ref('Accessory Request')
+    //       .child(key)
+    //       .remove();
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // add/update accessory
-  static Future<bool> add_update_accessory(Map<String, dynamic> data,
+  static Future add_update_accessory(Map<String, dynamic> data,
       {String key = '', bool sett = false}) async {
-    try {
-      if (sett)
-        await FirebaseFirestore.instance.collection('Accessories').add(data);
-      else
-        await FirebaseFirestore.instance
-            .collection('Accessories')
-            .doc(key)
-            .update(data);
+    // try {
+    //   if (sett)
+    //     await FirebaseFirestore.instance.collection('Accessories').add(data);
+    //   else
+    //     await FirebaseFirestore.instance
+    //         .collection('Accessories')
+    //         .doc(key)
+    //         .update(data);
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // delete accessory
-  static Future<bool> delete_accessory(String key) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('Accessories')
-          .doc(key)
-          .delete();
+  static Future delete_accessory(String key) async {
+    // try {
+    //   await FirebaseFirestore.instance
+    //       .collection('Accessories')
+    //       .doc(key)
+    //       .delete();
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
+  //?
+
   // get visitors record
-  static Future<DataSnapshot> get_visitors_record(String key) {
-    return FirebaseDatabase.instance.ref('Visitors').child(key).get();
+  static Future get_visitors_record(String key) async {
+    // return FirebaseDatabase.instance.ref('Visitors').child(key).get();
   }
 
   // add visitor to record
-  static Future<bool> add_visitor_to_record(
+  static Future add_visitor_to_record(
       String key, Map<String, dynamic> data) async {
-    try {
-      await FirebaseDatabase.instance
-          .ref('Visitors')
-          .child(key)
-          .push()
-          .set(data);
+    // try {
+    //   await FirebaseDatabase.instance
+    //       .ref('Visitors')
+    //       .child(key)
+    //       .push()
+    //       .set(data);
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // get office variables
-  static Future<DocumentSnapshot<Map<String, dynamic>>>?
-      get_office_variables() {
-    try {
-      return FirebaseFirestore.instance
-          .collection('Office')
-          .doc('Variables')
-          .get();
-    } catch (e) {
-      return null;
-    }
+  static Future get_office_variables() async {
+    // try {
+    //   return FirebaseFirestore.instance
+    //       .collection('Office')
+    //       .doc('Variables')
+    //       .get();
+    // } catch (e) {
+    //   return null;
+    // }
   }
 
   // clear accessory request
-  static Future<bool> clear_accessory_request() async {
-    try {
-      await FirebaseDatabase.instance.ref('Accessory Request').remove();
-      return true;
-    } catch (e) {
-      return false;
-    }
+  static Future clear_accessory_request() async {
+    // try {
+    //   await FirebaseDatabase.instance.ref('Accessory Request').remove();
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // remove accessory request from db
-  static Future<bool> delete_accessory_request(String key) async {
-    try {
-      await FirebaseDatabase.instance
-          .ref('Accessory Request')
-          .child(key)
-          .remove();
-      return true;
-    } catch (e) {
-      return false;
-    }
+  static Future delete_accessory_request(String key) async {
+    // try {
+    //   await FirebaseDatabase.instance
+    //       .ref('Accessory Request')
+    //       .child(key)
+    //       .remove();
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // add hmo
-  static Future<bool> add_hmo(
+  static Future add_hmo(
       String collection_key, Map<String, dynamic> map, String key,
       {bool sett = false}) async {
-    try {
-      if (sett)
-        await FirebaseFirestore.instance.collection(collection_key).add(map);
-      else
-        await FirebaseFirestore.instance
-            .collection(collection_key)
-            .doc(key)
-            .update(map);
+    // try {
+    //   if (sett)
+    //     await FirebaseFirestore.instance.collection(collection_key).add(map);
+    //   else
+    //     await FirebaseFirestore.instance
+    //         .collection(collection_key)
+    //         .doc(key)
+    //         .update(map);
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // delete hmo
-  static Future<bool> delete_hmo(String collection_key, String key) async {
-    try {
-      FirebaseFirestore.instance.collection(collection_key).doc(key).delete();
+  static Future delete_hmo(String collection_key, String key) async {
+    // try {
+    //   FirebaseFirestore.instance.collection(collection_key).doc(key).delete();
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // set admin password
-  static Future<bool> set_admin_passwords(
+  static Future set_admin_passwords(
       String key, Map<String, dynamic> data) async {
-    try {
-      FirebaseFirestore.instance
-          .collection('Admin Passwords')
-          .doc(key)
-          .update(data);
+    // try {
+    //   FirebaseFirestore.instance
+    //       .collection('Admin Passwords')
+    //       .doc(key)
+    //       .update(data);
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // upload image to storage
@@ -234,74 +249,74 @@ class AdminDatabaseHelpers {
       {bool staff = false}) async {
     // String fileName = Path.basename(file.path);
 
-    try {
-      Reference storageReference = FirebaseStorage.instance
-          .ref()
-          .child(staff
-              ? 'Staff'
-              : gym
-                  ? 'FT_Clients'
-                  : 'PT_Clients')
-          .child(id);
-      UploadTask uploadTask = storageReference.putData(file);
-      TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    // try {
+    //   Reference storageReference = FirebaseStorage.instance
+    //       .ref()
+    //       .child(staff
+    //           ? 'Staff'
+    //           : gym
+    //               ? 'FT_Clients'
+    //               : 'PT_Clients')
+    //       .child(id);
+    //   UploadTask uploadTask = storageReference.putData(file);
+    //   TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
 
-      if (taskSnapshot.state == TaskState.success) {
-        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-        print(downloadUrl);
-        return downloadUrl;
-      }
-    } catch (e) {
-      print(e.toString());
-    }
+    //   if (taskSnapshot.state == TaskState.success) {
+    //     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    //     print(downloadUrl);
+    //     return downloadUrl;
+    //   }
+    // } catch (e) {
+    //   print(e.toString());
+    // }
 
     return null;
   }
 
   // get news for staff
   static get_news() {
-    FirebaseFirestore.instance
-        .collection('Office')
-        .doc('News')
-        .get()
-        .then((value) {
-      if (value.exists) {
-        news = value.data()!['news'];
-      } else {
-        news = 'No news';
-      }
-    });
+    // FirebaseFirestore.instance
+    //     .collection('Office')
+    //     .doc('News')
+    //     .get()
+    //     .then((value) {
+    //   if (value.exists) {
+    //     news = value.data()!['news'];
+    //   } else {
+    //     news = 'No news';
+    //   }
+    // });
   }
 
   // get hmos
   static get_hmos(context) {
     // gym
-    FirebaseFirestore.instance
-        .collection('Gym HMO')
-        .snapshots()
-        .listen((event) {
-      List<HMO_Model> hmos = [];
-      event.docs.forEach((element) {
-        hmos.add(HMO_Model.fromMap(element.id, element.data()));
-      });
+    // FirebaseFirestore.instance
+    //     .collection('Gym HMO')
+    //     .snapshots()
+    //     .listen((event) {
+    //   List<HMO_Model> hmos = [];
+    //   event.docs.forEach((element) {
+    //     hmos.add(HMO_Model.fromMap(element.id, element.data()));
+    //   });
 
-      Provider.of<AppData>(context, listen: false).update_gym_hmo(hmos);
-      gym_hmo = hmos;
-    });
+    //   Provider.of<AppData>(context, listen: false).update_gym_hmo(hmos);
+    //   gym_hmo = hmos;
+    // });
 
-    // physio
-    FirebaseFirestore.instance
-        .collection('Physio HMO')
-        .snapshots()
-        .listen((event) {
-      List<HMO_Model> hmos = [];
-      event.docs.forEach((element) {
-        hmos.add(HMO_Model.fromMap(element.id, element.data()));
-      });
+    // // physio
+    // FirebaseFirestore.instance
+    //     .collection('Physio HMO')
+    //     .snapshots()
+    //     .listen((event) {
+    //   List<HMO_Model> hmos = [];
+    //   event.docs.forEach((element) {
+    //     hmos.add(HMO_Model.fromMap(element.id, element.data()));
+    //   });
 
-      Provider.of<AppData>(context, listen: false).update_physio_hmo(hmos);
-      physio_hmo = hmos;
-    });
+    //   Provider.of<AppData>(context, listen: false).update_physio_hmo(hmos);
+    //   physio_hmo = hmos;
+    // });
   }
 
   // audio player for attendance notification
@@ -311,91 +326,92 @@ class AdminDatabaseHelpers {
   static listen_to_sign_in_user(context) {
     if (!send_notification) return;
 
-    FirebaseFirestore.instance
-        .collection('Office')
-        .doc('Sign_in_user')
-        .snapshots()
-        .listen((event) {
-      if (event.exists) {
-        if (event.data()!.isNotEmpty) {
-          Provider.of<AppData>(context, listen: false).update_sign_in_cl(null);
-          ClientSignInModel cl_2 = ClientSignInModel.fromMap_2(event.data()!);
+    // FirebaseFirestore.instance
+    //     .collection('Office')
+    //     .doc('Sign_in_user')
+    //     .snapshots()
+    //     .listen((event) {
+    //   if (event.exists) {
+    //     if (event.data()!.isNotEmpty) {
+    //       Provider.of<AppData>(context, listen: false).update_sign_in_cl(null);
+    //       ClientSignInModel cl_2 = ClientSignInModel.fromMap_2(event.data()!);
 
-          // display user
-          notification_height.value = 0;
-          player.play(AssetSource('alert_1.mp3'));
-          Provider.of<AppData>(context, listen: false).update_sign_in_cl(cl_2);
-          notification_height.value = 90;
+    //       // display user
+    //       notification_height.value = 0;
+    //       player.play(AssetSource('alert_1.mp3'));
+    //       Provider.of<AppData>(context, listen: false).update_sign_in_cl(cl_2);
+    //       notification_height.value = 90;
 
-          // clear sign in user
-          FirebaseFirestore.instance
-              .collection('Office')
-              .doc('Sign_in_user')
-              .delete();
-        }
-      }
-    });
+    //       // clear sign in user
+    //       FirebaseFirestore.instance
+    //           .collection('Office')
+    //           .doc('Sign_in_user')
+    //           .delete();
+    //     }
+    //   }
+    // });
   }
 
   // get passwords
   static get_passwords(context) {
-    FirebaseFirestore.instance
-        .collection('Admin Passwords')
-        .snapshots()
-        .listen((event) {
-      List<PasswordModel> passwords = [];
+    // FirebaseFirestore.instance
+    //     .collection('Admin Passwords')
+    //     .snapshots()
+    //     .listen((event) {
+    //   List<PasswordModel> passwords = [];
 
-      event.docs.forEach((element) {
-        passwords.add(PasswordModel.fromMap(element.id, element.data()));
-      });
+    //   event.docs.forEach((element) {
+    //     passwords.add(PasswordModel.fromMap(element.id, element.data()));
+    //   });
 
-      Provider.of<AppData>(context, listen: false).update_passwords(passwords);
-    });
+    //   Provider.of<AppData>(context, listen: false).update_passwords(passwords);
+    // });
   }
 
   // get office variables
   static get_office_var() {
-    FirebaseFirestore.instance.collection('Office').snapshots().listen((event) {
-      var doc = event.docs.where((element) => element.id == 'Last ID');
+    // FirebaseFirestore.instance.collection('Office').snapshots().listen((event) {
+    //   var doc = event.docs.where((element) => element.id == 'Last ID');
 
-      if (doc.isNotEmpty) {
-        var elem = doc.first;
+    //   if (doc.isNotEmpty) {
+    //     var elem = doc.first;
 
-        last_ft_id = elem.data()['last_ft_id'] ?? 0;
-        last_pt_id = elem.data()['last_pt_id'] ?? 0;
-        last_st_id = elem.data()['last_st_id'] ?? 0;
-      }
+    //     last_ft_id = elem.data()['last_ft_id'] ?? 0;
+    //     last_pt_id = elem.data()['last_pt_id'] ?? 0;
+    //     last_st_id = elem.data()['last_st_id'] ?? 0;
+    //   }
 
-      is_loaded = true;
-    });
+    //   is_loaded = true;
+    // });
   }
 
   // get gym income data
   static Future<List<GymIncomeModel>> old_get_income_data(
       String key, String date) async {
     List<GymIncomeModel> gym_incomes = [];
+    return gym_incomes;
 
-    return GymDatabaseHelpers.ft_client_ref
-        .doc(key)
-        .collection('Sub History')
-        .where('hist_type',
-            whereIn: ['Registration', 'Renewal', 'Personal Training', 'Boxing'])
-        .where('time_stamp',
-            isGreaterThanOrEqualTo: date,
-            isLessThan: date.substring(0, date.length - 1) +
-                String.fromCharCode(date.codeUnitAt(date.length - 1) + 1))
-        .get()
-        .then((hist_onValue) {
-          hist_onValue.docs.forEach((hist_doc) {
-            Map<String, dynamic> new_data = hist_doc.data();
-            new_data.addAll({'client_key': key});
-            // print(new_data);
-            GymIncomeModel inc = GymIncomeModel.fromJson(new_data);
-            gym_incomes.add(inc);
-          });
+    // return GymDatabaseHelpers.ft_client_ref
+    //     .doc(key)
+    //     .collection('Sub History')
+    //     .where('hist_type',
+    //         whereIn: ['Registration', 'Renewal', 'Personal Training', 'Boxing'])
+    //     .where('time_stamp',
+    //         isGreaterThanOrEqualTo: date,
+    //         isLessThan: date.substring(0, date.length - 1) +
+    //             String.fromCharCode(date.codeUnitAt(date.length - 1) + 1))
+    //     .get()
+    //     .then((hist_onValue) {
+    //       hist_onValue.docs.forEach((hist_doc) {
+    //         Map<String, dynamic> new_data = hist_doc.data();
+    //         new_data.addAll({'client_key': key});
+    //         // print(new_data);
+    //         GymIncomeModel inc = GymIncomeModel.fromJson(new_data);
+    //         gym_incomes.add(inc);
+    //       });
 
-          return gym_incomes;
-        });
+    //       return gym_incomes;
+    //     });
   }
 
   static Future<List<GymIncomeModel>> get_income_data() async {

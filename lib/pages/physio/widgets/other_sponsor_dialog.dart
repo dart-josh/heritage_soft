@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
-class OtherSponsor extends StatefulWidget {
+class SponsorDialog extends StatefulWidget {
   final SponsorModel? sponsor;
   final bool view_only;
-  const OtherSponsor({super.key, this.sponsor, this.view_only = false});
+  const SponsorDialog({super.key, this.sponsor, this.view_only = false});
 
   @override
-  State<OtherSponsor> createState() => _OtherSponsorState();
+  State<SponsorDialog> createState() => _SponsorDialogState();
 }
 
-class _OtherSponsorState extends State<OtherSponsor> {
+class _SponsorDialogState extends State<SponsorDialog> {
   TextEditingController sponsor_name_controller = TextEditingController();
   TextEditingController sponsor_phone_controller = TextEditingController();
   TextEditingController sponsor_role_controller = TextEditingController();
@@ -38,10 +38,10 @@ class _OtherSponsorState extends State<OtherSponsor> {
   void assign_controllers() {
     if (widget.sponsor == null) return;
 
-    sponsor_name_controller.text = widget.sponsor!.sponsor_name;
-    sponsor_phone_controller.text = widget.sponsor!.sponsor_phone;
-    sponsor_role_controller.text = widget.sponsor!.sponsor_role;
-    sponsor_addr_controller.text = widget.sponsor!.sponsor_addr;
+    sponsor_name_controller.text = widget.sponsor!.name;
+    sponsor_phone_controller.text = widget.sponsor!.phone;
+    sponsor_role_controller.text = widget.sponsor!.role;
+    sponsor_addr_controller.text = widget.sponsor!.address;
   }
 
   @override
@@ -193,13 +193,13 @@ class _OtherSponsorState extends State<OtherSponsor> {
 
                             if (res != null && res) {
                               SponsorModel sponsorModel = SponsorModel(
-                                sponsor_name:
+                                name:
                                     sponsor_name_controller.text.trim(),
-                                sponsor_phone:
+                                phone:
                                     sponsor_phone_controller.text.trim(),
-                                sponsor_addr:
+                                address:
                                     sponsor_addr_controller.text.trim(),
-                                sponsor_role:
+                                role:
                                     sponsor_role_controller.text.trim(),
                               );
 

@@ -7,10 +7,11 @@ import 'package:heritage_soft/widgets/notification_center.dart';
 import 'package:month_year_picker2/month_year_picker2.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_html/html.dart';
 
 import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'dart:html';
+// import 'package:firebase_core/firebase_core.dart';
+import 'dart:io' as io;
 
 String page = 'main_app';
 String indemnity_key = '';
@@ -43,14 +44,15 @@ void getParams() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!io.Platform.isWindows) {
+    // await Firebase.initializeApp(
+    //   options: DefaultFirebaseOptions.currentPlatform,
+    // );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    getParams();
+  }
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-  getParams();
+  
   runApp(MyApp(page: page, page_key: indemnity_key));
 }
 
@@ -79,7 +81,7 @@ class _MyAppState extends State<MyApp> {
         title: 'Delightsome Heritage',
         theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
         home: (widget.page == 'main_app')
-            ? VerifyLogin()
+            ? SignInToApp()
             : ClientindemnityVerification(
                 client_key: widget.page_key,
               ),

@@ -186,20 +186,20 @@ class _StaffListState extends State<StaffList> {
                 return;
               }
 
-              if (width >= 800) {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => UserSetup(new_setup: true),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserSetup(new_setup: true),
-                  ),
-                );
-              }
+              // if (width >= 800) {
+              //   showDialog(
+              //     context: context,
+              //     barrierDismissible: false,
+              //     builder: (context) => UserSetup(new_setup: true),
+              //   );
+              // } else {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => UserSetup(new_setup: true),
+              //     ),
+              //   );
+              // }
             },
             child: Container(
               width: 300,
@@ -444,24 +444,24 @@ class _StaffListState extends State<StaffList> {
     return InkWell(
       onTap: () {
         if (width >= 800) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => UserSetup(
-              setup_profile: name_set,
-              staff: staff,
-            ),
-          );
+          // showDialog(
+          //   context: context,
+          //   barrierDismissible: false,
+          //   builder: (context) => UserSetup(
+          //     setup_profile: name_set,
+          //     staff: staff,
+          //   ),
+          // );
         } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => UserSetup(
-                setup_profile: name_set,
-                staff: staff,
-              ),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => UserSetup(
+          //       setup_profile: name_set,
+          //       staff: staff,
+          //     ),
+          //   ),
+          // );
         }
       },
       child: Container(

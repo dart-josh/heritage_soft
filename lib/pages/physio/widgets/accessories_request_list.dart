@@ -186,7 +186,7 @@ class _AccessoriesRequestListState extends State<AccessoriesRequestList> {
             ),
           ),
           onDismissed: (direction) {
-            AdminDatabaseHelpers.delete_accessory_request(shop.key);
+            AdminDatabaseHelpers.delete_accessory_request(shop.key ?? '');
           },
           confirmDismiss: (direction) async {
             if (direction == DismissDirection.endToStart) {
@@ -208,7 +208,7 @@ class _AccessoriesRequestListState extends State<AccessoriesRequestList> {
               return false;
             }
           },
-          key: Key(shop.key),
+          key: Key(shop.key ?? ''),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -224,13 +224,13 @@ class _AccessoriesRequestListState extends State<AccessoriesRequestList> {
                     children: [
                       // client id
                       Text(
-                        shop.client!.id,
+                        shop.patient!.patient_id,
                         style: TextStyle(color: Colors.black87, fontSize: 11),
                       ),
 
-                      // client name
+                      // patient name
                       Text(
-                        shop.client!.name,
+                        shop.patient!.f_name,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 14,
@@ -245,7 +245,7 @@ class _AccessoriesRequestListState extends State<AccessoriesRequestList> {
 
                 // items quantity
                 Text(
-                  shop.items.length.toString(),
+                  shop.accessories.length.toString(),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -272,10 +272,10 @@ class _AccessoriesRequestListState extends State<AccessoriesRequestList> {
       search_list = Provider.of<AppData>(context, listen: false)
           .accessory_request
           .where((element) =>
-              element.client!.name
+              element.patient!.f_name
                   .toLowerCase()
                   .contains(value.toLowerCase()) ||
-              element.client!.id
+              element.patient!.patient_id
                   .toString()
                   .toLowerCase()
                   .contains(value.toLowerCase()))

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  final String? loadingText;
+  const LoadingScreen({Key? key, this.loadingText}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,24 @@ class LoadingScreen extends StatelessWidget {
         child: Container(
           color: Colors.transparent,
           child: Center(
-            child: CircularProgressIndicator(),
+            child: Column(
+              children: [
+                CircularProgressIndicator(),
+
+                // loading text
+                if (loadingText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      loadingText!,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

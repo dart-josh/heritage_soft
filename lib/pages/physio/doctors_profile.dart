@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
@@ -19,8 +22,11 @@ class DoctorsProfile extends StatefulWidget {
 }
 
 class _DoctorsProfileState extends State<DoctorsProfile> {
+  DoctorModel? active_doctor;
+
   @override
   Widget build(BuildContext context) {
+    active_doctor = AppData.get(context).active_doctor;
     return Container(
       width: 500,
       color: Colors.transparent,
@@ -51,7 +57,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          Helpers.format_amount(widget.doc.pen_treatment),
+                          Helpers.format_amount(widget.doc.pen_patients.length),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
@@ -73,7 +79,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          Helpers.format_amount(widget.doc.ong_treatment),
+                          Helpers.format_amount(widget.doc.ong_patients.length),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
@@ -98,7 +104,13 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                       children: [
                         // total sessions count
                         Text(
-                          Helpers.format_amount(widget.doc.total_sessions),
+                          Helpers.format_amount(widget.doc.my_patients
+                              .reduce((element, next) => MyPatientModel(
+                                    patient: widget.doc.my_patients[0].patient,
+                                    session_count: element.session_count +
+                                        next.session_count,
+                                  ))
+                              .session_count),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 25,
@@ -117,7 +129,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                         // patients count
                         Text(
-                          Helpers.format_amount(widget.doc.patients),
+                          Helpers.format_amount(widget.doc.my_patients.length),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 25,
@@ -140,7 +152,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                 if (active_doctor != null &&
                     app_role == 'doctor' &&
-                    (widget.doc.user_id == active_doctor!.user_id))
+                    (widget.doc.user.user_id == active_doctor!.user.user_id))
                   // logout
                   Row(
                     children: [
@@ -185,7 +197,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                             bool dt =
                                 await StaffDatabaseHelpers.set_doctor_status(
-                                    widget.doc.key, false);
+                                    widget.doc.key ?? '', false);
 
                             Navigator.pop(context);
 
@@ -229,9 +241,15 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => PatientList(
-                            ongoing_patient: widget.doc.ong_patients,
-                            my_patients: widget.doc.all_patients,
-                            pending_patient: widget.doc.pen_patients,
+                            ongoing_patient: widget.doc.ong_patients
+                                .map((p) => p.patient)
+                                .toList(),
+                            my_patients: widget.doc.my_patients
+                                .map((p) => p.patient)
+                                .toList(),
+                            pending_patient: widget.doc.pen_patients
+                                .map((p) => p.patient)
+                                .toList(),
                           ),
                         ),
                       );
@@ -271,13 +289,13 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                   radius: 50,
                   backgroundColor: Color.fromARGB(255, 164, 183, 209),
                   foregroundColor: Colors.white,
-                  backgroundImage: widget.doc.user_image.isNotEmpty
+                  backgroundImage: widget.doc.user.user_image.isNotEmpty
                       ? NetworkImage(
-                          widget.doc.user_image,
+                          widget.doc.user.user_image,
                         )
                       : null,
                   child: Center(
-                    child: widget.doc.user_image.isEmpty
+                    child: widget.doc.user.user_image.isEmpty
                         ? Image.asset(
                             'images/icon/health-person.png',
                             width: 45,
@@ -291,7 +309,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                 // doctor name
                 Text(
-                  widget.doc.fullname,
+                  widget.doc.user.f_name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -316,7 +334,8 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
                     if (active_doctor == null) return;
 
                     if (app_role != 'doctor' ||
-                        (widget.doc.user_id != active_doctor!.user_id)) return;
+                        (widget.doc.user.user_id !=
+                            active_doctor!.user.user_id)) return;
 
                     int waiting_count =
                         Provider.of<AppData>(context, listen: false)
@@ -352,7 +371,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                         // go offline
                         bool dt = await StaffDatabaseHelpers.set_doctor_status(
-                            widget.doc.key, false);
+                            widget.doc.key ?? '', false);
 
                         Navigator.pop(context);
 
@@ -378,7 +397,7 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                       // go online
                       bool dt = await StaffDatabaseHelpers.set_doctor_status(
-                          widget.doc.key, true);
+                          widget.doc.key ?? '', true);
 
                       Navigator.pop(context);
 
@@ -421,13 +440,13 @@ class _DoctorsProfileState extends State<DoctorsProfile> {
 
                 if (active_doctor != null &&
                     app_role == 'doctor' &&
-                    (widget.doc.user_id != active_doctor!.user_id))
+                    (widget.doc.user.user_id != active_doctor!.user.user_id))
                   SizedBox(height: 5),
                 if (active_doctor != null &&
                     app_role == 'doctor' &&
-                    (widget.doc.user_id != active_doctor!.user_id))
+                    (widget.doc.user.user_id != active_doctor!.user.user_id))
                   Text(
-                    widget.doc.user_id,
+                    widget.doc.user.user_id,
                     style: TextStyle(
                       fontSize: 13,
                       fontStyle: FontStyle.italic,

@@ -1,8 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/helpers/physio_database_helpers.dart';
 import 'package:heritage_soft/pages/physio/print.page.dart';
 import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
 import 'dart:ui' as ui;
@@ -10,17 +9,17 @@ import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 
 class PhysioHistoryPage extends StatefulWidget {
-  final Physio_His_CL_Model client;
-  const PhysioHistoryPage({super.key, required this.client});
+  final PatientModel patient;
+  const PhysioHistoryPage({super.key, required this.patient});
 
   @override
   State<PhysioHistoryPage> createState() => _PhysioHistoryPageState();
 }
 
 class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
-  Physio_His_CL_Model? client;
-  List<PhysioHistoryModel> active_record = [];
-  List<GroupedPhysioHistory> _history = [];
+  late PatientModel patient;
+  List<ClinicHistoryModel> active_record = [];
+  List<GroupedClinicHistoryModel> _history = [];
 
   bool isLoading = false;
 
@@ -34,7 +33,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
 
   @override
   void initState() {
-    client = widget.client;
+    patient = widget.patient;
     load_data();
 
     super.initState();
@@ -42,21 +41,8 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
 
   // get all history
   load_data() async {
-    isLoading = true;
-
-    await PhysioDatabaseHelpers.get_history(client!.key).then((snapshot) {
-      List<PhysioHistoryModel> sub_h = [];
-
-      snapshot.docs.forEach((element) {
-        PhysioHistoryModel rec =
-            PhysioHistoryModel.fromMap(element.id, element.data());
-        sub_h.add(rec);
-      });
-
-      isLoading = false;
-
-      if (sub_h.isNotEmpty) {
-        _history = groupRec(sub_h);
+      if (patient.clinic_history.isNotEmpty) {
+        _history = groupRec(patient.clinic_history);
         var chk =
             _history.where((element) => element.year == active_year).toList();
 
@@ -69,16 +55,16 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
 
       setState(() {});
       return;
-    });
+    
   }
 
   // group history
-  List<GroupedPhysioHistory> groupRec(List<PhysioHistoryModel> ll) {
-    List<GroupedPhysioHistory> lgl = [];
+  List<GroupedClinicHistoryModel> groupRec(List<ClinicHistoryModel> ll) {
+    List<GroupedClinicHistoryModel> lgl = [];
     var ll_group = groupBy(ll, (e) => get_year(e.date));
 
     ll_group.forEach((key, value) {
-      GroupedPhysioHistory gsl = GroupedPhysioHistory(year: key, record: value);
+      GroupedClinicHistoryModel gsl = GroupedClinicHistoryModel(year: key, record: value);
       lgl.add(gsl);
     });
 
@@ -290,7 +276,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
               ),
               SizedBox(width: 4),
               Text(
-                Helpers.format_amount(client!.total_amount_paid, naira: true),
+                Helpers.format_amount(patient.total_amount_paid, naira: true),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -352,7 +338,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
             right: 0,
             child: Center(
               child: Text(
-                '${client!.name}\'s Clinic History',
+                '${patient.f_name}\'s Clinic History',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -399,7 +385,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
             children: [
               // client id
               Text(
-                widget.client.id,
+                widget.patient.patient_id,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -417,7 +403,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
               ),
 
               // hmo tag
-              PhysioHMOTag(hmo: widget.client.hmo),
+              PhysioHMOTag(hmo: widget.patient.hmo),
             ],
           ),
         ],
@@ -579,7 +565,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
   }
 
   // history tile
-  Widget history_tile(PhysioHistoryModel history) {
+  Widget history_tile(ClinicHistoryModel history) {
     String date =
         '${DateFormat.jm().format(history.date)} ${DateFormat('dd-MM-yyyy').format(history.date)}';
 
@@ -663,15 +649,15 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
                             date:
                                 '${DateFormat.jm().format(history.date)} ${DateFormat('dd-MM-yyyy').format(history.date)}',
                             receipt_id: history.history_id,
-                            client_id: client!.id,
-                            client_name: client!.fullname,
+                            client_id: patient.patient_id,
+                            client_name: '${patient.f_name} ${patient.l_name}',
                             amount: history.amount,
                             receipt_type: history.hist_type,
                             session_paid: history.session_paid,
-                            amount_b4_discount: history.amount_b4_discount,
-                            cost_p_session: history.cost_p_session,
-                            old_float: history.old_float,
-                            new_float: history.new_float,
+                            amount_b4_discount: history.amount_b4_discount ?? 0,
+                            cost_p_session: history.cost_p_session.toInt(),
+                            old_float: history.old_float.toInt(),
+                            new_float: history.new_float.toInt(),
                           );
 
                           await showDialog(
@@ -694,12 +680,12 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
                       Column(
                         children: [
                           if ((session_set) &&
-                              (history.session_frequency!.isNotEmpty))
+                              (history.session_frequency.isNotEmpty))
                             SizedBox(height: 6),
 
                           // frequency
                           if ((session_set) &&
-                              (history.session_frequency!.isNotEmpty))
+                              (history.session_frequency.isNotEmpty))
                             Row(
                               children: [
                                 // label
@@ -712,7 +698,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
                                 SizedBox(width: 6),
                                 // cost per session
                                 Text(
-                                  history.session_frequency ?? '',
+                                  history.session_frequency,
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -855,7 +841,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
                               ),
 
                             // if discount
-                            if (history.amount != 0 &&
+                            if (history.amount != 0 && history.amount_b4_discount != null &&
                                 (history.amount_b4_discount != history.amount))
                               Align(
                                 alignment: Alignment.centerRight,
@@ -863,7 +849,7 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
                                   padding: EdgeInsets.only(top: 4),
                                   child: Text(
                                     Helpers.format_amount(
-                                        history.amount_b4_discount,
+                                        history.amount_b4_discount ?? 0,
                                         naira: true),
                                     style: TextStyle(
                                       color: Colors.white60,
@@ -916,30 +902,12 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
   //
 }
 
-class GroupedPhysioHistory {
+class GroupedClinicHistoryModel {
   int year;
-  List<PhysioHistoryModel> record;
+  List<ClinicHistoryModel> record;
 
-  GroupedPhysioHistory({
+  GroupedClinicHistoryModel({
     required this.year,
     required this.record,
-  });
-}
-
-class Physio_His_CL_Model {
-  String key;
-  String id;
-  String name;
-  String fullname;
-  int total_amount_paid;
-  String hmo;
-
-  Physio_His_CL_Model({
-    required this.key,
-    required this.id,
-    required this.name,
-    required this.fullname,
-    required this.total_amount_paid,
-    required this.hmo,
   });
 }

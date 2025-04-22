@@ -48,7 +48,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
     );
 
     if (widget.shop != null) {
-      widget.shop!.items.forEach((element) {
+      widget.shop!.accessories.forEach((element) {
         items.add(element);
       });
     }
@@ -252,7 +252,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
 
   // id & hmo
   Widget id_sub_group() {
-    return widget.shop != null && widget.shop!.client != null
+    return widget.shop != null && widget.shop!.patient != null
         ? Padding(
             padding: EdgeInsets.only(top: 5, bottom: 8),
             child: Column(
@@ -274,9 +274,9 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                 // id group
                 Row(
                   children: [
-                    // client id
+                    // patient id
                     Text(
-                      widget.shop!.client!.id,
+                      widget.shop!.patient!.patient_id,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -302,7 +302,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
 
   // profile
   Widget profile_area() {
-    return widget.shop != null && widget.shop!.client != null
+    return widget.shop != null && widget.shop!.patient != null
         ? Container(
             padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
             child: Stack(
@@ -320,7 +320,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                     ),
                     padding: EdgeInsets.fromLTRB(33, 6, 10, 6),
                     child: Text(
-                      widget.shop!.client!.name,
+                      widget.shop!.patient!.f_name,
                       textAlign: TextAlign.end,
                       style: TextStyle(
                         color: Colors.white,
@@ -340,13 +340,13 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                     radius: 22,
                     backgroundColor: Color(0xFFf3f0da),
                     foregroundColor: Colors.white,
-                    backgroundImage: widget.shop!.client!.user_image.isNotEmpty
+                    backgroundImage: widget.shop!.patient!.user_image.isNotEmpty
                         ? NetworkImage(
-                            widget.shop!.client!.user_image,
+                            widget.shop!.patient!.user_image,
                           )
                         : null,
                     child: Center(
-                      child: widget.shop!.client!.user_image.isEmpty
+                      child: widget.shop!.patient!.user_image.isEmpty
                           ? Image.asset(
                               'images/icon/health-person.png',
                               width: 25,
@@ -453,7 +453,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
               child: Column(
                 children: items.map((e) {
                   int index = items.indexOf(e) + 1;
-                  int total_price = e.price * e.qty;
+                  int total_price = e.accessory.price * e.qty;
 
                   return Container(
                     decoration: BoxDecoration(
@@ -476,7 +476,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                         // item
                         Expanded(
                           child: Text(
-                            e.name,
+                            e.accessory.name,
                             style: cart_body_style,
                           ),
                         ),
@@ -486,7 +486,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                           width: 120,
                           child: Center(
                             child: Text(
-                                Helpers.format_amount(e.price, naira: true),
+                                Helpers.format_amount(e.accessory.price, naira: true),
                                 style: cart_body_style),
                           ),
                         ),
@@ -592,7 +592,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
     total_P = 0;
     total_Q = 0;
     items.forEach((e) {
-      int total_price = e.price * e.qty;
+      int total_price = e.accessory.price * e.qty;
       total_Q = total_Q + e.qty;
       total_P = total_P + total_price;
     });
@@ -655,13 +655,11 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
                                       return InkWell(
                                         onTap: () {
                                           var chk = items.where((element) =>
-                                              element.key == e.key);
+                                              element.accessory.key == e.key);
                                           if (chk.isEmpty) {
                                             var new_acc = AccessoryItemModel(
-                                              key: e.key,
-                                              name: e.name,
+                                              accessory: e,
                                               qty: 1,
-                                              price: e.price,
                                             );
                                             items.add(new_acc);
                                           } else {
@@ -864,7 +862,7 @@ class _AccessoriesShopPageState extends State<AccessoriesShopPage> {
             }
 
             if (widget.shop != null) {
-              AdminDatabaseHelpers.remove_accessory_request(widget.shop!.key);
+              AdminDatabaseHelpers.remove_accessory_request(widget.shop!.key ?? '');
             }
 
             // success

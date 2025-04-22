@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/pages/gym/clients_list.dart';
 import 'package:heritage_soft/pages/physio/doctors_list.dart';
@@ -30,9 +32,9 @@ class _AllDataState extends State<AllData> {
   List<ClientListModel> hmo_cl = [];
   List<HMO_Model> gym_hmos = [];
 
-  List<PhysioClientListModel> all_physio_cl = [];
-  List<PhysioClientListModel> phy_prv_cl = [];
-  List<PhysioClientListModel> phy_hmo_cl = [];
+  List<PatientModel> all_physio_cl = [];
+  List<PatientModel> phy_prv_cl = [];
+  List<PatientModel> phy_hmo_cl = [];
   List<HMO_Model> physio_hmos = [];
   int total_phy_session = 0;
 
@@ -57,7 +59,7 @@ class _AllDataState extends State<AllData> {
 
   // get physio data
   get_physio_data() {
-    all_physio_cl = Provider.of<AppData>(context).physio_clients;
+    all_physio_cl = Provider.of<AppData>(context).patients;
 
     phy_prv_cl =
         all_physio_cl.where((element) => element.hmo == 'No HMO').toList();
@@ -68,8 +70,8 @@ class _AllDataState extends State<AllData> {
     physio_hmos = Provider.of<AppData>(context).physio_hmo.toList();
 
     total_phy_session = 0;
-    Provider.of<AppData>(context).all_doctors.forEach((element) {
-      total_phy_session += element.total_sessions;
+    Provider.of<AppData>(context).all_doctors.forEach((el) {
+      total_phy_session += el.my_patients.reduce((element, next) => MyPatientModel(patient: el.my_patients[0].patient, session_count: element.session_count + next.session_count,)).session_count;
     });
   }
 

@@ -2,17 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/physio_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/helpers/physio_helpers.dart';
 import 'package:heritage_soft/pages/physio/clinic_tab.dart';
 import 'package:heritage_soft/pages/physio/physio_health_details_page.dart';
 import 'package:heritage_soft/pages/physio/physio_health_registration_page.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/edit_name_dialog.dart';
-import 'package:heritage_soft/pages/physio/widgets/physio_health_selector_dialog.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
 import 'package:heritage_soft/widgets/options_dialog.dart';
 import 'package:heritage_soft/pages/physio/widgets/other_sponsor_dialog.dart';
@@ -22,26 +23,24 @@ import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 
 import 'package:heritage_soft/widgets/text_field.dart';
-import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
-class PhysioClientProfilePage extends StatefulWidget {
-  const PhysioClientProfilePage({
+class PatientProfilePage extends StatefulWidget {
+  const PatientProfilePage({
     super.key,
-    required this.cl_id,
+    required this.patient,
     this.from_clinic = false,
     this.can_treat = false,
   });
 
-  final String cl_id;
+  final PatientModel patient;
   final bool from_clinic;
   final bool can_treat;
 
   @override
-  State<PhysioClientProfilePage> createState() =>
-      _PhysioClientProfilePageState();
+  State<PatientProfilePage> createState() => _PatientProfilePageState();
 }
 
-class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
+class _PatientProfilePageState extends State<PatientProfilePage> {
   TextStyle labelStyle = TextStyle(
     color: Color(0xFFc3c3c3),
     fontSize: 11,
@@ -57,19 +56,25 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
 
   Uint8List? image_file;
 
-  late StreamSubscription client_stream;
-  late StreamSubscription sponsor_stream;
+  late PatientModel patient;
+  UserModel? active_user;
+
+  void get_patient(PatientModel patient) {
+    var res = AppData.get(context)
+        .patients
+        .where((p) => p.key == patient.key)
+        .toList();
+
+    if (res.isNotEmpty) {
+      patient = res.first;
+    }
+    print('in');
+    update_profile_controllers();
+  }
 
   @override
   void initState() {
-    client_stream = get_client_details(widget.cl_id);
-    sponsor_stream = get_other_sponsor_details(widget.cl_id);
-
-    Future.delayed(Duration(milliseconds: 400), () {
-      sponsor_name_controller.addListener(() {
-        if (sponsor_name_controller.text.isEmpty) other_sponsors.clear();
-      });
-    });
+    patient = widget.patient;
 
     super.initState();
   }
@@ -94,22 +99,17 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
     dob_node.dispose();
     age_node.dispose();
 
-    sponsor_name_controller.dispose();
-    sponsor_phone_controller.dispose();
-    sponsor_addr_controller.dispose();
-    sponsor_role_controller.dispose();
-
     refferal_code_controller.dispose();
     nature_of_work_controller.dispose();
-
-    client_stream.cancel();
-    sponsor_stream.cancel();
 
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    active_user = AppData.get(context).active_user;
+    get_patient(patient);
+
     double width = MediaQuery.of(context).size.width * 0.85;
     double height = MediaQuery.of(context).size.height * 0.93;
     return Scaffold(
@@ -187,7 +187,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                       ],
                     ),
 
-                    // edit notifictaion
+                    // edit notifICTaion
                     (edit)
                         ? Positioned(
                             top: 10,
@@ -227,33 +227,6 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
     );
   }
 
-  StreamSubscription get_client_details(String key) {
-    return PhysioDatabaseHelpers.physio_client_details_stream(key)
-        .listen((event) {
-      Map? map = event.data();
-
-      if (map != null) {
-        client = PhysioClientModel.fromMap(event.id, map);
-        update_profile_controllers();
-      }
-    });
-  }
-
-  StreamSubscription get_other_sponsor_details(String key) {
-    return PhysioDatabaseHelpers.physio_sponsor_stream(key).listen((event) {
-      other_sponsors.clear();
-      event.docs.forEach((e) {
-        other_sponsors.add(SponsorModel.fromMap(e.id, e.data()));
-      });
-
-      Future.delayed(Duration(milliseconds: 400), () {
-        setState(() {});
-      });
-    });
-  }
-
-  PhysioClientModel? client;
-
   // WIDGETs
 
   // main page
@@ -269,7 +242,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
               Row(
                 children: [
                   // id & subscription group
-                  client != null ? id_sub_group() : Container(height: 30),
+                  id_sub_group(),
 
                   Expanded(child: Container()),
 
@@ -315,7 +288,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
           // personal/contact details
           Expanded(
               child: SingleChildScrollView(
-                  child: (app_role == 'doctor')
+                  child: (active_user!.app_role == 'Doctor')
                       ? personal_details()
                       : contact_details())),
         ],
@@ -335,18 +308,24 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
               child: Column(
                 children: [
                   // personal details
-                  (app_role == 'doctor') ? Container() : personal_details(),
+                  (active_user!.app_role == 'Doctor')
+                      ? Container()
+                      : personal_details(),
 
                   // other details
-                  (app_role == 'doctor') ? Container() : other_details(),
+                  (active_user!.app_role == 'Doctor')
+                      ? Container()
+                      : other_details(),
 
                   SizedBox(height: 10),
 
                   // sponsor details
-                  (app_role == 'doctor') ? Container() : sponsor_details(),
+                  (active_user!.app_role == 'Doctor')
+                      ? Container()
+                      : sponsor_details(),
 
-                  // doctor tab
-                  doctor_tab(),
+                  // Doctor tab
+                  Doctor_tab(),
                 ],
               ),
             ),
@@ -379,7 +358,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
           children: [
             // client id
             Text(
-              client!.id ?? '',
+              patient.patient_id,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -400,14 +379,14 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
-                color: (client!.hmo! == 'No HMO')
+                color: (patient.hmo == 'No HMO')
                     ? Color.fromARGB(255, 232, 186, 93).withOpacity(0.4)
                     : Color.fromARGB(255, 232, 93, 218).withOpacity(0.4),
               ),
               padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               margin: EdgeInsets.only(left: 10, top: 2),
               child: Text(
-                (client!.hmo! == 'No HMO') ? 'Walk-In' : client!.hmo!,
+                (patient.hmo == 'No HMO') ? 'Walk-In' : patient.hmo,
                 style: TextStyle(
                   fontSize: 9,
                   letterSpacing: 1,
@@ -633,11 +612,6 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
   TextEditingController hykau_controller = TextEditingController();
   TextEditingController refferal_code_controller = TextEditingController();
 
-  TextEditingController sponsor_name_controller = TextEditingController();
-  TextEditingController sponsor_phone_controller = TextEditingController();
-  TextEditingController sponsor_addr_controller = TextEditingController();
-  TextEditingController sponsor_role_controller = TextEditingController();
-
   // Text nodes
   FocusNode phone_1_node = FocusNode();
   FocusNode phone_2_node = FocusNode();
@@ -655,9 +629,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
 
   String occupation_select = '';
 
-  bool sponsor = false;
-
-  List<SponsorModel> other_sponsors = [];
+  List<SponsorModel> sponsors = [];
 
   List<String> hmo = physio_hmo.map((e) => e.hmo_name).toList();
 
@@ -902,6 +874,33 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                 edit: !edit,
               ),
             ),
+
+          // hmo
+          if (patient.hmo != 'No HMO')
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text_field(
+                label: 'HMO',
+                controller: TextEditingController(
+                  text: patient.hmo,
+                ),
+                edit: true,
+              ),
+            ),
+
+          // hmo id
+          if (patient.hmo != 'No HMO')
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 1),
+              child: Text_field(
+                controller: TextEditingController(
+                  text: patient.hmo_id,
+                ),
+                edit: true,
+              ),
+            ),
+
+          if (patient.hmo != 'No HMO') SizedBox(height: 8),
         ],
       ),
     );
@@ -910,10 +909,10 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
   // sponor details
   Widget sponsor_details() {
     // view mode & no sponsor
-    if (!edit && !sponsor) return Container();
+    if (!edit && patient.sponsors.isEmpty) return Container();
 
     // view mode with sponsor
-    if (!edit && sponsor)
+    if (!edit && patient.sponsors.isNotEmpty)
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 15),
         child: Column(
@@ -928,95 +927,15 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                 ),
               ),
               child: Text(
-                'Main Sponsors',
+                'Sponsors',
                 style: headingStyle,
               ),
             ),
 
             SizedBox(height: 6),
 
-            // main sponsor
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFababab)),
-                ),
-              ),
-              child: Row(
-                children: [
-                  // sponsor details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text('Sponsor:', style: labelStyle),
-                            SizedBox(width: 10),
-                            Text(sponsor_name_controller.text,
-                                style: headingStyle),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text('Role', style: labelStyle),
-                            SizedBox(width: 8),
-                            Text(sponsor_role_controller.text,
-                                style: headingStyle),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(width: 15),
-
-                  // View full details
-                  TextButton(
-                      onPressed: () {
-                        SponsorModel sponsor = SponsorModel(
-                          sponsor_name: sponsor_name_controller.text,
-                          sponsor_phone: sponsor_phone_controller.text,
-                          sponsor_addr: sponsor_addr_controller.text,
-                          sponsor_role: sponsor_role_controller.text,
-                        );
-
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => OtherSponsor(
-                            sponsor: sponsor,
-                            view_only: true,
-                          ),
-                        );
-                      },
-                      child: Text('Details'))
-                ],
-              ),
-            ),
-
-            if (other_sponsors.isNotEmpty) SizedBox(height: 8),
-
-            // other sponsor heading
-            if (other_sponsors.isNotEmpty)
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFababab)),
-                  ),
-                ),
-                child: Text(
-                  'Other Sponsors',
-                  style: headingStyle,
-                ),
-              ),
-
-            if (other_sponsors.isNotEmpty) SizedBox(height: 8),
-
-            // other sponsors list
-            for (var sponsor in other_sponsors)
+            // sponsors list
+            for (var sponsor in patient.sponsors)
               Container(
                 decoration: BoxDecoration(
                   border: Border(
@@ -1035,17 +954,16 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                             children: [
                               Text('Sponsor:', style: labelStyle),
                               SizedBox(width: 10),
-                              Text(sponsor.sponsor_name, style: headingStyle),
+                              Text(sponsor.name, style: headingStyle),
                             ],
                           ),
-                          if (sponsor.sponsor_role.isNotEmpty)
-                            SizedBox(height: 4),
-                          if (sponsor.sponsor_role.isNotEmpty)
+                          if (sponsor.role.isNotEmpty) SizedBox(height: 4),
+                          if (sponsor.role.isNotEmpty)
                             Row(
                               children: [
                                 Text('Role', style: labelStyle),
                                 SizedBox(width: 8),
-                                Text(sponsor.sponsor_role, style: headingStyle),
+                                Text(sponsor.role, style: headingStyle),
                               ],
                             ),
                         ],
@@ -1060,8 +978,8 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (context) =>
-                                OtherSponsor(sponsor: sponsor, view_only: true),
+                            builder: (context) => SponsorDialog(
+                                sponsor: sponsor, view_only: true),
                           );
                         },
                         child: Text('Details'))
@@ -1073,18 +991,14 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
       );
 
     // edit mode & no sponsor
-    if (!sponsor && edit)
+    if (sponsors.isEmpty && edit)
       // Add sponsor
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 15),
         child: Row(
           children: [
             InkWell(
-              onTap: () {
-                setState(() {
-                  sponsor = true;
-                });
-              },
+              onTap: () {},
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.deepPurple,
@@ -1153,19 +1067,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                     );
 
                     if (res != null && res) {
-                      sponsor_name_controller.clear();
-                      sponsor_phone_controller.clear();
-                      sponsor_addr_controller.clear();
-                      sponsor_role_controller.clear();
-                      sponsor = false;
-
-                      // delete other sponsor from database
-                      if (other_sponsors.isNotEmpty) {
-                        other_sponsors.forEach((e) {
-                          PhysioDatabaseHelpers.delete_physio_sponsor(
-                              widget.cl_id, e.key!);
-                        });
-                      }
+                      sponsors.clear();
 
                       setState(() {});
                     }
@@ -1182,72 +1084,11 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
 
           SizedBox(height: 7),
 
-          // sponsor name
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Fullname',
-              controller: sponsor_name_controller,
-              edit: !edit,
-              require: true,
-            ),
-          ),
-
-          // sponsor no.
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Phone no.',
-              controller: sponsor_phone_controller,
-              format: [FilteringTextInputFormatter.digitsOnly],
-              edit: !edit,
-              require: true,
-            ),
-          ),
-
-          // sponsor role
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Role',
-              controller: sponsor_role_controller,
-              edit: !edit,
-            ),
-          ),
-
-          // sponsor address
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Address',
-              controller: sponsor_addr_controller,
-              maxLine: 3,
-              edit: !edit,
-            ),
-          ),
-
-          // other sponsor heading
-          if (other_sponsors.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFababab)),
-                  ),
-                ),
-                child: Text(
-                  'Other Sponsors',
-                  style: headingStyle,
-                ),
-              ),
-            ),
-
           // other sponsor list
-          if (other_sponsors.isNotEmpty)
+          if (sponsors.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: other_sponsors.map((sponsor) {
+              children: sponsors.map((sponsor) {
                 // each sponsor
                 return Container(
                   width: double.infinity,
@@ -1265,7 +1106,7 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                       // sponsor details
                       Expanded(
                         child: Text(
-                          '${sponsor.sponsor_name} ${(sponsor.sponsor_role.isNotEmpty) ? ' -- ${sponsor.sponsor_role}' : ''}',
+                          '${sponsor.name} ${(sponsor.role.isNotEmpty) ? ' -- ${sponsor.role}' : ''}',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w400,
@@ -1283,22 +1124,12 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                             context: context,
                             barrierDismissible: false,
                             builder: (context) =>
-                                OtherSponsor(sponsor: sponsor),
+                                SponsorDialog(sponsor: sponsor),
                           );
 
                           if (spon != null) {
-                            var ind = other_sponsors.indexOf(sponsor);
-                            other_sponsors[ind] = spon;
-
-                            SponsorModel spn = spon;
-
-                            // update sponsor in database
-                            PhysioDatabaseHelpers.add_physio_sponsor(
-                              widget.cl_id,
-                              sponsor.key,
-                              spn.toJson(),
-                            );
-
+                            var ind = sponsors.indexOf(sponsor);
+                            sponsors[ind] = spon;
                             setState(() {});
                           }
                         },
@@ -1319,12 +1150,8 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                           );
 
                           if (res != null && res) {
-                            var ind = other_sponsors.indexOf(sponsor);
-                            other_sponsors.removeAt(ind);
-
-                            // delete sponsor from database
-                            PhysioDatabaseHelpers.delete_physio_sponsor(
-                                widget.cl_id, sponsor.key!);
+                            var ind = sponsors.indexOf(sponsor);
+                            sponsors.removeAt(ind);
 
                             setState(() {});
                           }
@@ -1337,71 +1164,62 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
               }).toList(),
             ),
 
-          // add other sponsors
-          if (sponsor_name_controller.text.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: InkWell(
-                onTap: () async {
-                  // max sponsor = 2
-                  if (other_sponsors.length >= 2) {
-                    Helpers.showToast(
-                      context: context,
-                      color: Colors.red,
-                      toastText: 'Maximum number of sponsor reached!',
-                      icon: Icons.error,
-                    );
-                    return;
-                  }
-
-                  var spon = await showDialog(
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: InkWell(
+              onTap: () async {
+                // max sponsor = 3
+                if (sponsors.length >= 3) {
+                  Helpers.showToast(
                     context: context,
-                    barrierDismissible: false,
-                    builder: (context) => OtherSponsor(),
+                    color: Colors.red,
+                    toastText: 'Maximum number of sponsor reached!',
+                    icon: Icons.error,
                   );
+                  return;
+                }
 
-                  if (spon != null) {
-                    other_sponsors.add(spon);
-                    SponsorModel spn = spon;
+                var spon = await showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => SponsorDialog(),
+                );
 
-                    PhysioDatabaseHelpers.add_physio_sponsor(
-                      widget.cl_id,
-                      null,
-                      spn.toJson(),
-                    );
+                if (spon != null) {
+                  sponsors.add(spon);
 
-                    setState(() {});
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add,
+                  setState(() {});
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Add Other Sponsor',
+                      style: TextStyle(
                         color: Colors.white,
-                        size: 18,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Add Other Sponsor',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -1464,8 +1282,8 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
     );
   }
 
-  // doctors tab
-  Widget doctor_tab() {
+  // Doctors tab
+  Widget Doctor_tab() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Column(
@@ -1489,8 +1307,6 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                   style: headingStyle,
                 ),
               ),
-
-              // Expanded(child: Container()),
             ],
           ),
 
@@ -1506,169 +1322,160 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                 // health details
                 InkWell(
                   onTap: () async {
-                    if (client == null) return;
+                    if (patient == null) return;
 
                     Helpers.showLoadingScreen(context: context);
-
-                    PhysioHealthClientModel client_h = PhysioHealthClientModel(
-                      key: client!.key!,
-                      id: client!.id!,
-                      name: '$first_name $middle_name $last_name',
-                      user_image: user_image,
-                      hmo: client!.hmo!,
-                      baseline_done: client!.baseline_done,
-                    );
 
                     List<G_PhysioHealthModel> _all = [];
 
                     // get all health entries from db
-                    await PhysioDatabaseHelpers.get_physio_health_info(
-                            client!.key!)
-                        .then((snap) async {
-                      snap.docs.forEach((element) {
-                        _all.add(G_PhysioHealthModel(
-                          key: element.id,
-                          data: PhysioHealthModel.fromMap(
-                              element.id, element.data()),
-                        ));
-                      });
+                    // await PhysioDatabaseHelpers.get_physio_health_info(
+                    //         client!.key!)
+                    //     .then((snap) async {
+                    //   snap.docs.forEach((element) {
+                    //     _all.add(G_PhysioHealthModel(
+                    //       key: element.id,
+                    //       data: PhysioHealthModel.fromMap(
+                    //           element.id, element.data()),
+                    //     ));
+                    //   });
 
-                      // remove loading scrren
-                      Navigator.pop(context);
+                    //   // remove loading scrren
+                    //   Navigator.pop(context);
 
-                      // if db contains health details
-                      if (_all.isNotEmpty) {
-                        // set baseline done if baseline date is different from today
-                        if (_all.length == 1 && !client!.baseline_done) {
-                          if (PhysioHelpers.fmt_date(_all[0].data.date) !=
-                              DateFormat('d MMM, y').format(DateTime.now())) {
-                            PhysioDatabaseHelpers.edit_physio_client(
-                                client!.key!, {'baseline_done': true});
-                            client!.baseline_done = true;
-                          }
-                        }
+                    //   // if db contains health details
+                    //   if (_all.isNotEmpty) {
+                    //     // set baseline done if baseline date is different from today
+                    //     if (_all.length == 1 && !client!.baseline_done) {
+                    //       if (PhysioHelpers.fmt_date(_all[0].data.date) !=
+                    //           DateFormat('d MMM, y').format(DateTime.now())) {
+                    //         PhysioDatabaseHelpers.edit_physio_client(
+                    //             client!.key!, {'baseline_done': true});
+                    //         client!.baseline_done = true;
+                    //       }
+                    //     }
 
-                        // if baseline is done
-                        if (client!.baseline_done) {
-                          var conf = await showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  PhysioHealthSelectorDialog(list: _all));
+                    //     // if baseline is done
+                    //     if (client!.baseline_done) {
+                    //       var conf = await showDialog(
+                    //           context: context,
+                    //           builder: (context) =>
+                    //               PhysioHealthSelectorDialog(list: _all));
 
-                          if (conf != null) {
-                            // new health data
-                            if (conf[1]) {
-                              new_health_details(
-                                  client: client_h, health: conf[0]);
-                            }
+                    //       if (conf != null) {
+                    //         // new health data
+                    //         if (conf[1]) {
+                    //           new_health_details(
+                    //               client: client_h, health: conf[0]);
+                    //         }
 
-                            // view health data
-                            else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PhysioClientHDPage(
-                                    client: client_h,
-                                    health: conf[0],
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        }
+                    //         // view health data
+                    //         else {
+                    //           Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //               builder: (context) => PhysioClientHDPage(
+                    //                 client: client_h,
+                    //                 health: conf[0],
+                    //               ),
+                    //             ),
+                    //           );
+                    //         }
+                    //       }
+                    //     }
 
-                        // if baseline not done
-                        else {
-                          var data = _all
-                              .where((element) => element.key == 'Baseline')
-                              .first
-                              .data;
+                    //     // if baseline not done
+                    //     else {
+                    //       var data = _all
+                    //           .where((element) => element.key == 'Baseline')
+                    //           .first
+                    //           .data;
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PhysioClientHDPage(
-                                client: client_h,
-                                health: data,
-                              ),
-                            ),
-                          );
-                        }
-                      }
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => PhysioClientHDPage(
+                    //             client: client_h,
+                    //             health: data,
+                    //           ),
+                    //         ),
+                    //       );
+                    //     }
+                    //   }
 
-                      // if no health entries
-                      else {
-                        // if not desk user
-                        if (app_role != 'desk' && app_role != 'ict') {
-                          Helpers.showToast(
-                            context: context,
-                            color: Colors.red,
-                            toastText: 'No Health details',
-                            icon: Icons.error,
-                          );
-                          return;
-                        }
+                    //   // if no health entries
+                    //   else {
+                    //     // if not CSU user
+                    //     if (active_user.app_role != 'CSU' && active_user.app_role != 'ICT') {
+                    //       Helpers.showToast(
+                    //         context: context,
+                    //         color: Colors.red,
+                    //         toastText: 'No Health details',
+                    //         icon: Icons.error,
+                    //       );
+                    //       return;
+                    //     }
 
-                        var bs = await showDialog(
-                          context: context,
-                          builder: (context) => ConfirmDialog(
-                            title: 'Baseline Assessment',
-                            subtitle:
-                                'You are about to take form for baseline assessment. Would you like to proceed?',
-                          ),
-                        );
+                    //     var bs = await showDialog(
+                    //       context: context,
+                    //       builder: (context) => ConfirmDialog(
+                    //         title: 'Baseline Assessment',
+                    //         subtitle:
+                    //             'You are about to take form for baseline assessment. Would you like to proceed?',
+                    //       ),
+                    //     );
 
-                        if (bs == null || !bs) return;
+                    //     if (bs == null || !bs) return;
 
-                        // new health details
-                        PhysioHealthModel pty = PhysioHealthModel(
-                          height: '',
-                          weight: '',
-                          ideal_weight: '',
-                          fat_rate: '',
-                          weight_gap: '',
-                          weight_target: '',
-                          waist: '',
-                          arm: '',
-                          chest: '',
-                          thighs: '',
-                          hips: '',
-                          pulse_rate: '',
-                          blood_pressure: '',
-                          chl_ov: '',
-                          chl_nv: '',
-                          chl_rm: '',
-                          hdl_ov: '',
-                          hdl_nv: '',
-                          hdl_rm: '',
-                          ldl_ov: '',
-                          ldl_nv: '',
-                          ldl_rm: '',
-                          trg_ov: '',
-                          trg_nv: '',
-                          trg_rm: '',
-                          blood_sugar: false,
-                          eh_finding: '',
-                          eh_recommend: '',
-                          sh_finding: '',
-                          sh_recommend: '',
-                          ah_finding: '',
-                          ah_recommend: '',
-                          other_finding: '',
-                          other_recommend: '',
-                          ft_obj_1: '',
-                          ft_obj_2: '',
-                          ft_obj_3: '',
-                          ft_obj_4: '',
-                          ft_obj_5: '',
-                          key: 'Baseline',
-                          date: DateFormat('dd_MM_yyyy').format(DateTime.now()),
-                          done: false,
-                        );
+                    //     // new health details
+                    //     PhysioHealthModel pty = PhysioHealthModel(
+                    //       height: '',
+                    //       weight: '',
+                    //       ideal_weight: '',
+                    //       fat_rate: '',
+                    //       weight_gap: '',
+                    //       weight_target: '',
+                    //       waist: '',
+                    //       arm: '',
+                    //       chest: '',
+                    //       thighs: '',
+                    //       hips: '',
+                    //       pulse_rate: '',
+                    //       blood_pressure: '',
+                    //       chl_ov: '',
+                    //       chl_nv: '',
+                    //       chl_rm: '',
+                    //       hdl_ov: '',
+                    //       hdl_nv: '',
+                    //       hdl_rm: '',
+                    //       ldl_ov: '',
+                    //       ldl_nv: '',
+                    //       ldl_rm: '',
+                    //       trg_ov: '',
+                    //       trg_nv: '',
+                    //       trg_rm: '',
+                    //       blood_sugar: false,
+                    //       eh_finding: '',
+                    //       eh_recommend: '',
+                    //       sh_finding: '',
+                    //       sh_recommend: '',
+                    //       ah_finding: '',
+                    //       ah_recommend: '',
+                    //       other_finding: '',
+                    //       other_recommend: '',
+                    //       ft_obj_1: '',
+                    //       ft_obj_2: '',
+                    //       ft_obj_3: '',
+                    //       ft_obj_4: '',
+                    //       ft_obj_5: '',
+                    //       key: 'Baseline',
+                    //       date: DateFormat('dd_MM_yyyy').format(DateTime.now()),
+                    //       done: false,
+                    //     );
 
-                        new_health_details(client: client_h, health: pty);
-                      }
-                    });
+                    //     new_health_details(client: client_h, health: pty);
+                    //   }
+                    // });
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -1691,23 +1498,11 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
                 if (!widget.from_clinic)
                   InkWell(
                     onTap: () async {
-                      if (client == null) return;
-
-                      PhysioHealthClientModel client_h =
-                          PhysioHealthClientModel(
-                        key: client!.key!,
-                        id: client!.id!,
-                        name: '$first_name $middle_name $last_name',
-                        user_image: user_image,
-                        hmo: client!.hmo!,
-                        baseline_done: client!.baseline_done,
-                      );
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ClinicTab(
-                            client: client_h,
+                            patient: patient,
                             can_treat: false,
                           ),
                         ),
@@ -1746,7 +1541,9 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // edit icon - Only admin
-        client != null && (app_role == 'ict')
+        (active_user!.app_role == 'ICT' ||
+                active_user!.app_role == 'CSU' ||
+                active_user!.app_role == 'Admin')
             ? Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5),
                 child: InkWell(
@@ -1773,7 +1570,9 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
         SizedBox(width: 15),
 
         // settings icon
-        client != null && (app_role == 'desk' || app_role == 'ict')
+        (active_user!.app_role == 'CSU' ||
+                active_user!.app_role == 'ICT' ||
+                active_user!.app_role == 'Admin')
             ? Padding(
                 padding: EdgeInsets.symmetric(horizontal: 3),
                 child: settings_menu(
@@ -1903,43 +1702,6 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
           return;
         }
 
-        // check sponsor
-        if (sponsor) {
-          // check name if not empty
-          if (sponsor_name_controller.text.isEmpty) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Enter sponsor name',
-              icon: Icons.error,
-            );
-            return;
-          }
-
-          // check phone if not empty
-          if (sponsor_phone_controller.text.isEmpty) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Enter sponsor contact',
-              icon: Icons.error,
-            );
-            return;
-          }
-
-          // validate phone
-          if (sponsor_phone_controller.text.length > 11 ||
-              sponsor_phone_controller.text.length < 10) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Sponsor contact Invalid',
-              icon: Icons.error,
-            );
-            return;
-          }
-        }
-
         // continue
         bool? res = await showDialog(
           context: context,
@@ -2011,39 +1773,18 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
             middle_name = res['middle_name'];
             last_name = res['last_name'];
 
-            Map<String, dynamic> client_name_update = {
-              'f_name': first_name,
-              'm_name': middle_name,
-              'l_name': last_name,
-            };
+            PatientModel client_update = patient;
+            client_update.f_name = first_name;
+            client_update.m_name = middle_name;
+            client_update.l_name = last_name;
 
-            Helpers.showLoadingScreen(context: context);
-
-            // update physio client
-            bool ress = await PhysioDatabaseHelpers.edit_physio_client(
-                client!.key!, client_name_update);
-            Navigator.pop(context);
-
-            // if error
-            if (!ress) {
-              Helpers.showToast(
-                context: context,
-                color: Colors.redAccent,
-                toastText: 'An Error occured, Try again!',
-                icon: Icons.error,
-              );
-              return;
-            }
-
-            // successful
-            Helpers.showToast(
-              context: context,
-              color: Colors.greenAccent,
-              toastText: 'Name updated successfully',
-              icon: Icons.check,
+            // update client details
+            await PhysioDatabaseHelpers.add_update_patient(
+              context,
+              data: client_update.toJson(),
+              showLoading: true,
+              showToast: true,
             );
-
-            setState(() {});
           }
         }
 
@@ -2059,93 +1800,69 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
           );
 
           if (response != null) {
-            Helpers.showLoadingScreen(context: context);
+            PatientModel client_update = patient;
+            var hmo_id;
 
-            // update client details
-            bool ress = await PhysioDatabaseHelpers.edit_physio_client(
-                widget.cl_id, {'hmo': response});
-            Navigator.pop(context);
-
-            // if error
-            if (!ress) {
-              Helpers.showToast(
+            if (response != 'No HMO') {
+              // open dialog for inputing hmo ID
+              hmo_id = await showDialog(
                 context: context,
-                color: Colors.redAccent,
-                toastText: 'An Error occured, Try again!',
-                icon: Icons.error,
+                builder: (context) => HmoIdDialog(
+                  hmo: response,
+                ),
               );
-              return;
+
+              if (hmo_id == null || hmo_id.isEmpty) return;
+
+              client_update.hmo = response;
+              client_update.hmo_id = hmo_id;
+            } else {
+              client_update.hmo = response;
+              client_update.hmo_id = '';
             }
 
-            // successful
-            Helpers.showToast(
-              context: context,
-              color: Colors.blue,
-              toastText: 'Patient Type updated',
-              icon: Icons.check,
+            // update client details
+            await PhysioDatabaseHelpers.add_update_patient(
+              context,
+              data: client_update.toJson(),
+              showLoading: true,
+              showToast: true,
             );
           }
         }
 
         // delete user
         if (value == 0) {
-          var conf = await Helpers.enter_password(context,
-              title: 'Delete User password');
+          var conf = await Helpers.showConfirmation(
+              context: context,
+              title: 'Delete Patient',
+              message:
+                  'Are you sure you want to delete this Patient? This cannot be undone!');
 
           if (!conf) return;
 
-          var res = await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => ConfirmDialog(
-              title: 'Delete User',
-              subtitle:
-                  'You are about to delete this client\'s profile, This cannot be undone.\nWould you like to proceed?',
-            ),
+          Map del = await PhysioDatabaseHelpers.delete_patient(
+            context,
+            patient_id: patient.key ?? '',
+            showLoading: true,
+            showToast: true,
           );
 
-          if (res != null && res == true) {
-            Helpers.showLoadingScreen(context: context);
-
-            bool del =
-                await PhysioDatabaseHelpers.delete_physio_client(widget.cl_id);
-
+          if (del['status'] == true) {
             Navigator.pop(context);
-
-            if (!del) {
-              Helpers.showToast(
-                context: context,
-                color: Colors.redAccent,
-                toastText: 'Error, Try again',
-                icon: Icons.error,
-              );
-              return;
-            }
-
-            // successful
-            // remove page
-            Navigator.pop(context);
-            Helpers.showToast(
-              context: context,
-              color: Colors.blue,
-              toastText: 'User Deleted',
-              icon: Icons.check,
-            );
           }
         }
       },
       itemBuilder: (context) => [
-        // edit name - only admin
-        if (app_role == 'ict')
-          PopupMenuItem(
-            value: 1,
-            child: Container(
-              child: Text(
-                'Edit name',
-                style: TextStyle(),
-              ),
+        PopupMenuItem(
+          value: 1,
+          child: Container(
+            child: Text(
+              'Edit name',
+              style: TextStyle(),
             ),
           ),
+        ),
 
         // change type
         PopupMenuItem(
@@ -2160,19 +1877,19 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
 
         PopupMenuDivider(),
 
-        // delete user - only admin
-        if (active_staff!.full_access)
-          PopupMenuItem(
-            value: 0,
-            child: Container(
-              child: Text(
-                'Delete User',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                ),
+        // delete patient - only admin
+        // if (active_user!.full_access)
+        PopupMenuItem(
+          value: 0,
+          child: Container(
+            child: Text(
+              'Delete Patient',
+              style: TextStyle(
+                color: Colors.redAccent,
               ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -2182,92 +1899,76 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
   void update_profile_controllers() {
     if (edit) return;
 
-    first_name = client!.f_name!;
-    middle_name = client!.m_name!;
-    last_name = client!.l_name!;
-    user_image = client!.user_image!;
+    first_name = patient.f_name;
+    middle_name = patient.m_name;
+    last_name = patient.l_name;
+    user_image = patient.user_image;
 
-    phone_1_controller.text = client!.phone_1!;
-    phone_2_controller.text = client!.phone_2!;
-    email_controller.text = client!.email!;
-    address_controller.text = client!.address!;
+    phone_1_controller.text = patient.phone_1;
+    phone_2_controller.text = patient.phone_2;
+    email_controller.text = patient.email;
+    address_controller.text = patient.address;
 
-    dob_controller.text = client!.dob;
-    age_controller.text = client!.age;
-    occupation_select = client!.occupation!;
-    nature_of_work_controller.text = client!.nature_of_work!;
-    gender_select = client!.gender!;
+    dob_controller.text = patient.dob;
+    age_controller.text = patient.age;
+    occupation_select = patient.occupation;
+    nature_of_work_controller.text = patient.nature_of_work;
+    gender_select = patient.gender;
 
-    sponsor_name_controller.text = client!.sponsor_name;
-    sponsor_phone_controller.text = client!.sponsor_phone;
-    sponsor_addr_controller.text = client!.sponsor_addr;
-    sponsor_role_controller.text = client!.sponsor_role;
-    sponsor = client!.sponsor;
+    hykau = patient.hykau;
+    hykau_controller.text = patient.hykau_others;
+    refferal_code_controller.text = patient.refferal_code;
 
-    hykau = client!.hykau!;
-    hykau_controller.text = client!.hykau_others!;
-    refferal_code_controller.text = client!.refferal_code;
+    sponsors = patient.sponsors;
 
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   // update client info
-  update_client_details() async {
-    Helpers.showLoadingScreen(context: context);
-
+  Future<bool?> update_client_details() async {
     // upload image
-    if (image_file != null) {
-      user_image = await AdminDatabaseHelpers.uploadFile(
-              image_file!, widget.cl_id, false) ??
-          '';
-    }
+    if (image_file != null) {}
 
-    // client details
-    Map<String, dynamic> client_update_details = {
-      'phone_1': phone_1_controller.text.trim(),
-      'phone_2': phone_2_controller.text.trim(),
-      'email': email_controller.text.trim(),
-      'address': address_controller.text.trim(),
-      'gender': gender_select,
-      'dob': dob_controller.text.trim(),
-      'age': age_controller.text.trim(),
-      'occupation': occupation_select,
-      'nature_of_work': nature_of_work_controller.text.trim(),
-      'user_image': user_image,
-      'sponsor_name': sponsor_name_controller.text.trim(),
-      'sponsor_phone': sponsor_phone_controller.text.trim(),
-      'sponsor_addr': sponsor_addr_controller.text.trim(),
-      'sponsor': sponsor,
-      'hykau': hykau,
-      'hykau_others': hykau_controller.text.trim(),
-      'refferal_code': refferal_code_controller.text.trim(),
-      'sponsor_role': sponsor_role_controller.text.trim(),
-    };
+    PatientModel client_update = PatientModel(
+      key: patient.key,
+      f_name: patient.f_name,
+      m_name: patient.m_name,
+      l_name: patient.l_name,
+      phone_1: phone_1_controller.text.trim(),
+      phone_2: phone_2_controller.text.trim(),
+      email: email_controller.text.trim(),
+      address: address_controller.text.trim(),
+      gender: gender_select,
+      dob: dob_controller.text.trim(),
+      age: age_controller.text.trim(),
+      occupation: occupation_select,
+      nature_of_work: nature_of_work_controller.text.trim(),
+      user_image: user_image,
+      hykau: hykau,
+      hykau_others: hykau_controller.text.trim(),
+      refferal_code: refferal_code_controller.text.trim(),
+      sponsors: sponsors,
+      hmo: patient.hmo,
+      hmo_id: patient.hmo_id,
+      patient_id: patient.patient_id,
+      reg_date: patient.reg_date,
+      user_status: patient.user_status,
+      baseline_done: patient.baseline_done,
+    );
 
     // update client details
-    bool upd = await PhysioDatabaseHelpers.edit_physio_client(
-        widget.cl_id, client_update_details);
+    Map upd = await PhysioDatabaseHelpers.add_update_patient(
+      context,
+      data: client_update.toJson(),
+      showLoading: true,
+      showToast: true,
+    );
 
-    Navigator.pop(context);
-
-    // error
-    if (!upd) {
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'An Error occured, Try again!',
-        icon: Icons.error,
-      );
-      return false;
+    if (upd['status'] == true) {
+      patient = upd['patient'];
     }
 
-    // successful
-    Helpers.showToast(
-      context: context,
-      color: Colors.greenAccent,
-      toastText: 'Profile Successfully Updated',
-      icon: Icons.check,
-    );
+    return upd['status'];
   }
 
   // go to new health details page
@@ -2298,4 +1999,45 @@ class _PhysioClientProfilePageState extends State<PhysioClientProfilePage> {
   }
 
   //
+}
+
+class HmoIdDialog extends StatelessWidget {
+  final String hmo;
+  final TextEditingController _hmoId = TextEditingController();
+
+  HmoIdDialog({required this.hmo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: 200,
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Enter HMO ID',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _hmoId,
+              decoration: InputDecoration(
+                labelText: hmo,
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, _hmoId.text.trim());
+              },
+              child: Text('Submit'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }

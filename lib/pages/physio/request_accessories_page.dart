@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'dart:ui' as ui;
 
 import 'package:heritage_soft/helpers/helper_methods.dart';
@@ -10,8 +10,8 @@ import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:provider/provider.dart';
 
 class RequestAccessoriesPage extends StatefulWidget {
-  final PhysioHealthClientModel client;
-  const RequestAccessoriesPage({super.key, required this.client});
+  final PatientModel patient;
+  const RequestAccessoriesPage({super.key, required this.patient});
 
   @override
   State<RequestAccessoriesPage> createState() => _RequestAccessoriesPageState();
@@ -266,9 +266,9 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
           // id group
           Row(
             children: [
-              // client id
+              // patient id
               Text(
-                widget.client.id,
+                widget.patient.patient_id,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -310,7 +310,7 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
               ),
               padding: EdgeInsets.fromLTRB(33, 6, 10, 6),
               child: Text(
-                widget.client.name.trim(),
+                widget.patient.f_name.trim(),
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   color: Colors.white,
@@ -330,13 +330,13 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
               radius: 22,
               backgroundColor: Color(0xFFf3f0da),
               foregroundColor: Colors.white,
-              backgroundImage: widget.client.user_image.isNotEmpty
+              backgroundImage: widget.patient.user_image.isNotEmpty
                   ? NetworkImage(
-                      widget.client.user_image,
+                      widget.patient.user_image,
                     )
                   : null,
               child: Center(
-                child: widget.client.user_image.isEmpty
+                child: widget.patient.user_image.isEmpty
                     ? Image.asset(
                         'images/icon/health-person.png',
                         width: 25,
@@ -449,7 +449,7 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
                         // item
                         Expanded(
                           child: Text(
-                            e.name,
+                            e.accessory.name,
                             style: cart_body_style,
                           ),
                         ),
@@ -564,14 +564,14 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
                 if (res != null && res == true) {
                   A_ShopModel shop = A_ShopModel(
                     key: Helpers.generate_order_id(),
-                    items: items,
-                    client: widget.client,
+                    accessories: items,
+                    patient: widget.patient,
                   );
 
                   Helpers.showLoadingScreen(context: context);
 
-                  bool dt = await PhysioDatabaseHelpers.accessory_request(
-                      shop.key, shop.toJson());
+                  bool dt = await PhysioDatabaseHelpers.add_update_accessory_request(
+                      context, data: shop.toJson());
 
                   Navigator.pop(context);
 
@@ -693,7 +693,7 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
                                       return InkWell(
                                         onTap: () {
                                           var chk = items.where((element) =>
-                                              element.key == e.key);
+                                              element.accessory.key == e.key);
 
                                           // item already exist
                                           if (chk.isNotEmpty) {
@@ -709,10 +709,8 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
                                           // new item
                                           else {
                                             var new_acc = AccessoryItemModel(
-                                              key: e.key,
-                                              name: e.name,
+                                              accessory: e,
                                               qty: 1,
-                                              price: e.price,
                                             );
                                             items.add(new_acc);
                                           }

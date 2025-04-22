@@ -1,28 +1,26 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/helpers/physio_database_helpers.dart';
 import 'dart:ui' as ui;
 
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/physio_helpers.dart';
-import 'package:heritage_soft/pages/physio/case_file_page.dart';
 import 'package:heritage_soft/pages/physio/clinic_tab.dart';
-import 'package:heritage_soft/pages/physio/physio_health_details_page.dart';
 import 'package:heritage_soft/pages/physio/request_accessories_page.dart';
 import 'package:heritage_soft/pages/physio/widgets/clinic_info.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
-import 'package:heritage_soft/pages/physio/widgets/physio_health_selector_dialog.dart';
 import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/pages/physio/widgets/session_plan_dialog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
 class TreatmentTab extends StatefulWidget {
-  final PhysioHealthClientModel client;
-  final TreatmentModel? treatmentInfo;
-  final AssessmentModel? assessmentModel;
+  final PatientModel patient;
+  final TreatmentInfoModel? treatmentInfo;
+  final AssessmentInfoModel? assessmentModel;
   final CaseFileModel case_file;
   final bool assessment_completed;
   final int completed_session;
@@ -32,7 +30,7 @@ class TreatmentTab extends StatefulWidget {
 
   const TreatmentTab({
     super.key,
-    required this.client,
+    required this.patient,
     this.treatmentInfo,
     required this.assessmentModel,
     required this.case_file,
@@ -88,6 +86,8 @@ class _TreatmentTabState extends State<TreatmentTab> {
   TextEditingController equipment_select_controller = TextEditingController();
   TextEditingController diagnosis_controller = TextEditingController();
 
+  DoctorModel? active_doctor;
+
   update_controllers() {
     session_set = widget.session_details;
     bp_controller.text = case_file!.bp_reading;
@@ -95,7 +95,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
     note_controller.text = case_file!.note;
     bp_reading = bp_controller.text;
 
-    decision_select = case_file!.decision;
+    decision_select = case_file!.treatment_decision;
     decision_refered_select = case_file!.refered_decision;
     other_decision_controller.text = case_file!.other_decision;
 
@@ -106,7 +106,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
       diagnosis_controller.text = widget.assessmentModel!.diagnosis;
       case_type_select = widget.assessmentModel!.case_type;
       treatment_type_select = widget.assessmentModel!.treatment_type;
-      equipment_select_controller.text = widget.assessmentModel!.equipment;
+      equipment_select_controller.text = widget.assessmentModel!.equipments.map((e) => e.equipmentName).toList().join(',');
       selected_equipment_options = equipment_select_controller.text.split(',');
     }
   }
@@ -227,75 +227,75 @@ class _TreatmentTabState extends State<TreatmentTab> {
     Helpers.showLoadingScreen(context: context);
 
     // save assessment data
-    if (!assessment_completed) {
-      AssessmentModel ass = AssessmentModel(
-        case_select: case_select_controller.text.trim(),
-        diagnosis: diagnosis_controller.text.trim(),
-        case_type: case_type_select,
-        treatment_type: treatment_type_select,
-        equipment: equipment_select_controller.text.trim(),
-      );
+    // if (!assessment_completed) {
+    //   AssessmentInfoModel ass = AssessmentInfoModel(
+    //     case_select: case_select_controller.text.trim(),
+    //     diagnosis: diagnosis_controller.text.trim(),
+    //     case_type: case_type_select,
+    //     treatment_type: treatment_type_select,
+    //     equipments: equipment_select_controller.text.split(',').map((e) => EquipmentModel(equipmentName: e.trim(), key: '', equipmentId: '', category: '', costing: 0, status: '', )).toList(), case_select_others: '', case_description: '', assessment_date: null,
+    //   );
 
-      // save assessment details
-      bool dt = await PhysioDatabaseHelpers.save_assessment_details(
-          widget.client.key, ass.toJson());
+    //   // save assessment details
+    //   // bool dt = await PhysioDatabaseHelpers.save_assessment_details(
+    //   //     widget.patient.key, ass.toJson());
 
-      if (!dt) {
-        Navigator.pop(context);
-        Helpers.showToast(
-          context: context,
-          color: Colors.redAccent,
-          toastText: 'Error, Try again',
-          icon: Icons.error,
-        );
-        return false;
-      }
-    }
+    //   if (!dt) {
+    //     Navigator.pop(context);
+    //     Helpers.showToast(
+    //       context: context,
+    //       color: Colors.redAccent,
+    //       toastText: 'Error, Try again',
+    //       icon: Icons.error,
+    //     );
+    //     return false;
+    //   }
+    // }
 
     // case file data
-    String sv_date = case_file!.key;
+    // String sv_date = case_file!.key;
 
-    CaseFileModel file = CaseFileModel(
-      treatment_date: case_file!.treatment_date,
-      bp_reading: bp_reading,
-      note: note_controller.text,
-      remarks: remarks_controller.text,
-      doctor: active_doctor != null ? active_doctor!.fullname : 'No Doctor',
-      type: (assessment_completed) ? 'Treatment' : 'Assessment',
-      key: case_file!.key,
-      start_time: case_file!.start_time,
-      end_time: case_file!.end_time,
-      decision: decision_select,
-      refered_decision: decision_refered_select,
-      other_decision: other_decision_controller.text.trim(),
-    );
+    // CaseFileModel file = CaseFileModel(
+    //   treatment_date: case_file!.treatment_date,
+    //   bp_reading: bp_reading,
+    //   note: note_controller.text,
+    //   remarks: remarks_controller.text,
+    //   doctor: active_doctor != null ? active_doctor!.fullname : 'No Doctor',
+    //   type: (assessment_completed) ? 'Treatment' : 'Assessment',
+    //   key: case_file!.key,
+    //   start_time: case_file!.start_time,
+    //   end_time: case_file!.end_time,
+    //   decision: decision_select,
+    //   refered_decision: decision_refered_select,
+    //   other_decision: other_decision_controller.text.trim(),
+    // );
 
-    Map<String, dynamic> data = file.toJson_update();
+    // Map<String, dynamic> data = file.toJson_update();
 
     // update case file
-    bool cf = await PhysioDatabaseHelpers.save_case_file(
-        widget.client.key, sv_date, data);
+    // bool cf = await PhysioDatabaseHelpers.save_case_file(
+    //     widget.patient.key, sv_date, data);
 
-    if (!cf) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return false;
-    }
+    // if (!cf) {
+    //   Navigator.pop(context);
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: 'Error, Try again',
+    //     icon: Icons.error,
+    //   );
+    //   return false;
+    // }
 
-    file_saved = true;
+    // file_saved = true;
 
-    Navigator.pop(context);
-    Helpers.showToast(
-      context: context,
-      color: Colors.blue,
-      toastText: 'Case File Saved',
-      icon: Icons.check,
-    );
+    // Navigator.pop(context);
+    // Helpers.showToast(
+    //   context: context,
+    //   color: Colors.blue,
+    //   toastText: 'Case File Saved',
+    //   icon: Icons.check,
+    // );
 
     return true;
   }
@@ -344,69 +344,69 @@ class _TreatmentTabState extends State<TreatmentTab> {
     }
 
     // update treatment info
-    bool ti = await PhysioDatabaseHelpers.update_treatment_info(
-        widget.client.key, t_data,
-        sett: (widget.treatmentInfo == null));
+    // bool ti = await PhysioDatabaseHelpers.update_treatment_info(
+    //     widget.patient.key, t_data,
+    //     sett: (widget.treatmentInfo == null));
 
-    if (!ti) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return;
-    }
+    // if (!ti) {
+    //   Navigator.pop(context);
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: 'Error, Try again',
+    //     icon: Icons.error,
+    //   );
+    //   return;
+    // }
 
-    // update case file with end time
-    bool cf = await PhysioDatabaseHelpers.save_case_file(
-      widget.client.key,
-      widget.case_file.key,
-      {'end_time': DateTime.now().toString()},
-    );
+    // // update case file with end time
+    // bool cf = await PhysioDatabaseHelpers.save_case_file(
+    //   widget.client.key,
+    //   widget.case_file.key,
+    //   {'end_time': DateTime.now().toString()},
+    // );
 
-    if (!cf) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return;
-    }
+    // if (!cf) {
+    //   Navigator.pop(context);
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: 'Error, Try again',
+    //     icon: Icons.error,
+    //   );
+    //   return;
+    // }
 
-    // update clinic info increase completed sessions
-    if (assessment_completed) {
-      int compl = widget.completed_session + 1;
+    // // update clinic info increase completed sessions
+    // if (assessment_completed) {
+    //   int compl = widget.completed_session + 1;
 
-      bool ci = await PhysioDatabaseHelpers.update_clinic_info(
-        widget.client.key,
-        {'completed_session': compl},
-      );
+    //   bool ci = await PhysioDatabaseHelpers.update_clinic_info(
+    //     widget.client.key,
+    //     {'completed_session': compl},
+    //   );
 
-      if (!ci) {
-        Navigator.pop(context);
-        Helpers.showToast(
-          context: context,
-          color: Colors.redAccent,
-          toastText: 'Error, Try again',
-          icon: Icons.error,
-        );
-        return;
-      }
-    }
+    //   if (!ci) {
+    //     Navigator.pop(context);
+    //     Helpers.showToast(
+    //       context: context,
+    //       color: Colors.redAccent,
+    //       toastText: 'Error, Try again',
+    //       icon: Icons.error,
+    //     );
+    //     return;
+    //   }
+    // }
 
-    // update doctor tab with patient & remove from clinic
-    await PhysioDatabaseHelpers.add_patient_to_doctor_tab(
-        active_doctor!.key, widget.client.key);
+    // // update doctor tab with patient & remove from clinic
+    // await PhysioDatabaseHelpers.add_patient_to_doctor_tab(
+    //     active_doctor!.key, widget.client.key);
 
-    // remove loading screen
-    Navigator.pop(context);
+    // // remove loading screen
+    // Navigator.pop(context);
 
-    // remove page with end of treatment
-    Navigator.pop(context, 'done');
+    // // remove page with end of treatment
+    // Navigator.pop(context, 'done');
   }
 
   @override
@@ -583,7 +583,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
             child: Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                'PT ${active_doctor!.fullname}',
+                'PT ${active_doctor!.user.f_name}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -744,67 +744,67 @@ class _TreatmentTabState extends State<TreatmentTab> {
                           ),
                         );
 
-                        if (res != null) {
-                          Map r_map = res;
+                        // if (res != null) {
+                        //   Map r_map = res;
 
-                          int total = r_map['total'];
-                          String frequency = r_map['frequency'];
+                        //   int total = r_map['total'];
+                        //   String frequency = r_map['frequency'];
 
-                          Helpers.showLoadingScreen(context: context);
+                        //   Helpers.showLoadingScreen(context: context);
 
                           // set clinic info
-                          bool ci =
-                              await PhysioDatabaseHelpers.update_clinic_info(
-                            widget.client.key,
-                            {
-                              'total_session': total,
-                              'frequency': frequency,
-                              'completed_session': 0,
-                              'paid_session': 0,
-                            },
-                            sett: true,
-                          );
+                        //   bool ci =
+                        //       await PhysioDatabaseHelpers.update_clinic_info(
+                        //     widget.client.key,
+                        //     {
+                        //       'total_session': total,
+                        //       'frequency': frequency,
+                        //       'completed_session': 0,
+                        //       'paid_session': 0,
+                        //     },
+                        //     sett: true,
+                        //   );
 
-                          Navigator.pop(context);
+                        //   Navigator.pop(context);
 
-                          if (!ci) {
-                            Helpers.showToast(
-                              context: context,
-                              color: Colors.red,
-                              toastText: 'An Error occurred',
-                              icon: Icons.error,
-                            );
-                            return;
-                          }
+                        //   if (!ci) {
+                        //     Helpers.showToast(
+                        //       context: context,
+                        //       color: Colors.red,
+                        //       toastText: 'An Error occurred',
+                        //       icon: Icons.error,
+                        //     );
+                        //     return;
+                        //   }
 
-                          PhysioHistoryModel hist = PhysioHistoryModel(
-                            hist_type: 'Session Setup',
-                            amount: 0,
-                            amount_b4_discount: 0,
-                            date: DateTime.now(),
-                            session_paid: total,
-                            history_id: Helpers.generate_order_id(),
-                            cost_p_session: 0,
-                            old_float: 0,
-                            new_float: 0,
-                            session_frequency: frequency,
-                          );
+                        //   PhysioHistoryModel hist = PhysioHistoryModel(
+                        //     hist_type: 'Session Setup',
+                        //     amount: 0,
+                        //     amount_b4_discount: 0,
+                        //     date: DateTime.now(),
+                        //     session_paid: total,
+                        //     history_id: Helpers.generate_order_id(),
+                        //     cost_p_session: 0,
+                        //     old_float: 0,
+                        //     new_float: 0,
+                        //     session_frequency: frequency,
+                        //   );
 
-                          PhysioDatabaseHelpers.add_history(
-                              widget.client.key, hist.toJson());
+                        //   PhysioDatabaseHelpers.add_history(
+                        //       widget.client.key, hist.toJson());
 
-                          session_set = SessionModel(
-                            total_session: total,
-                            completed_session: 0,
-                            paid_session: 0,
-                            frequency: frequency,
-                            cost_per_session: 0,
-                            amount_paid: 0,
-                            floating_amount: 0,
-                          );
+                        //   session_set = SessionModel(
+                        //     total_session: total,
+                        //     completed_session: 0,
+                        //     paid_session: 0,
+                        //     frequency: frequency,
+                        //     cost_per_session: 0,
+                        //     amount_paid: 0,
+                        //     floating_amount: 0,
+                        //   );
 
-                          setState(() {});
-                        }
+                        //   setState(() {});
+                        // }
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -829,13 +829,13 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
                           if (widget.assessmentModel == null) return;
 
-                          showDialog(
-                            context: context,
-                            builder: (context) => CaseFileD(
-                              client: widget.client,
-                              case_title: widget.assessmentModel!.diagnosis,
-                            ),
-                          );
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (context) => CaseFileD(
+                          //     client: widget.client,
+                          //     case_title: widget.assessmentModel!.diagnosis,
+                          //   ),
+                          // );
                         },
                         child: Icon(
                           Icons.folder,
@@ -911,70 +911,70 @@ class _TreatmentTabState extends State<TreatmentTab> {
       elevation: 8,
       onSelected: (value) async {
         // health details
-        if (value == 1) {
-          Helpers.showLoadingScreen(context: context);
+        // if (value == 1) {
+        //   Helpers.showLoadingScreen(context: context);
 
-          List<G_PhysioHealthModel> _all = [];
+        //   List<G_PhysioHealthModel> _all = [];
 
-          await PhysioDatabaseHelpers.get_physio_health_info(widget.client.key)
-              .then((snap) async {
-            snap.docs.forEach((element) {
-              _all.add(G_PhysioHealthModel(
-                  key: element.id,
-                  data: PhysioHealthModel.fromMap(element.id, element.data())));
-            });
+        //   await PhysioDatabaseHelpers.get_physio_health_info(widget.client.key)
+        //       .then((snap) async {
+        //     snap.docs.forEach((element) {
+        //       _all.add(G_PhysioHealthModel(
+        //           key: element.id,
+        //           data: PhysioHealthModel.fromMap(element.id, element.data())));
+        //     });
 
-            Navigator.pop(context);
+        //     Navigator.pop(context);
 
-            if (_all.isNotEmpty) {
-              if (widget.client.baseline_done) {
-                var conf = await showDialog(
-                    context: context,
-                    builder: (context) =>
-                        PhysioHealthSelectorDialog(list: _all));
+        //     if (_all.isNotEmpty) {
+        //       if (widget.client.baseline_done) {
+        //         var conf = await showDialog(
+        //             context: context,
+        //             builder: (context) =>
+        //                 PhysioHealthSelectorDialog(list: _all));
 
-                if (conf != null) {
-                  if (!conf[1]) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PhysioClientHDPage(
-                          client: widget.client,
-                          health: conf[0],
-                        ),
-                      ),
-                    );
-                  }
-                }
-              } else {
-                var data = _all
-                    .where((element) => element.key == 'Baseline')
-                    .first
-                    .data;
+        //         if (conf != null) {
+        //           if (!conf[1]) {
+        //             Navigator.push(
+        //               context,
+        //               MaterialPageRoute(
+        //                 builder: (context) => PhysioClientHDPage(
+        //                   client: widget.client,
+        //                   health: conf[0],
+        //                 ),
+        //               ),
+        //             );
+        //           }
+        //         }
+        //       } else {
+        //         var data = _all
+        //             .where((element) => element.key == 'Baseline')
+        //             .first
+        //             .data;
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PhysioClientHDPage(
-                      client: widget.client,
-                      health: data,
-                    ),
-                  ),
-                );
-              }
-            } else {
-              if (app_role != 'desk') {
-                Helpers.showToast(
-                  context: context,
-                  color: Colors.red,
-                  toastText: 'No Health details',
-                  icon: Icons.error,
-                );
-                return;
-              }
-            }
-          });
-        }
+        //         Navigator.push(
+        //           context,
+        //           MaterialPageRoute(
+        //             builder: (context) => PhysioClientHDPage(
+        //               client: widget.client,
+        //               health: data,
+        //             ),
+        //           ),
+        //         );
+        //       }
+        //     } else {
+        //       if (app_role != 'desk') {
+        //         Helpers.showToast(
+        //           context: context,
+        //           color: Colors.red,
+        //           toastText: 'No Health details',
+        //           icon: Icons.error,
+        //         );
+        //         return;
+        //       }
+        //     }
+        //   });
+        // }
 
         // request accessories
         if (value == 2) {
@@ -982,7 +982,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
             context,
             MaterialPageRoute(
               builder: (context) => RequestAccessoriesPage(
-                client: widget.client,
+                patient: widget.patient,
               ),
             ),
           );
@@ -1079,7 +1079,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
             children: [
               // client id
               Text(
-                widget.client.id,
+                widget.patient.patient_id,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -1097,7 +1097,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
               ),
 
               // hmo tag
-              PhysioHMOTag(hmo: widget.client.hmo),
+              PhysioHMOTag(hmo: widget.patient.hmo),
             ],
           ),
         ],
@@ -1124,7 +1124,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
               ),
               padding: EdgeInsets.fromLTRB(33, 6, 10, 6),
               child: Text(
-                widget.client.name.trim(),
+                widget.patient.f_name.trim(),
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   color: Colors.white,
@@ -1144,13 +1144,13 @@ class _TreatmentTabState extends State<TreatmentTab> {
               radius: 22,
               backgroundColor: Color(0xFFf3f0da),
               foregroundColor: Colors.white,
-              backgroundImage: widget.client.user_image.isNotEmpty
+              backgroundImage: widget.patient.user_image.isNotEmpty
                   ? NetworkImage(
-                      widget.client.user_image,
+                      widget.patient.user_image,
                     )
                   : null,
               child: Center(
-                child: widget.client.user_image.isEmpty
+                child: widget.patient.user_image.isEmpty
                     ? Image.asset(
                         'images/icon/health-person.png',
                         width: 25,

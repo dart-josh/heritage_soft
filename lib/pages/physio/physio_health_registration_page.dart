@@ -1665,9 +1665,9 @@ class _PhysioHealthRegistrationPageState
 
           if (conf != null) {
             if (conf) {
-              PhysioDatabaseHelpers.edit_physio_client(client!.key, {
-                'baseline_done': true,
-              });
+              // PhysioDatabaseHelpers.edit_physio_client(client!.key, {
+              //   'baseline_done': true,
+              // });
             }
 
             update_health_details(conf);
@@ -1919,23 +1919,23 @@ class _PhysioHealthRegistrationPageState
     Helpers.showLoadingScreen(context: context);
     
     // set data
-    bool dt = await PhysioDatabaseHelpers.set_health_data(
-      client!.key,
-      health!.key,
-      h_data.toJson(),
-    );
+    // bool dt = await PhysioDatabaseHelpers.set_health_data(
+    //   client!.key,
+    //   health!.key,
+    //   h_data.toJson(),
+    // );
 
     Navigator.pop(context);
 
-    if (!dt) {
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'An Error occured, Try again!',
-        icon: Icons.error,
-      );
-      return false;
-    }
+    // if (!dt) {
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: 'An Error occured, Try again!',
+    //     icon: Icons.error,
+    //   );
+    //   return false;
+    // }
 
     Helpers.showToast(
       context: context,
@@ -1955,15 +1955,15 @@ class _PhysioHealthRegistrationPageState
       );
 
       Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ClinicTab(
-            client: client_h,
-            can_treat: false,
-          ),
-        ),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => ClinicTab(
+      //       client: client_h,
+      //       can_treat: false,
+      //     ),
+      //   ),
+      // );
     } else {
       Navigator.pop(context, h_data);
     }

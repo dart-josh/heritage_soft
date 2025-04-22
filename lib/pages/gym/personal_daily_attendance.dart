@@ -59,24 +59,24 @@ class _PDAState extends State<PDA> {
     String att_key = '${widget.client.key}/$month/$date/sessions';
     await GymDatabaseHelpers.get_client_personal_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map val = snapshot.value as Map;
+      // if (snapshot.value != null) {
+        // Map val = snapshot.value as Map;
 
-        if (val.isNotEmpty) {
-          val.forEach((key, value) {
-            Map sess_map = {
-              'timeIn': value['time_in'],
-              'timeOut': value['time_out'],
-            };
+        // if (val.isNotEmpty) {
+        //   val.forEach((key, value) {
+        //     Map sess_map = {
+        //       'timeIn': value['time_in'],
+        //       'timeOut': value['time_out'],
+        //     };
 
-            if (value['session'] == 'morning') _morning_session.add(sess_map);
-            if (value['session'] == 'afternoon')
-              _afternoon_session.add(sess_map);
-            if (value['session'] == 'evening') _evening_session.add(sess_map);
-            if (value['session'] == 'midnight') _other_session.add(sess_map);
-          });
-        }
-      }
+        //     if (value['session'] == 'morning') _morning_session.add(sess_map);
+        //     if (value['session'] == 'afternoon')
+        //       _afternoon_session.add(sess_map);
+        //     if (value['session'] == 'evening') _evening_session.add(sess_map);
+        //     if (value['session'] == 'midnight') _other_session.add(sess_map);
+        //   });
+        // }
+      // }
 
       if (mounted) setState(() {});
     });

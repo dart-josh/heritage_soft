@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/password_model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
+import 'package:provider/provider.dart';
 
 class AppData extends ChangeNotifier {
+  static AppData get(context, {bool listen = true}) {
+    return Provider.of<AppData>(context, listen: listen);
+  }
+
+  static AppData set(context, {bool listen = false}) {
+    return Provider.of<AppData>(context, listen: listen);
+  }
+
+  StaffModel? auth_staff;
+
+  UserModel? active_user;
+  DoctorModel? active_doctor;
+
   List<ClientListModel> clients = [];
   List<ClientSignInModel> client_list = [];
 
-  List<PhysioClientListModel> physio_clients = [];
+  List<PatientModel> patients = [];
 
   List<AccessoryModel> accessories = [];
 
   List<A_ShopModel> accessory_request = [];
 
   List<DoctorModel> all_doctors = [];
-
-  DoctorModel? active_doctor;
 
   List<PhysioClientListModel> doctors_patients = [];
   List<PhysioClientListModel> doctors_ong_patients = [];
@@ -67,8 +82,30 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void update_physio_client(List<PhysioClientListModel> value) {
-    physio_clients = value;
+  void update_all_patients(List<PatientModel> value) {
+    patients = value;
+    notifyListeners();
+  }
+
+  void update_patient(PatientModel value) {
+    var pat = patients.indexWhere((p) => p.key == value.key);
+
+    if (pat != -1) {
+      patients[pat] = value;
+    } else {
+      patients.add(value);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_patient(String value) {
+    var pat = patients.indexWhere((p) => p.key == value);
+
+    if (pat != -1) {
+      patients.removeAt(pat);
+    }
+
     notifyListeners();
   }
 
@@ -79,6 +116,11 @@ class AppData extends ChangeNotifier {
 
   void update_accessory_request(List<A_ShopModel> value) {
     accessory_request = value;
+    notifyListeners();
+  }
+
+  void update_active_user(UserModel value) {
+    active_user = value;
     notifyListeners();
   }
 

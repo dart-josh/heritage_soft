@@ -134,36 +134,36 @@ class PhysioClientModel {
 }
 
 // physio sponsor details
-class SponsorModel {
-  String? key;
-  String sponsor_name;
-  String sponsor_phone;
-  String sponsor_addr;
-  String sponsor_role;
+// class SponsorModel {
+//   String? key;
+//   String sponsor_name;
+//   String sponsor_phone;
+//   String sponsor_addr;
+//   String sponsor_role;
 
-  SponsorModel({
-    this.key,
-    required this.sponsor_name,
-    required this.sponsor_phone,
-    required this.sponsor_addr,
-    required this.sponsor_role,
-  });
+//   SponsorModel({
+//     this.key,
+//     required this.sponsor_name,
+//     required this.sponsor_phone,
+//     required this.sponsor_addr,
+//     required this.sponsor_role,
+//   });
 
-  factory SponsorModel.fromMap(String key, Map map) => SponsorModel(
-        key: key,
-        sponsor_name: map['sponsor_name'] ?? '',
-        sponsor_phone: map['sponsor_phone'] ?? '',
-        sponsor_addr: map['sponsor_addr'] ?? '',
-        sponsor_role: map['sponsor_role'] ?? '',
-      );
+//   factory SponsorModel.fromMap(String key, Map map) => SponsorModel(
+//         key: key,
+//         sponsor_name: map['sponsor_name'] ?? '',
+//         sponsor_phone: map['sponsor_phone'] ?? '',
+//         sponsor_addr: map['sponsor_addr'] ?? '',
+//         sponsor_role: map['sponsor_role'] ?? '',
+//       );
 
-  Map<String, dynamic> toJson() => {
-        'sponsor_name': sponsor_name,
-        'sponsor_phone': sponsor_phone,
-        'sponsor_addr': sponsor_addr,
-        'sponsor_role': sponsor_role,
-      };
-}
+//   Map<String, dynamic> toJson() => {
+//         'sponsor_name': sponsor_name,
+//         'sponsor_phone': sponsor_phone,
+//         'sponsor_addr': sponsor_addr,
+//         'sponsor_role': sponsor_role,
+//       };
+// }
 
 // physio client health details
 class PhysioHealthModel {
@@ -447,147 +447,44 @@ class PhysioHealthClientModel {
       };
 }
 
-// treatment model
-class TreatmentModel {
-  String last_bp;
-  String last_bp_p;
-  DateTime? last_treatment_date;
-  DateTime? last_treatment_date_p;
-  DateTime? current_treatment_date;
-  bool treatment_elapse;
 
-  TreatmentModel({
-    required this.last_bp,
-    required this.last_bp_p,
-    required this.last_treatment_date,
-    required this.last_treatment_date_p,
-    required this.current_treatment_date,
-    required this.treatment_elapse,
-  });
-
-  factory TreatmentModel.fromMap(Map map) => TreatmentModel(
-        last_bp: map['last_bp'] ?? '',
-        last_bp_p: map['last_bp_p'] ?? '',
-        last_treatment_date:
-            map['date'] != null ? DateTime.parse(map['date']) : null,
-        last_treatment_date_p:
-            map['date_p'] != null ? DateTime.parse(map['date_p']) : null,
-        current_treatment_date: map['current_treatment_date'] != null
-            ? DateTime.parse(map['current_treatment_date'])
-            : null,
-        treatment_elapse: map['treatment_elapse'] ?? false,
-      );
-}
 
 // assessment model
-class AssessmentModel {
-  String case_select;
-  String diagnosis;
-  String case_type;
-  String treatment_type;
-  String equipment;
+// class AssessmentModel {
+//   String case_select;
+//   String diagnosis;
+//   String case_type;
+//   String treatment_type;
+//   String equipment;
 
-  AssessmentModel({
-    required this.case_select,
-    required this.diagnosis,
-    required this.case_type,
-    required this.treatment_type,
-    required this.equipment,
-  });
+//   AssessmentModel({
+//     required this.case_select,
+//     required this.diagnosis,
+//     required this.case_type,
+//     required this.treatment_type,
+//     required this.equipment,
+//   });
 
-  factory AssessmentModel.fromMap(Map map) {
-    return AssessmentModel(
-      case_select: map['case_select'] ?? '',
-      diagnosis: map['diagnosis'] ?? '',
-      case_type: map['case_type'] ?? '',
-      treatment_type: map['treatment_type'] ?? '',
-      equipment: map['equipment'] ?? '',
-    );
-  }
+//   factory AssessmentModel.fromMap(Map map) {
+//     return AssessmentModel(
+//       case_select: map['case_select'] ?? '',
+//       diagnosis: map['diagnosis'] ?? '',
+//       case_type: map['case_type'] ?? '',
+//       treatment_type: map['treatment_type'] ?? '',
+//       equipment: map['equipment'] ?? '',
+//     );
+//   }
 
-  Map<String, dynamic> toJson() => {
-        'case_select': case_select,
-        'diagnosis': diagnosis,
-        'case_type': case_type,
-        'treatment_type': treatment_type,
-        'equipment': equipment,
-      };
-}
+//   Map<String, dynamic> toJson() => {
+//         'case_select': case_select,
+//         'diagnosis': diagnosis,
+//         'case_type': case_type,
+//         'treatment_type': treatment_type,
+//         'equipment': equipment,
+//       };
+// }
 
 // case file details
-class CaseFileModel {
-  String key;
-  DateTime? treatment_date;
-  String bp_reading;
-  String note;
-  String remarks;
-  String doctor;
-  String type;
-  bool expanded;
-  DateTime? start_time;
-  DateTime? end_time;
-  String decision;
-  String refered_decision;
-  String other_decision;
-
-  CaseFileModel({
-    required this.key,
-    required this.treatment_date,
-    required this.bp_reading,
-    required this.note,
-    required this.remarks,
-    required this.doctor,
-    required this.type,
-    this.expanded = false,
-    required this.start_time,
-    required this.end_time,
-    required this.decision,
-    required this.refered_decision,
-    required this.other_decision,
-  });
-
-  factory CaseFileModel.fromMap(String key, Map map) => CaseFileModel(
-      treatment_date: map['treatment_date'] != null
-          ? DateTime.parse(map['treatment_date'])
-          : null,
-      bp_reading: map['bp_reading'] ?? '',
-      note: map['note'] ?? '',
-      remarks: map['remarks'] ?? '',
-      doctor: map['doctor'] ?? '',
-      type: map['type'] ?? '',
-      key: key,
-      start_time:
-          map['start_time'] != null ? DateTime.parse(map['start_time']) : null,
-      end_time:
-          map['end_time'] != null ? DateTime.parse(map['end_time']) : null,
-      decision: map['decision'] ?? '',
-      refered_decision: map['refered_decision'] ?? '',
-      other_decision: map['other_decision'] ?? '');
-
-  Map<String, dynamic> toJson_open() => {
-        'treatment_date': treatment_date.toString(),
-        'bp_reading': bp_reading,
-        'note': note,
-        'remarks': remarks,
-        'doctor': doctor,
-        'type': type,
-        'decision': decision,
-        'refered_decision': refered_decision,
-        'other_decision': other_decision,
-        'start_time': start_time.toString(),
-      };
-
-  Map<String, dynamic> toJson_update() => {
-        'bp_reading': bp_reading,
-        'note': note,
-        'remarks': remarks,
-        'doctor': doctor,
-        'type': type,
-        'decision': decision,
-        'refered_decision': refered_decision,
-        'other_decision': other_decision,
-      };
-}
 
 // history model
 class PhysioHistoryModel {

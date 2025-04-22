@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/attendance_model.dart';
@@ -10,10 +10,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class StaffDatabaseHelpers {
-  static final staff_ref = FirebaseFirestore.instance.collection('Staffs');
+  static final dynamic staff_ref = "FirebaseFirestore.instance.collection('Staffs')";
 
   // staff stream
-  static Stream<QuerySnapshot<Map<String, dynamic>>> staff_stream() {
+  static Stream staff_stream() {
     return staff_ref.snapshots();
   }
 
@@ -69,16 +69,16 @@ class StaffDatabaseHelpers {
   }
 
   // get staff
-  static Future<QuerySnapshot<Map<String, dynamic>>> get_staff() {
+  static Future get_staff() {
     return staff_ref.get();
   }
 
   // get staff attendance
-  static Future<DataSnapshot> get_staff_attendance_by_key(String key) {
-    return FirebaseDatabase.instance
-        .ref('Staff_Personal_attendance')
-        .child(key)
-        .get();
+  static Future get_staff_attendance_by_key(String key) async {
+    // return FirebaseDatabase.instance
+    //     .ref('Staff_Personal_attendance')
+    //     .child(key)
+    //     .get();
   }
 
   // update staff details
@@ -89,10 +89,10 @@ class StaffDatabaseHelpers {
       if (new_staff) {
         await staff_ref.add(data);
 
-        FirebaseFirestore.instance
-            .collection('Office')
-            .doc('Last ID')
-            .update({'last_st_id': Helpers.strip_id(data['user_id'])});
+        // FirebaseFirestore.instance
+        //     .collection('Office')
+        //     .doc('Last ID')
+        //     .update({'last_st_id': Helpers.strip_id(data['user_id'])});
       } else
         await staff_ref.doc(staff_key).update(data);
 
@@ -106,8 +106,8 @@ class StaffDatabaseHelpers {
   static Future<bool> update_doctor_details(
       String staff_key, Map<String, dynamic> data,
       {bool new_staff = false}) async {
-    var doctor_ref =
-        FirebaseFirestore.instance.collection('Doctors').doc(staff_key);
+     dynamic doctor_ref =
+        "FirebaseFirestore.instance.collection('Doctors').doc(staff_key)";
     try {
       if (new_staff)
         await doctor_ref.set(data);
@@ -121,12 +121,12 @@ class StaffDatabaseHelpers {
   }
 
   // sign in to app
-  static Future<QuerySnapshot<Map<String, dynamic>>> sign_in_to_app(
-      String user_id) {
-    return FirebaseFirestore.instance
-        .collection('Staffs')
-        .where('user_id', isEqualTo: user_id)
-        .get();
+  static Future sign_in_to_app(
+      String user_id)  async  {
+    // return FirebaseFirestore.instance
+    //     .collection('Staffs')
+    //     .where('user_id', isEqualTo: user_id)
+    //     .get();
   }
 
   // delete staff
@@ -140,31 +140,31 @@ class StaffDatabaseHelpers {
   }
 
   // get staff details
-  static Future<DocumentSnapshot<Map<String, dynamic>>> get_staff_details(
+  static Future get_staff_details(
       String staff_key) {
     return staff_ref.doc(staff_key).get();
   }
 
   // get doctor details
-  static Future<DocumentSnapshot<Map<String, dynamic>>> get_doctor_details(
-      String doctor_key) {
-    return FirebaseFirestore.instance
-        .collection('Doctors')
-        .doc(doctor_key)
-        .get();
+  static Future get_doctor_details(
+      String doctor_key) async  {
+    // return FirebaseFirestore.instance
+    //     .collection('Doctors')
+    //     .doc(doctor_key)
+    //     .get();
   }
 
   // logout doctor
-  static Future<bool> set_doctor_status(String doctor_key, bool status) async {
-    try {
-      FirebaseFirestore.instance
-          .collection('Doctors')
-          .doc(doctor_key)
-          .update({'is_available': status});
-      return true;
-    } catch (e) {
-      return false;
-    }
+  static Future set_doctor_status(String doctor_key, bool status) async {
+    // try {
+    //   FirebaseFirestore.instance
+    //       .collection('Doctors')
+    //       .doc(doctor_key)
+    //       .update({'is_available': status});
+    //   return true;
+    // } catch (e) {
+    //   return false;
+    // }
   }
 
   // set user password
@@ -173,17 +173,17 @@ class StaffDatabaseHelpers {
       required String user_key,
       required String password}) async {
     // setup password
-    var pass = await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => PasswordSetup(password: password),
-    );
+    // var pass = await showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (context) => PasswordSetup(password: password),
+    // );
 
-    if (pass == null) return false;
+    // if (pass == null) return false;
 
     Helpers.showLoadingScreen(context: context);
 
-    bool us = await update_staff_details(user_key, {'password': pass});
+    bool us = await update_staff_details(user_key, {'password': 'pass'});
 
     // remove loading screen
     Navigator.pop(context);
@@ -218,130 +218,130 @@ class StaffDatabaseHelpers {
     String month = DateFormat("MMMM, yyyy").format(tod_date);
     String date = DateFormat("d MMMM, yyyy").format(tod_date);
 
-    DatabaseReference patt_loc = FirebaseDatabase.instance
-        .ref('Staff_Personal_attendance/$key/$month/$date');
+    // DatabaseReference patt_loc = FirebaseDatabase.instance
+    //     .ref('Staff_Personal_attendance/$key/$month/$date');
 
-    DatabaseReference gatt_loc = FirebaseDatabase.instance
-        .ref('Staff_General_attendance/$month/$date/$key');
+    // DatabaseReference gatt_loc = FirebaseDatabase.instance
+    //     .ref('Staff_General_attendance/$month/$date/$key');
 
-    // sign in
-    if (sign_in) {
-      PAH? ss = null;
+    // // sign in
+    // if (sign_in) {
+    //   PAH? ss = null;
 
-      // morning
-      if (current_hour < 12) {
-        ss = PAH(
-          session: 'morning',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // morning
+    //   if (current_hour < 12) {
+    //     ss = PAH(
+    //       session: 'morning',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // afternoon
-      else if (current_hour >= 12 && current_hour < 16) {
-        ss = PAH(
-          session: 'afternoon',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // afternoon
+    //   else if (current_hour >= 12 && current_hour < 16) {
+    //     ss = PAH(
+    //       session: 'afternoon',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // evening
-      else if (current_hour >= 16 && current_hour < 22) {
-        ss = PAH(
-          session: 'evening',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // evening
+    //   else if (current_hour >= 16 && current_hour < 22) {
+    //     ss = PAH(
+    //       session: 'evening',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // midnight
-      else {
-        ss = PAH(
-          session: 'midnight',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // midnight
+    //   else {
+    //     ss = PAH(
+    //       session: 'midnight',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      String dt = DateFormat("E, d MMM").format(tod_date);
+    //   String dt = DateFormat("E, d MMM").format(tod_date);
 
-      Map<String, dynamic> ss_map = ss.toJson();
+    //   Map<String, dynamic> ss_map = ss.toJson();
 
-      // save record to attendance
-      await patt_loc.once().then((value) {
-        if (value.snapshot.exists) {
-          Map valu = value.snapshot.value as Map;
-          Map ss_valu = valu['sessions'];
+    //   // save record to attendance
+    //   await patt_loc.once().then((value) {
+    //     if (value.snapshot.exists) {
+    //       Map valu = value.snapshot.value as Map;
+    //       Map ss_valu = valu['sessions'];
 
-          int sv = ss_valu.length + 1;
+    //       int sv = ss_valu.length + 1;
 
-          patt_loc.child('sessions/s$sv').set(ss_map);
+    //       patt_loc.child('sessions/s$sv').set(ss_map);
 
-          gatt_loc.child('sessions/s$sv').set(ss_map);
-        } else {
-          patt_loc.child('date').set(dt);
-          patt_loc.child('sessions/s1').set(ss_map);
+    //       gatt_loc.child('sessions/s$sv').set(ss_map);
+    //     } else {
+    //       patt_loc.child('date').set(dt);
+    //       patt_loc.child('sessions/s1').set(ss_map);
 
-          gatt_loc.child('date').set(dt);
-          gatt_loc.child('sessions/s1').set(ss_map);
+    //       gatt_loc.child('date').set(dt);
+    //       gatt_loc.child('sessions/s1').set(ss_map);
 
-          gatt_loc.child('daily_time_in').set(time);
-        }
-      });
+    //       gatt_loc.child('daily_time_in').set(time);
+    //     }
+    //   });
 
-      Map<String, dynamic> last_act = {
-        'time_in': tod_date.toString(),
-        'time_out': '',
-      };
+    //   Map<String, dynamic> last_act = {
+    //     'time_in': tod_date.toString(),
+    //     'time_out': '',
+    //   };
 
-      Map<String, dynamic> upd_val = {
-        'in_out': false,
-        'in_time': tod_date.toString(),
-        'last_activity': last_act,
-        'last_check_in_date': tod_date.toString(),
-        'fresh_day': false,
-      };
+    //   Map<String, dynamic> upd_val = {
+    //     'in_out': false,
+    //     'in_time': tod_date.toString(),
+    //     'last_activity': last_act,
+    //     'last_check_in_date': tod_date.toString(),
+    //     'fresh_day': false,
+    //   };
 
-      // update staff record
-      staff_ref.doc(key).update(upd_val);
-    }
+    //   // update staff record
+    //   staff_ref.doc(key).update(upd_val);
+    // }
 
-    // sign out
-    else {
-      // save record
-      await patt_loc.once().then((value) {
-        if (value.snapshot.exists) {
-          Map valu = value.snapshot.value as Map;
-          Map ss_valu = valu['sessions'];
+    // // sign out
+    // else {
+    //   // save record
+    //   await patt_loc.once().then((value) {
+    //     if (value.snapshot.exists) {
+    //       Map valu = value.snapshot.value as Map;
+    //       Map ss_valu = valu['sessions'];
 
-          int sv = ss_valu.length;
+    //       int sv = ss_valu.length;
 
-          Map<String, dynamic> ss_map = {
-            'time_out': time,
-          };
+    //       Map<String, dynamic> ss_map = {
+    //         'time_out': time,
+    //       };
 
-          patt_loc.child('sessions/s$sv').update(ss_map);
-          gatt_loc.child('sessions/s$sv').update(ss_map);
+    //       patt_loc.child('sessions/s$sv').update(ss_map);
+    //       gatt_loc.child('sessions/s$sv').update(ss_map);
 
-          gatt_loc.child('daily_time_out').set(time);
-        }
-      });
+    //       gatt_loc.child('daily_time_out').set(time);
+    //     }
+    //   });
 
-      Map<String, dynamic> last_act = {
-        'time_in': in_time,
-        'time_out': tod_date.toString(),
-      };
+    //   Map<String, dynamic> last_act = {
+    //     'time_in': in_time,
+    //     'time_out': tod_date.toString(),
+    //   };
 
-      Map<String, dynamic> upd_val = {
-        'in_out': true,
-        'in_time': '',
-        'last_activity': last_act,
-      };
+    //   Map<String, dynamic> upd_val = {
+    //     'in_out': true,
+    //     'in_time': '',
+    //     'last_activity': last_act,
+    //   };
 
-      // update staff record
-      staff_ref.doc(key).update(upd_val);
-    }
+    //   // update staff record
+    //   staff_ref.doc(key).update(upd_val);
+    // }
   }
 
   //

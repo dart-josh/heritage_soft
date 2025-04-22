@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/physio_database_helpers.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
 import 'package:heritage_soft/pages/physio/clinic_tab.dart';
-import 'package:heritage_soft/pages/physio/physio_pofile_page.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
 import 'package:heritage_soft/pages/physio/widgets/other_sponsor_dialog.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:intl/intl.dart';
-import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
 class PhysioRegistrationPage extends StatefulWidget {
-  String cl_id;
   final Ft_Pt_Model? new_ft;
   PhysioRegistrationPage({
     super.key,
-    required this.cl_id,
     this.new_ft,
   });
 
@@ -59,18 +54,27 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
     hmo_id_controller.text = widget.new_ft!.hmo_id;
   }
 
+  String patient_id = '';
+
+  generate_patient_id() async {
+    var res = await PhysioDatabaseHelpers.generate_patient_id(context);
+    if (res != '') {
+      String id =
+          Helpers.generate_id(xx: 'phy', hmo: false, id: int.parse(res));
+      patient_id = id;
+      if (mounted) setState(() {});
+    }
+  }
+
   @override
   void initState() {
+    generate_patient_id();
     if (widget.new_ft != null) new_ft_cl();
 
     hmo_id_controller.addListener(() {
       setState(() {});
     });
 
-    sponsor_name_controller.addListener(() {
-      if (sponsor_name_controller.text.isEmpty) other_sponsors.clear();
-      setState(() {});
-    });
     super.initState();
   }
 
@@ -101,11 +105,6 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
     age_node.dispose();
 
     hmo_id_controller.dispose();
-
-    sponsor_name_controller.dispose();
-    sponsor_phone_controller.dispose();
-    sponsor_addr_controller.dispose();
-    sponsor_role_controller.dispose();
 
     refferal_code_controller.dispose();
     nature_of_work_controller.dispose();
@@ -208,9 +207,9 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
   // main page
   Widget main_page() {
     if (hmo_select != 'No HMO') {
-      widget.cl_id = widget.cl_id.replaceAll('PT', 'HM');
+      patient_id = patient_id.replaceAll('PT', 'HM');
     } else {
-      widget.cl_id = widget.cl_id.replaceAll('HM', 'PT');
+      patient_id = patient_id.replaceAll('HM', 'PT');
     }
 
     return Padding(
@@ -349,7 +348,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
         ),
         // client id
         Text(
-          widget.cl_id,
+          patient_id,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -386,11 +385,6 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
 
   TextEditingController hmo_id_controller = TextEditingController();
 
-  TextEditingController sponsor_name_controller = TextEditingController();
-  TextEditingController sponsor_phone_controller = TextEditingController();
-  TextEditingController sponsor_addr_controller = TextEditingController();
-  TextEditingController sponsor_role_controller = TextEditingController();
-
   TextEditingController hykau_controller = TextEditingController();
   TextEditingController refferal_code_controller = TextEditingController();
 
@@ -422,9 +416,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
 
   String hmo_select = 'No HMO';
 
-  bool sponsor = false;
-
-  List<SponsorModel> other_sponsors = [];
+  List<SponsorModel> sponsors = [];
 
   List<String> hmo = physio_hmo.map((e) => e.hmo_name).toList();
 
@@ -818,24 +810,159 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
 
   // sponsor details
   Widget sponsor_details() {
-    if (!sponsor)
-      // Add Sponsor
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        child: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                setState(() {
-                  sponsor = true;
-                });
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // heading
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // title
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFababab)),
+                  ),
+                ),
+                child: Text(
+                  'Sponsors/Accompany',
+                  style: headingStyle,
+                ),
+              ),
+
+              // remove sponsor
+              TextButton(
+                onPressed: () {
+                  sponsors.clear();
+
+                  setState(() {});
+                },
+                child: Text(
+                  'Remove all',
+                  style: TextStyle(
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 7),
+
+          if (sponsors.isNotEmpty)
+            // Other sponsors list
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: sponsors.map((sponsor) {
+                // each sponsor tile
+                return Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.symmetric(vertical: 5),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(
+                      color: Color(0xFFBCBCBC),
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      // sponsor details (name, role)
+                      Expanded(
+                        child: Text(
+                          '${sponsor.name} ${(sponsor.role.isNotEmpty) ? ' -- ${sponsor.role}' : ''}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(width: 10),
+
+                      // edit sponsor
+                      InkWell(
+                        onTap: () async {
+                          var spon = await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) =>
+                                SponsorDialog(sponsor: sponsor),
+                          );
+
+                          if (spon != null) {
+                            var ind = sponsors.indexOf(sponsor);
+                            sponsors[ind] = spon;
+                            setState(() {});
+                          }
+                        },
+                        child: Icon(Icons.edit, color: Color(0xFFBCBCBC)),
+                      ),
+
+                      SizedBox(width: 6),
+
+                      // delete sponsor
+                      InkWell(
+                        onTap: () async {
+                          bool? res = await showDialog(
+                            context: context,
+                            builder: (context) => ConfirmDialog(
+                              title: 'Remove Sponsor',
+                              subtitle: 'Are you sure you want to proceed?',
+                            ),
+                          );
+
+                          if (res != null && res) {
+                            var ind = sponsors.indexOf(sponsor);
+                            sponsors.removeAt(ind);
+                            setState(() {});
+                          }
+                        },
+                        child: Icon(Icons.delete, color: Colors.red.shade400),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+
+          // Add sponsor
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: InkWell(
+              onTap: () async {
+                // max length of sponsor -3
+                if (sponsors.length >= 3) {
+                  Helpers.showToast(
+                    context: context,
+                    color: Colors.red,
+                    toastText: 'Maximum number of sponsor reached!',
+                    icon: Icons.error,
+                  );
+                  return;
+                }
+
+                var spon = await showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => SponsorDialog(),
+                );
+
+                if (spon != null) {
+                  sponsors.add(spon);
+                  setState(() {});
+                }
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple,
+                  color: Colors.blue,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -858,249 +985,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
                 ),
               ),
             ),
-          ],
-        ),
-      );
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // heading
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // title
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFababab)),
-                  ),
-                ),
-                child: Text(
-                  'Sponsor/Accompany',
-                  style: headingStyle,
-                ),
-              ),
-
-              // remove sponsor
-              TextButton(
-                onPressed: () {
-                  sponsor_name_controller.clear();
-                  sponsor_phone_controller.clear();
-                  sponsor_addr_controller.clear();
-                  sponsor_role_controller.clear();
-                  sponsor = false;
-                  other_sponsors.clear();
-
-                  setState(() {});
-                },
-                child: Text(
-                  'Remove',
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-            ],
           ),
-
-          SizedBox(height: 7),
-
-          // sponsor name
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Fullname',
-              controller: sponsor_name_controller,
-              require: true,
-            ),
-          ),
-
-          // sponsor no.
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Phone no.',
-              controller: sponsor_phone_controller,
-              format: [FilteringTextInputFormatter.digitsOnly],
-              require: true,
-            ),
-          ),
-
-          // sponsor role
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Role',
-              controller: sponsor_role_controller,
-            ),
-          ),
-
-          // sponsor address
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text_field(
-              label: 'Sponsor Address',
-              controller: sponsor_addr_controller,
-              maxLine: 3,
-            ),
-          ),
-
-          if (other_sponsors.isNotEmpty)
-            // Other Sponsor heading
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFababab)),
-                  ),
-                ),
-                child: Text(
-                  'Other Sponsors',
-                  style: headingStyle,
-                ),
-              ),
-            ),
-
-          if (other_sponsors.isNotEmpty)
-            // Other sponsors list
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: other_sponsors.map((sponsor) {
-                // each sponsor tile
-                return Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: 5),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(
-                      color: Color(0xFFBCBCBC),
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      // sponsor details (name, role)
-                      Expanded(
-                        child: Text(
-                          '${sponsor.sponsor_name} ${(sponsor.sponsor_role.isNotEmpty) ? ' -- ${sponsor.sponsor_role}' : ''}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(width: 10),
-
-                      // edit sponsor
-                      InkWell(
-                        onTap: () async {
-                          var spon = await showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) =>
-                                OtherSponsor(sponsor: sponsor),
-                          );
-
-                          if (spon != null) {
-                            var ind = other_sponsors.indexOf(sponsor);
-                            other_sponsors[ind] = spon;
-                            setState(() {});
-                          }
-                        },
-                        child: Icon(Icons.edit, color: Color(0xFFBCBCBC)),
-                      ),
-
-                      SizedBox(width: 6),
-
-                      // delete sponsor
-                      InkWell(
-                        onTap: () async {
-                          bool? res = await showDialog(
-                            context: context,
-                            builder: (context) => ConfirmDialog(
-                              title: 'Remove Sponsor',
-                              subtitle: 'Are you sure you want to proceed?',
-                            ),
-                          );
-
-                          if (res != null && res) {
-                            var ind = other_sponsors.indexOf(sponsor);
-                            other_sponsors.removeAt(ind);
-                            setState(() {});
-                          }
-                        },
-                        child: Icon(Icons.delete, color: Colors.red.shade400),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-
-          if (sponsor_name_controller.text.isNotEmpty)
-            // Add other sponsor
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: InkWell(
-                onTap: () async {
-                  // max length of sponsor -2
-                  if (other_sponsors.length >= 2) {
-                    Helpers.showToast(
-                      context: context,
-                      color: Colors.red,
-                      toastText: 'Maximum number of sponsor reached!',
-                      icon: Icons.error,
-                    );
-                    return;
-                  }
-
-                  var spon = await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => OtherSponsor(),
-                  );
-
-                  if (spon != null) {
-                    other_sponsors.add(spon);
-                    setState(() {});
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Add Other Sponsor',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -1155,9 +1040,6 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
       ),
     );
   }
-
-  // Key to save document
-  String new_key = '';
 
   // submit button
   Widget next_button() {
@@ -1270,43 +1152,6 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
           return;
         }
 
-        // check sponsor
-        if (sponsor) {
-          // sponsor name if empty
-          if (sponsor_name_controller.text.isEmpty) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Enter sponsor name',
-              icon: Icons.error,
-            );
-            return;
-          }
-
-          // sponsor phone if empty
-          if (sponsor_phone_controller.text.isEmpty) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Enter sponsor contact',
-              icon: Icons.error,
-            );
-            return;
-          }
-
-          // validate sponsor phone
-          if (sponsor_phone_controller.text.length > 11 ||
-              sponsor_phone_controller.text.length < 10) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Sponsor contact Invalid',
-              icon: Icons.error,
-            );
-            return;
-          }
-        }
-
         // check hmo id if hmo selected
         if (hmo_select != 'No HMO' && hmo_id_controller.text.isEmpty) {
           Helpers.showToast(
@@ -1350,7 +1195,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
         );
 
         if (res != null && res) {
-          register_client();
+          register_patient();
         }
       },
       child: Container(
@@ -1402,6 +1247,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
         occupation_select = '';
         gender_select = '';
         hmo_select = 'No HMO';
+        hmo_id_controller.text = '';
         nature_of_work_controller.text = '';
         hykau = 'Select one';
         hykau_controller.text = '';
@@ -1409,12 +1255,7 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
         image_file = null;
         imageUrl = '';
 
-        sponsor_name_controller.text = '';
-        sponsor_phone_controller.text = '';
-        sponsor_addr_controller.text = '';
-        sponsor_role_controller.text = '';
-        sponsor = false;
-        other_sponsors.clear();
+        sponsors.clear();
 
         temp_dob.text = '';
 
@@ -1445,44 +1286,13 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
 
   // FUNCTION
   // register client
-  void register_client() async {
-    Helpers.showLoadingScreen(context: context);
-
-    // assign new key
-    if (new_key.isEmpty) {
-      new_key = await PhysioDatabaseHelpers.assign_physio_registration_key();
-    }
-
-    // check client id to ensure no duplicates
-    List check_id =
-        await PhysioDatabaseHelpers.check_physio_client_id(widget.cl_id);
-
-    // check for errors
-    if (!check_id[0]) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: check_id[1],
-        icon: Icons.error,
-      );
-      return;
-    }
-
-    // upload profile image
-    if (image_file != null) {
-      imageUrl =
-          await AdminDatabaseHelpers.uploadFile(image_file!, new_key, false) ??
-              '';
-    }
-
+  void register_patient() async {
     // assign registration date
-    var reg_date = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    var reg_date = DateTime.now();
 
     // new client model
-    var newcl = PhysioClientModel(
-      key: new_key,
-      id: widget.cl_id,
+    var newcl = PatientModel(
+      patient_id: patient_id,
       reg_date: reg_date,
       user_status: true,
       f_name: first_name_controller.text.trim(),
@@ -1502,93 +1312,29 @@ class _PhysioRegistrationPageState extends State<PhysioRegistrationPage> {
       hykau_others: hykau_controller.text.trim(),
       hmo: hmo_select,
       baseline_done: false,
-      sponsor_name: sponsor_name_controller.text.trim(),
-      sponsor_phone: sponsor_phone_controller.text.trim(),
-      sponsor_addr: sponsor_addr_controller.text.trim(),
-      sponsor_role: sponsor_role_controller.text.trim(),
-      sponsor: sponsor,
+      sponsors: sponsors,
       refferal_code: refferal_code_controller.text.trim(),
-      current_doctor: '',
+      hmo_id: hmo_id_controller.text.trim(),
     );
 
     var cl_map = newcl.toJson();
 
-    // register cleint
-    bool registration =
-        await PhysioDatabaseHelpers.register_physio_client(new_key, cl_map);
+    Map response =
+        await PhysioDatabaseHelpers.add_update_patient(context, data: cl_map);
 
-    // check for errors
-    if (!registration) {
+    if (response['status']) {
       Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
+      // Go to clinic tab
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ClinicTab(
+            patient: response['patient'],
+            can_treat: false,
+          ),
+        ),
       );
-      return;
     }
-
-    // add sponsors
-    if (newcl.sponsor && other_sponsors.isNotEmpty) {
-      other_sponsors.forEach((sponsor) {
-        PhysioDatabaseHelpers.add_physio_sponsor(
-            new_key, null, sponsor.toJson());
-      });
-    }
-
-    // update gym profile if registration is from gym profile
-    if (widget.new_ft != null) {
-      GymDatabaseHelpers.update_client_details(widget.new_ft!.user_key, {
-        'physio_key': new_key,
-        'physio_cl': true,
-      });
-    }
-
-    // update last physio ID
-    PhysioDatabaseHelpers.update_last_physio_id(widget.cl_id);
-
-    // complete
-    Navigator.pop(context);
-    Helpers.showToast(
-      context: context,
-      color: Colors.blue,
-      toastText: 'Client Registered',
-      icon: Icons.error,
-    );
-
-    // remove registration page
-    Navigator.pop(context);
-    // Go to Profile page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PhysioClientProfilePage(
-          cl_id: newcl.key!,
-        ),
-      ),
-    );
-
-    // create health model
-    PhysioHealthClientModel client_h = PhysioHealthClientModel(
-      key: newcl.key!,
-      id: newcl.id!,
-      name: '${newcl.f_name} ${newcl.m_name} ${newcl.l_name}',
-      user_image: newcl.user_image!,
-      hmo: newcl.hmo!,
-      baseline_done: false,
-    );
-
-    // Go to clinic tab
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ClinicTab(
-          client: client_h,
-          can_treat: false,
-        ),
-      ),
-    );
   }
 
   //

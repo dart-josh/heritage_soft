@@ -952,51 +952,51 @@ class _DALState extends State<DAL> {
 
     return GymDatabaseHelpers.get_daily_attendance_list(month, date)
         .then((snap) {
-      if (snap.exists) {
-        Map val = snap.value as Map;
-        List<Map<String, dynamic>> cls = [];
+      // if (snap.exists) {
+      //   Map val = snap.value as Map;
+      //   List<Map<String, dynamic>> cls = [];
 
-        val.forEach((key, value) {
-          if (session.isEmpty) {
-            cls.add({
-              'key': key,
-              'val': value,
-            });
-          } else {
-            Map vv = value['sessions'];
+      //   val.forEach((key, value) {
+      //     if (session.isEmpty) {
+      //       cls.add({
+      //         'key': key,
+      //         'val': value,
+      //       });
+      //     } else {
+      //       Map vv = value['sessions'];
 
-            if (vv.toString().toLowerCase().contains(session.toLowerCase())) {
-              cls.add({
-                'key': key,
-                'val': value,
-              });
-            }
-          }
-        });
+      //       if (vv.toString().toLowerCase().contains(session.toLowerCase())) {
+      //         cls.add({
+      //           'key': key,
+      //           'val': value,
+      //         });
+      //       }
+      //     }
+      //   });
 
-        return cls;
-      } else {
+      //   return cls;
+      // } else {
         return [];
-      }
+      // }
     });
   }
 
   // map out client details
   Future<Map> get_cl_details(String key) async {
     return GymDatabaseHelpers.get_client_details(key).then((snap) {
-      if (snap.exists) {
-        String fn = snap.data()!['f_name'];
-        String mn = snap.data()!['m_name'];
-        String ln = snap.data()!['l_name'];
+      // if (snap.exists) {
+      //   String fn = snap.data()!['f_name'];
+      //   String mn = snap.data()!['m_name'];
+      //   String ln = snap.data()!['l_name'];
 
-        Map details = {
-          'name': '$fn $mn $ln',
-          'sub_plan': snap.data()!['sub_plan'] ?? '',
-          'reg_date': snap.data()!['reg_date'] ?? '',
-          'renew_date': snap.data()!['renew_date'] ?? '',
-        };
-        return details;
-      } else
+      //   Map details = {
+      //     'name': '$fn $mn $ln',
+      //     'sub_plan': snap.data()!['sub_plan'] ?? '',
+      //     'reg_date': snap.data()!['reg_date'] ?? '',
+      //     'renew_date': snap.data()!['renew_date'] ?? '',
+      //   };
+      //   return details;
+      // } else
         return {};
     });
   }
@@ -1113,16 +1113,16 @@ class _DAL_SState extends State<DAL_S> {
 
     return GymDatabaseHelpers.get_daily_attendance_list(month, date)
         .then((snap) {
-      if (snap.exists) {
-        Map val = snap.value as Map;
+      // if (snap.exists) {
+      //   Map val = snap.value as Map;
 
-        if (val.length > 0)
-          return true;
-        else
-          return false;
-      } else {
+      //   if (val.length > 0)
+      //     return true;
+      //   else
+      //     return false;
+      // } else {
         return false;
-      }
+      // }
     });
   }
 

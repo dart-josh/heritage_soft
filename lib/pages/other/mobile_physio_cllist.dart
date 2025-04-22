@@ -29,18 +29,18 @@ class _MobilePhysioClientListState extends State<MobilePhysioClientList> {
   get_clients() async {
     is_loading = true;
 
-    sub = PhysioDatabaseHelpers.physio_clients_stream().listen((snap) {
-      clients.clear();
-      snap.docs.forEach((e) {
-        PhysioClientListModel cli =
-            PhysioClientListModel.fromMap(e.id, e.data());
+    // sub = PhysioDatabaseHelpers.physio_clients_stream().listen((snap) {
+    //   clients.clear();
+    //   snap.docs.forEach((e) {
+    //     PhysioClientListModel cli =
+    //         PhysioClientListModel.fromMap(e.id, e.data());
 
-        clients.add(cli);
-      });
+    //     clients.add(cli);
+    //   });
 
-      is_loading = false;
-      setState(() {});
-    });
+    //   is_loading = false;
+    //   setState(() {});
+    // });
   }
 
   bool search_on = false;
@@ -297,20 +297,20 @@ class _MobilePhysioClientListState extends State<MobilePhysioClientList> {
               'user_image': img,
             };
 
-            bool ed = await PhysioDatabaseHelpers.edit_physio_client(
-                user_id, client_update_details);
+            // bool ed = await PhysioDatabaseHelpers.edit_physio_client(
+            //     user_id, client_update_details);
 
-            Navigator.pop(context);
+            // Navigator.pop(context);
 
-            if (!ed) {
-              Helpers.showToast(
-                context: context,
-                color: Colors.redAccent,
-                toastText: 'An Error occured, Try again!',
-                icon: Icons.error,
-              );
-              return;
-            }
+            // if (!ed) {
+            //   Helpers.showToast(
+            //     context: context,
+            //     color: Colors.redAccent,
+            //     toastText: 'An Error occured, Try again!',
+            //     icon: Icons.error,
+            //   );
+            //   return;
+            // }
 
             Helpers.showToast(
               context: context,

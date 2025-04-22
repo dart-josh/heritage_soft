@@ -134,11 +134,11 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         GymDatabaseHelpers.client_details_stream(widget.cl_id).listen((event) {
       if (edit) return;
 
-      if (event.data() != null) {
-        Map map = event.data()!;
-        client = ClientModel.fromMap(event.id, map);
-        update_profile_controllers();
-      }
+      // if (event.data() != null) {
+      //   Map map = event.data()!;
+      //   client = ClientModel.fromMap(event.id, map);
+      //   update_profile_controllers();
+      // }
     });
   }
 
@@ -149,12 +149,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             .listen((event) {
       if (edit) return;
 
-      if (event.data() != null) {
-        HealthSummaryModel client_health =
-            HealthSummaryModel.fromMap(event.data()!);
+      // if (event.data() != null) {
+      //   HealthSummaryModel client_health =
+      //       HealthSummaryModel.fromMap(event.data()!);
 
-        update_health_controllers(client_health);
-      }
+      //   update_health_controllers(client_health);
+      // }
     });
   }
 
@@ -1402,13 +1402,13 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
                   await GymDatabaseHelpers.client_health_details(client!.key!)
                       .then((snap) async {
-                    snap.docs.forEach((element) {
-                      _all.add(G_HealthModel(
-                          key: element.id,
-                          type: element.data()['data_type'] ?? 'basic',
-                          data:
-                              HealthModel.fromMap(element.id, element.data())));
-                    });
+                    // snap.docs.forEach((element) {
+                    //   _all.add(G_HealthModel(
+                    //       key: element.id,
+                    //       type: element.data()['data_type'] ?? 'basic',
+                    //       data:
+                    //           HealthModel.fromMap(element.id, element.data())));
+                    // });
 
                     Navigator.pop(context);
 
@@ -2646,13 +2646,13 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         if (value == 5) {
           // view physio profile
           if (client!.physio_cl && client!.physio_key.isNotEmpty) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    PhysioClientProfilePage(cl_id: client!.physio_key),
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) =>
+            //         PatientProfilePage(cl_id: client!.physio_key),
+            //   ),
+            // );
           }
 
           // register for physio
@@ -2688,15 +2688,15 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
               user_key: client!.key!,
             );
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => PhysioRegistrationPage(
-                        cl_id: Helpers.generate_id(
-                            'phy', (hmo_select != 'No HMO')),
-                        new_ft: new_pt_cl,
-                      )),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //       builder: (context) => PhysioRegistrationPage(
+            //             cl_id: Helpers.generate_id(
+            //                 'phy', (hmo_select != 'No HMO')),
+            //             new_ft: new_pt_cl,
+            //           )),
+            // );
           }
         }
 
@@ -2911,7 +2911,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         PopupMenuDivider(),
 
         // delete user
-        if (active_staff!.full_access)
+        // if (active_staff!.full_access)
           PopupMenuItem(
             value: 0,
             child: Container(

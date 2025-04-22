@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/equipement.model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
@@ -7,7 +8,7 @@ import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
 class ClinicInfo extends StatefulWidget {
-  final AssessmentModel? info;
+  final AssessmentInfoModel? info;
   final bool new_det;
   const ClinicInfo({super.key, required this.info, this.new_det = false});
 
@@ -36,7 +37,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
       treatment_type_select = widget.info!.treatment_type;
 
-      equipment_select_controller.text = widget.info!.equipment;
+      equipment_select_controller.text =
+          widget.info!.equipments.map((e) => e.equipmentName).join(',');
       selected_equipment_options = equipment_select_controller.text.split(',');
     }
 
@@ -131,7 +133,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
       tile('Treatment type', widget.info!.treatment_type),
 
       // equipment
-      tile('Equipment(s)', widget.info!.equipment),
+      tile('Equipment(s)',
+          widget.info!.equipments.map((e) => e.equipmentName).join(',')),
     ];
   }
 
@@ -329,12 +332,23 @@ class _ClinicInfoState extends State<ClinicInfo> {
           );
 
           if (conf != null && conf) {
-            AssessmentModel ass = AssessmentModel(
+            AssessmentInfoModel ass = AssessmentInfoModel(
               case_select: case_select_controller.text.trim(),
               diagnosis: diagnosis_controller.text.trim(),
               case_type: case_type_select,
               treatment_type: treatment_type_select,
-              equipment: equipment_select_controller.text.trim(),
+              equipments: selected_equipment_options
+                  .map((e) => EquipmentModel(
+                      key: e,
+                      equipmentName: e,
+                      equipmentId: e,
+                      category: e,
+                      costing: 0,
+                      status: 'Available'))
+                  .toList(),
+              case_select_others: '',
+              case_description: '',
+              assessment_date: null,
             );
 
             Navigator.pop(context, ass);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/users_model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/pages/physio/doctors_profile.dart';
 import 'package:heritage_soft/pages/physio/patient_list.dart';

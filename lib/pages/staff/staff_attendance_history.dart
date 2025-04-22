@@ -149,15 +149,15 @@ class _SAHState extends State<SAH> {
 
     await StaffDatabaseHelpers.get_staff_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map map = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map map = snapshot.value as Map;
 
-        if (map.isNotEmpty) {
-          map.forEach((key, value) {
-            att_hist.add(PersonalAttendanceModel.fromMap(value));
-          });
-        }
-      }
+      //   if (map.isNotEmpty) {
+      //     map.forEach((key, value) {
+      //       att_hist.add(PersonalAttendanceModel.fromMap(value));
+      //     });
+      //   }
+      // }
     });
 
     isLoading = false;

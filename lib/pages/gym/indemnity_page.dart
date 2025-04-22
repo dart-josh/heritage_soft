@@ -27,10 +27,10 @@ class _indemnityPageState extends State<indemnityPage> {
   StreamSubscription listen_to_verification() {
     return GymDatabaseHelpers.client_details_stream(widget.client_key)
         .listen((event) {
-      if (event.exists) {
-        is_verified = event.data()!['indemnity_verified'] ?? false;
-        setState(() {});
-      }
+      // if (event.exists) {
+      //   is_verified = event.data()!['indemnity_verified'] ?? false;
+      //   setState(() {});
+      // }
     });
   }
 

@@ -131,22 +131,22 @@ class _WaitingPatientsListState extends State<WaitingPatientsList> {
       ),
       child: InkWell(
         onTap: () {
-          PhysioHealthClientModel client_h = PhysioHealthClientModel(
-              key: patient.key!,
-              id: patient.id!,
-              name: name2,
-              user_image: patient.user_image!,
-              hmo: patient.hmo!,
-              baseline_done: patient.baseline_done);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ClinicTab(
-                client: client_h,
-                can_treat: true,
-              ),
-            ),
-          );
+          // PhysioHealthClientModel client_h = PhysioHealthClientModel(
+          //     key: patient.key!,
+          //     id: patient.id!,
+          //     name: name2,
+          //     user_image: patient.user_image!,
+          //     hmo: patient.hmo!,
+          //     baseline_done: patient.baseline_done);
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => ClinicTab(
+          //       patient: client_h,
+          //       can_treat: true,
+          //     ),
+          //   ),
+          // );
         },
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),

@@ -806,9 +806,9 @@ class _GAH_TState extends State<GAH_T> {
     String att_key = '${key}/${active_month!.title}/${date}';
     return GymDatabaseHelpers.get_client_personal_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.exists)
-        return true;
-      else
+      // if (snapshot.exists)
+      //   return true;
+      // else
         return false;
     });
   }

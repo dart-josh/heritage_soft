@@ -413,17 +413,17 @@ class _GAH_CState extends State<GAH_C> {
 
     return GymDatabaseHelpers.get_daily_attendance_list(month, ttl)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map val = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map val = snapshot.value as Map;
 
-        if (val.isNotEmpty) {
-          return val.length;
-        } else {
-          return 0;
-        }
-      } else {
+      //   if (val.isNotEmpty) {
+      //     return val.length;
+      //   } else {
+      //     return 0;
+      //   }
+      // } else {
         return 0;
-      }
+      // }
     });
 
     // return 0;

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/global_variables.dart';
+import 'package:heritage_soft/helpers/physio_database_helpers.dart';
+import 'package:heritage_soft/helpers/server_helpers.dart';
 import 'package:heritage_soft/pages/physio/physio_pofile_page.dart';
+import 'package:heritage_soft/pages/physio/physio_registration_page.dart';
 import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
@@ -17,10 +20,44 @@ class PhysioClientsList extends StatefulWidget {
 }
 
 class _PhysioClientsListState extends State<PhysioClientsList> {
-  List<PhysioClientListModel> main_clients = [];
-  List<PhysioClientListModel> clients = [];
-  List<PhysioClientListModel> search_list = [];
+  List<PatientModel> main_patients = [];
+  List<PatientModel> patients = [];
+  List<PatientModel> search_list = [];
   bool emptySearch = false;
+
+  dynamic get_patients(dynamic data) async {
+    PatientModel patient = PatientModel.fromMap(data);
+
+    AppData.set(context).update_patient(patient);
+  }
+
+  dynamic remove_patient(dynamic id) async {
+    AppData.set(context).delete_patient(id);
+  }
+
+  initators() async {
+    await PhysioDatabaseHelpers.get_all_patients(context);
+  }
+
+  @override
+  void initState() {
+    initators();
+    ServerHelpers.socket!.on('Patient', (data) {
+      get_patients(data);
+    });
+    ServerHelpers.socket!.on('PatientD', (data) {
+      remove_patient(data);
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    ServerHelpers.socket!.off('Patient');
+    ServerHelpers.socket!.off('PatientD');
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +135,10 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
   }
 
   // filter function
-  List<PhysioClientListModel> filter_module() {
-    if (!filter_on) return main_clients;
+  List<PatientModel> filter_module() {
+    if (!filter_on) return main_patients;
 
-    return main_clients
+    return main_patients
         .where((element) => ((type_filter_on)
             ? ((type_filter_val == 'Walk-In')
                 ? (element.hmo == 'No HMO')
@@ -112,19 +149,19 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
 
   // WIDGETS
 
-  int client_count = 0;
-  int filter_client_count = 0;
+  int patient_count = 0;
+  int filter_patient_count = 0;
 
   // main page
   Widget main_page() {
-    main_clients = Provider.of<AppData>(context).physio_clients;
-    clients = filter_module();
+    main_patients = Provider.of<AppData>(context).patients;
+    patients = filter_module();
 
-    client_count = main_clients.length;
-    filter_client_count = clients.length;
+    patient_count = main_patients.length;
+    filter_patient_count = patients.length;
 
-    if (clients.isNotEmpty && search_list.isNotEmpty)
-      search_clients(search_bar_controller.text, build: true);
+    if (patients.isNotEmpty && search_list.isNotEmpty)
+      search_patients(search_bar_controller.text, build: true);
 
     return Column(
       children: [
@@ -141,7 +178,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
 
                   // list
                   Expanded(
-                    child: (clients.isEmpty)
+                    child: (patients.isEmpty)
                         ? Center(
                             child: Text(
                               'NO CLIENTS',
@@ -168,24 +205,24 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
     );
   }
 
-  void search_clients(String value, {bool build = false}) {
+  void search_patients(String value, {bool build = false}) {
     search_list.clear();
     emptySearch = false;
 
     if (value.isNotEmpty) {
-      var data = clients
+      var data = patients
           .where(
             (element) =>
-                element.f_name!
+                element.f_name
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.m_name!
+                element.m_name
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.l_name!
+                element.l_name
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.id
+                element.patient_id
                     .toString()
                     .toLowerCase()
                     .contains(value.toLowerCase()),
@@ -289,7 +326,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Text(
-                nt.format(filter_client_count),
+                nt.format(filter_patient_count),
                 style: TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
@@ -450,7 +487,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Center(
               child: Text(
-                'Physio Client List - (${nt.format(client_count)})',
+                'Physio Client List - (${nt.format(patient_count)})',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.black,
@@ -468,6 +505,20 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PhysioRegistrationPage()));
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                    size: 24,
+                  ),
+                ),
+
                 // serach field
                 AnimatedContainer(
                   width: search_box_width,
@@ -495,14 +546,14 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                               fontWeight: FontWeight.w400,
                               fontSize: 16,
                             ),
-                            onChanged: search_clients,
+                            onChanged: search_patients,
                             controller: search_bar_controller,
                             focusNode: search_bar_node,
                             textInputAction: TextInputAction.done,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Color(0xFF3c3c3c),
-                              hintText: 'Search client...',
+                              hintText: 'Search patient...',
                               hintStyle: TextStyle(
                                 fontStyle: FontStyle.italic,
                                 fontSize: 13,
@@ -584,10 +635,10 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
 
   // grid list
   Widget list() {
-    clients.sort((a, b) {
-      return int.parse(b.id!.split('-')[1])
-          .compareTo(int.parse(a.id!.split('-')[1]));
-    });
+    // patients.sort((a, b) {
+    //   return int.parse(b.patient_id.split('-')[1])
+    //       .compareTo(int.parse(a.patient_id.split('-')[1]));
+    // });
 
     return
         // empty serach
@@ -619,7 +670,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                     ),
                   )
 
-                // clients list
+                // patients list
                 : Container(
                     child: GridView(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -630,21 +681,21 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                       ),
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 15),
                       physics: BouncingScrollPhysics(),
-                      children: clients.map((e) => list_tile(e)).toList(),
+                      children: patients.map((e) => list_tile(e)).toList(),
                     ),
                   );
   }
 
-  // client list tile
-  Widget list_tile(PhysioClientListModel client) {
-    String cl_name = '${client.f_name} ${client.l_name}';
+  // patient list tile
+  Widget list_tile(PatientModel patient) {
+    String cl_name = '${patient.f_name} ${patient.l_name}';
 
     return InkWell(
       onTap: () async {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PhysioClientProfilePage(cl_id: client.key!),
+            builder: (context) => PatientProfilePage(patient: patient),
           ),
         );
 
@@ -667,7 +718,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
-                child: client.user_image!.isEmpty
+                child: patient.user_image.isEmpty
                     ? Image.asset(
                         'images/icon/user-alt.png',
                         width: 50,
@@ -676,7 +727,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
-                          client.user_image!,
+                          patient.user_image,
                           height: 80,
                           width: 80,
                           fit: BoxFit.cover,
@@ -698,7 +749,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                     children: [
                       // id
                       Text(
-                        client.id!,
+                        patient.patient_id,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 12,
@@ -727,7 +778,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
                   SizedBox(height: 8),
 
                   // hmo tag
-                  PhysioHMOTag(hmo: client.hmo!),
+                  PhysioHMOTag(hmo: patient.hmo),
                 ],
               ),
             ),

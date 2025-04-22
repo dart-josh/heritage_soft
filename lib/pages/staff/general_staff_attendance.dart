@@ -795,9 +795,9 @@ class _GSAHState extends State<GSAH> {
     String att_key = '$key/${active_month!.title}/$date';
     return await StaffDatabaseHelpers.get_staff_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.exists)
-        return true;
-      else
+      // if (snapshot.exists)
+      //   return true;
+      // else
         return false;
     });
   }

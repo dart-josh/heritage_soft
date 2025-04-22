@@ -1,17 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/physio_database_helpers.dart';
 import 'package:intl/intl.dart';
 
 class CaseFileD extends StatefulWidget {
-  final PhysioHealthClientModel client;
-  final String case_title;
+  final PatientModel patient;
   const CaseFileD({
     super.key,
-    required this.client,
-    required this.case_title,
+    required this.patient,
   });
 
   @override
@@ -21,37 +19,11 @@ class CaseFileD extends StatefulWidget {
 class _CaseFileDState extends State<CaseFileD> {
   List<CaseFileModel> _files = [];
 
-  bool first_fetch = false;
-
-  late StreamSubscription case_file_stream;
-
   // case file stream
-  get_case_files() {
-    case_file_stream =
-        PhysioDatabaseHelpers.case_file_stream(widget.client.key).listen((event) {
-      _files.clear();
-      if (event.docs.isNotEmpty) {
-        event.docs.forEach((element) {
-          CaseFileModel cs = CaseFileModel.fromMap(element.id, element.data());
-          _files.add(cs);
-        });
-      }
-
-      if (first_fetch) {
-        if (mounted) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.blue,
-            toastText: 'Case File updaated',
-            icon: Icons.update,
-          );
-        }
-      } else {
-        first_fetch = true;
-      }
-
-      setState(() {});
-    });
+  get_case_files() async {
+    _files = await PhysioDatabaseHelpers.get_case_file_by_patient(
+            context, widget.patient.key ?? '') ??
+        [];
   }
 
   @override
@@ -62,7 +34,6 @@ class _CaseFileDState extends State<CaseFileD> {
 
   @override
   void dispose() {
-    case_file_stream.cancel();
     super.dispose();
   }
 
@@ -92,7 +63,8 @@ class _CaseFileDState extends State<CaseFileD> {
                 topBar(),
 
                 // case title
-                case_title(widget.case_title),
+                if (widget.patient.assessment_info.isNotEmpty)
+                  case_title(widget.patient.assessment_info[0].diagnosis),
 
                 // list
                 Expanded(
@@ -237,7 +209,7 @@ class _CaseFileDState extends State<CaseFileD> {
 
           // id group
           Text(
-            widget.client.id,
+            widget.patient.patient_id,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -298,13 +270,13 @@ class _CaseFileDState extends State<CaseFileD> {
                   fontSize: 18,
                 ),
               ),
-              
+
               // show assessment
-              (file.type == 'Assessment')
+              (file.case_type == 'Assessment')
                   ? Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: Text(
-                        file.type,
+                        file.case_type,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -316,7 +288,7 @@ class _CaseFileDState extends State<CaseFileD> {
               Expanded(child: Container()),
 
               // expand icon
-              InkWell(  
+              InkWell(
                 onTap: () {
                   file.expanded = !file.expanded;
                   setState(() {});
@@ -572,7 +544,7 @@ class _CaseFileDState extends State<CaseFileD> {
 
         SizedBox(height: 3),
 
-        // main decision
+        // main treatment_decision
         Container(
           decoration: BoxDecoration(
             color: Colors.transparent,
@@ -584,19 +556,19 @@ class _CaseFileDState extends State<CaseFileD> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: SelectableText(
-                file.decision,
+                file.treatment_decision,
                 style: textStyle,
               ),
             ),
           ),
         ),
 
-        if ((file.decision.toLowerCase().contains('refer')) ||
-            (file.decision.toLowerCase().contains('other')))
+        if ((file.treatment_decision.toLowerCase().contains('refer')) ||
+            (file.treatment_decision.toLowerCase().contains('other')))
           SizedBox(height: 8),
-        
-        // refer decision
-        if (file.decision.toLowerCase().contains('refer'))
+
+        // refer treatment_decision
+        if (file.treatment_decision.toLowerCase().contains('refer'))
           Container(
             decoration: BoxDecoration(
               color: Colors.transparent,
@@ -615,9 +587,9 @@ class _CaseFileDState extends State<CaseFileD> {
               ),
             ),
           )
-        
-        // other decision
-        else if (file.decision.toLowerCase().contains('other'))
+
+        // other treatment_decision
+        else if (file.treatment_decision.toLowerCase().contains('other'))
           Container(
             decoration: BoxDecoration(
               color: Colors.transparent,

@@ -46,11 +46,11 @@ class _SubHistoryPageState extends State<SubHistoryPage> {
     await GymDatabaseHelpers.get_sub_history(client!.key).then((snapshot) {
       List<Sub_History_Model> sub_h = [];
 
-      snapshot.docs.forEach((element) {
-        Sub_History_Model rec =
-            Sub_History_Model.fromMap(element.id, element.data());
-        sub_h.add(rec);
-      });
+      // snapshot.docs.forEach((element) {
+      //   Sub_History_Model rec =
+      //       Sub_History_Model.fromMap(element.id, element.data());
+      //   sub_h.add(rec);
+      // });
 
       isLoading = false;
 

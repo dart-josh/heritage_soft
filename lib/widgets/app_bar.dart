@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/utils.dart';
 import 'package:heritage_soft/pages/other/accessories_shop_page.dart';
 import 'package:heritage_soft/pages/other/birthday_list.dart';
+import 'package:heritage_soft/pages/physio/physio_registration_page.dart';
 import 'package:heritage_soft/pages/sign_in_page.dart';
 import 'package:heritage_soft/pages/physio/widgets/accessories_request_list.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
@@ -23,6 +26,17 @@ class _MyAppBarState extends State<MyAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    UserModel? user = AppData.get(context).active_user;
+
+    if (user == null)
+      return Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 3, 25, 43),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 1),
+      );
+
     return Stack(
       children: [
         Container(
@@ -32,16 +46,18 @@ class _MyAppBarState extends State<MyAppBar> {
           ),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 1),
           child: Center(
-            child: (app_role == 'doctor') ? doctors_row() : receptionist_row(),
+            child: (user.app_role == 'Doctor')
+                ? doctors_row()
+                : receptionist_row(),
           ),
         ),
-        (app_role == 'doctor')
+        (user.app_role == 'Doctor')
             ? Positioned(
                 top: 40,
                 right: 20,
                 child: waiting_list_open ? WaitingPatientsList() : Container(),
               )
-            : (app_role == 'desk' || app_role == 'ict')
+            : (user.app_role == 'CSU' || user.app_role == 'ICT')
                 ? Positioned(
                     top: 40,
                     right: 20,
@@ -56,15 +72,14 @@ class _MyAppBarState extends State<MyAppBar> {
 
   // doctors row
   Widget doctors_row() {
-    int waiting_count = Provider.of<AppData>(context)
-        .doctors_ong_patients
-        .where((element) => element.pending_treatment)
-        .length;
+    DoctorModel? doctor = AppData.get(context).active_doctor;
+
+    int waiting_count = doctor?.pen_patients.length ?? 0;
 
     return Row(
       children: [
         // profile image
-        global_key.currentState == null || active_doctor == null
+        global_key.currentState == null || doctor == null
             ? Container()
             : Container(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -77,13 +92,13 @@ class _MyAppBarState extends State<MyAppBar> {
                     radius: 20,
                     backgroundColor: Color(0xFFf3f0da),
                     foregroundColor: Colors.white,
-                    backgroundImage: active_doctor!.user_image.isNotEmpty
+                    backgroundImage: doctor.user.user_image.isNotEmpty
                         ? NetworkImage(
-                            active_doctor!.user_image,
+                            doctor.user.user_image,
                           )
                         : null,
                     child: Center(
-                      child: active_doctor!.user_image.isEmpty
+                      child: doctor.user.user_image.isEmpty
                           ? Image.asset(
                               'images/icon/health-person.png',
                               width: 15,
@@ -169,7 +184,9 @@ class _MyAppBarState extends State<MyAppBar> {
   // receptionist row
   Widget receptionist_row() {
     int request_count = Provider.of<AppData>(context).accessory_request.length;
-    String name = '${active_staff!.f_name} ${active_staff!.l_name}';
+    UserModel? user = AppData.get(context).active_user;
+
+    String name = '${user!.f_name} ${user.l_name}';
     int birthday_count = get_birthday();
 
     return Row(
@@ -184,13 +201,13 @@ class _MyAppBarState extends State<MyAppBar> {
                 radius: 20,
                 backgroundColor: Color(0xFFf3f0da),
                 foregroundColor: Colors.white,
-                backgroundImage: active_staff!.user_image.isNotEmpty
+                backgroundImage: user.user_image.isNotEmpty
                     ? NetworkImage(
-                        active_staff!.user_image,
+                        user.user_image,
                       )
                     : null,
                 child: Center(
-                  child: active_staff!.user_image.isEmpty
+                  child: user.user_image.isEmpty
                       ? Image.asset(
                           'images/icon/health-person.png',
                           width: 15,
@@ -199,9 +216,9 @@ class _MyAppBarState extends State<MyAppBar> {
                       : Container(),
                 ),
               ),
-        
+
               SizedBox(width: 15),
-        
+
               // name
               Text(
                 name,
@@ -215,6 +232,21 @@ class _MyAppBarState extends State<MyAppBar> {
         ),
 
         Expanded(child: Container()),
+
+        InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PhysioRegistrationPage()));
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                    size: 24,
+                  ),
+                ),
 
         // birthday
         Container(
@@ -407,18 +439,18 @@ class _MyAppBarState extends State<MyAppBar> {
         .toList()
         .length;
 
-    int physio_clients = Provider.of<AppData>(context, listen: false)
-        .physio_clients
-        .where((element) =>
-            element.dob!.isNotEmpty &&
-            (element.dob == '/1900'
-                ? false
-                : (get_birth_Date(getDate(element.dob!)) ==
-                    get_birth_Date(DateTime.now()))))
-        .toList()
-        .length;
+    // int physio_clients = Provider.of<AppData>(context, listen: false)
+    //     .physio_clients
+    //     .where((element) =>
+    //         element.dob!.isNotEmpty &&
+    //         (element.dob == '/1900'
+    //             ? false
+    //             : (get_birth_Date(getDate(element.dob!)) ==
+    //                 get_birth_Date(DateTime.now()))))
+    //     .toList()
+    //     .length;
 
-    return gym_client + physio_clients;
+    return 0;
   }
 
   // get date

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'dart:ui' as ui;
-
-import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/physio/doctors_profile.dart';
 import 'package:provider/provider.dart';
@@ -236,9 +235,11 @@ class _DoctorsListState extends State<DoctorsList> {
 
   // doctors tile
   Widget doctors_tile(DoctorModel doctor) {
-    bool active = doctor.is_available && doctor.active_patients == 0;
-    bool wating = doctor.is_available && doctor.active_patients == 1;
-    bool not_active = doctor.is_available && doctor.active_patients >= 2;
+    int total_patient = doctor.ong_patients.length + doctor.pen_patients.length;
+
+    bool active = doctor.is_available && total_patient == 0;
+    bool wating = doctor.is_available && total_patient == 1;
+    bool not_active = doctor.is_available && total_patient >= 5;
 
     return InkWell(
       onTap: () {
@@ -295,7 +296,7 @@ class _DoctorsListState extends State<DoctorsList> {
               width: 120,
               height: 120,
               child: Center(
-                child: doctor.user_image.isEmpty
+                child: doctor.user.user_image.isEmpty
                     ? Image.asset(
                         'images/icon/user-alt.png',
                         width: 60,
@@ -304,7 +305,7 @@ class _DoctorsListState extends State<DoctorsList> {
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          doctor.user_image,
+                          doctor.user.user_image,
                           height: 120,
                           width: 120,
                           fit: BoxFit.cover,
@@ -317,7 +318,7 @@ class _DoctorsListState extends State<DoctorsList> {
 
             // name
             Text(
-              doctor.fullname,
+              doctor.user.f_name,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -369,12 +370,14 @@ class _DoctorsListState extends State<DoctorsList> {
     if (active_doctor == null || !active_doctor!.is_available)
       return Container(height: 45);
 
+      int total_patient = active_doctor!.ong_patients.length + active_doctor!.pen_patients.length;
+
     bool active =
-        active_doctor!.is_available && active_doctor!.active_patients == 0;
+        active_doctor!.is_available && total_patient == 0;
     bool wating =
-        active_doctor!.is_available && active_doctor!.active_patients == 1;
+        active_doctor!.is_available && total_patient == 1;
     bool not_active =
-        active_doctor!.is_available && active_doctor!.active_patients >= 2;
+        active_doctor!.is_available && total_patient >= 5;
 
     return InkWell(
       onTap: () async {

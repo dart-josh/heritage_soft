@@ -1,37 +1,37 @@
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 
 // accessory request model
 class A_ShopModel {
-  String key;
-  List<AccessoryItemModel> items;
-  PhysioHealthClientModel? client;
+  String? key;
+  List<AccessoryItemModel> accessories;
+  PatientModel? patient;
+  DoctorModel? doctor;
 
   A_ShopModel({
-    required this.key,
-    required this.items,
-    this.client,
+    this.key,
+    required this.accessories,
+    this.patient,
+    this.doctor,
   });
 
-  factory A_ShopModel.fromMap(String key, Map map) {
-    List itm = map['items'];
-    List<AccessoryItemModel> item_l = [];
-
-    itm.forEach((value) {
-      item_l.add(AccessoryItemModel.fromMap(value));
-    });
+  factory A_ShopModel.fromMap(Map map) {
 
     return A_ShopModel(
-      key: key,
-      items: item_l,
-      client: PhysioHealthClientModel.fromMap(
-        map['client'],
+      key: map['_id'],
+      accessories: List<AccessoryItemModel>.from(map['accessories'].map((x) => AccessoryItemModel.fromMap(x))),
+      patient: PatientModel.fromMap(
+        map['patient'],
       ),
+      doctor: DoctorModel.fromMap(map['doctor']),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'items': items.map((e) => e.toJson()).toList(),
-        'client': client!.toJson(),
+    'id': key,
+        'accessories': accessories.map((e) => e.toJson()).toList(),
+        'patient': patient!.key,
+        'doctor': doctor!.key,
       };
 }
 
@@ -144,8 +144,7 @@ class AccessoryModel {
     this.limit = 0,
   });
 
-  factory AccessoryModel.fromMap(String key, Map map) =>
-      AccessoryModel(
+  factory AccessoryModel.fromMap(String key, Map map) => AccessoryModel(
         key: key,
         name: map['name'],
         code: map['code'],
@@ -171,30 +170,22 @@ class AccessoryModel {
 
 // accessory item in shop record
 class AccessoryItemModel {
-  String key;
-  String name;
+  AccessoryModel accessory;
   int qty;
-  int price;
 
   AccessoryItemModel({
-    required this.key,
-    required this.name,
+    required this.accessory,
     required this.qty,
-    required this.price,
   });
 
-  factory AccessoryItemModel.fromMap(Map map) =>
-      AccessoryItemModel(
-        key: map['key'],
-        name: map['name'],
+  factory AccessoryItemModel.fromMap(Map map) => AccessoryItemModel(
+        accessory:
+            AccessoryModel.fromMap(map['accessory']['_id'], map['accessory']),
         qty: map['qty'],
-        price: map['price'],
       );
 
   Map<String, dynamic> toJson() => {
-        'key': key,
-        'name': name,
+        'accessory': accessory.key,
         'qty': qty,
-        'price': price,
       };
 }

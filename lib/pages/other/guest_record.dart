@@ -160,22 +160,22 @@ class _GuestRecordState extends State<GuestRecord> {
 
     await AdminDatabaseHelpers.get_visitors_record(active_month!.title)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map map = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map map = snapshot.value as Map;
 
-        if (map.isNotEmpty) {
-          map.forEach((key, value) {
-            Map map_2 = value as Map;
-            List<GuestModel> guests = [];
+      //   if (map.isNotEmpty) {
+      //     map.forEach((key, value) {
+      //       Map map_2 = value as Map;
+      //       List<GuestModel> guests = [];
 
-            map_2.forEach((key_2, value_2) {
-              guests.add(GuestModel.fromMap(key_2, value_2));
-            });
+      //       map_2.forEach((key_2, value_2) {
+      //         guests.add(GuestModel.fromMap(key_2, value_2));
+      //       });
 
-            active_list.add(GuestRecordModel(date: key, record: guests));
-          });
-        }
-      }
+      //       active_list.add(GuestRecordModel(date: key, record: guests));
+      //     });
+      //   }
+      // }
     });
 
     isLoading = false;

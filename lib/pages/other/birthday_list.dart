@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
@@ -29,8 +30,8 @@ class _BirthdayListState extends State<BirthdayList> {
   List<ClientListModel> gym_client = [];
   List<ClientListModel> search_gym_client = [];
 
-  List<PhysioClientListModel> physio_clients = [];
-  List<PhysioClientListModel> search_physio_clients = [];
+  List<PatientModel> physio_clients = [];
+  List<PatientModel> search_physio_clients = [];
 
   // check for birthdays
   get_values() {
@@ -45,7 +46,7 @@ class _BirthdayListState extends State<BirthdayList> {
         .toList();
 
     physio_clients = Provider.of<AppData>(context, listen: false)
-        .physio_clients
+        .patients
         .where((element) =>
             element.dob!.isNotEmpty &&
             (element.dob == '/1900'
@@ -569,7 +570,7 @@ class _BirthdayListState extends State<BirthdayList> {
   }
 
   // client list tile
-  Widget physio_list_tile(PhysioClientListModel client) {
+  Widget physio_list_tile(PatientModel client) {
     String cl_name = '${client.f_name} ${client.l_name}';
 
     return Container(
@@ -584,7 +585,7 @@ class _BirthdayListState extends State<BirthdayList> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        PhysioClientProfilePage(cl_id: client.key!),
+                        PatientProfilePage(patient: client),
                   ),
                 );
 
@@ -641,7 +642,7 @@ class _BirthdayListState extends State<BirthdayList> {
                             children: [
                               // id
                               Text(
-                                client.id!,
+                                client.patient_id!,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 12,

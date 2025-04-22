@@ -139,15 +139,15 @@ class _CAHState extends State<CAH> {
     String att_key = '${client!.key}/${active_month!.title}';
     await GymDatabaseHelpers.get_client_personal_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map value = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map value = snapshot.value as Map;
 
-        if (value.isNotEmpty) {
-          value.forEach((key, value) {
-            att_hist.add(PersonalAttendanceModel.fromMap(value));
-          });
-        }
-      }
+      //   if (value.isNotEmpty) {
+      //     value.forEach((key, value) {
+      //       att_hist.add(PersonalAttendanceModel.fromMap(value));
+      //     });
+      //   }
+      // }
     });
 
     isLoading = false;

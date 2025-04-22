@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart' as cs;
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/back_date_gym_client.dart';
+import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/pages/other/accessories_list_page.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
@@ -167,6 +168,7 @@ class _HomePageState extends State<HomePage> {
 
   // sliders
   Widget sliders() {
+    UserModel? user = AppData.get(context).active_user;
     return Row(
       children: [
         // previous
@@ -186,17 +188,17 @@ class _HomePageState extends State<HomePage> {
         Expanded(
           child: cs.CarouselSlider(
             items:
-            active_staff!.full_access ? [
+            user!.full_access ? [
               full_access_tab_1(),
               full_access_tab_2(),
               full_access_tab_3(),
             ] :  
-            (app_role == 'admin' || app_role == 'management')
+            (user.app_role == 'Admin' || user.app_role == 'Management')
                 ? [
                     admin_tab_1(),
                     admin_tab_2(),
                   ]
-                : (app_role == 'desk') ? [
+                : (user.app_role == 'CSU') ? [
                     main_page_0(),
                     main_page_1(),
                     main_page_2(),
@@ -409,7 +411,6 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            backdate_ft_client(),
             register_ft_client(),
             register_pt_client(),
             mark_attendance(),
@@ -711,7 +712,7 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
               builder: (context) => RegistrationPage(
-                    cl_id: Helpers.generate_id('gym', false),
+                    cl_id: Helpers.generate_id(xx: 'gym', hmo: false, id: 1289),
                   )),
         );
       },
@@ -790,7 +791,6 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
               builder: (context) => PhysioRegistrationPage(
-                    cl_id: Helpers.generate_id('phy', false),
                   )),
         );
       },
@@ -1599,85 +1599,6 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  // ! BACKDATE
-  // register client
-  Widget backdate_ft_client() {
-    return InkWell(
-      onTap: () {
-        if (!is_loaded) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.red,
-            toastText: 'Please wait...',
-            icon: Icons.error,
-          );
-          return;
-        }
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => BackDateRegistration(
-                    cl_id: Helpers.generate_id('gym', false),
-                  )),
-        );
-      },
-      child: Container(
-        width: 220,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Stack(
-          children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/new_gym.jpg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 10),
-                  Text(
-                    'Backdate Gym Client',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                ],
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   //
 }

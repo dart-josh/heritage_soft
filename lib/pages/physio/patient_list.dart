@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/pages/physio/clinic_tab.dart';
 import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
 import 'package:provider/provider.dart';
 
 class PatientList extends StatefulWidget {
-  final List<PhysioClientListModel>? my_patients;
-  final List<PhysioClientListModel>? ongoing_patient;
-  final List<PhysioClientListModel>? pending_patient;
+  final List<PatientModel>? my_patients;
+  final List<PatientModel>? ongoing_patient;
+  final List<PatientModel>? pending_patient;
 
   const PatientList({
     super.key,
@@ -41,24 +41,24 @@ class _PatientListState extends State<PatientList>
     super.dispose();
   }
 
-  List<PhysioClientListModel> my_patients = [];
-  List<PhysioClientListModel> ongoing_patients = [];
-  List<PhysioClientListModel> pending_patients = [];
+  List<PatientModel> my_patients = [];
+  List<PatientModel> ongoing_patients = [];
+  List<PatientModel> pending_patients = [];
 
   get_patients() {
     var all_p = Provider.of<AppData>(context).doctors_ong_patients;
 
-    ongoing_patients = all_p
-        .where((element) =>
-            element.ongoing_treatment && !element.pending_treatment)
-        .toList();
+    // ongoing_patients = all_p
+    //     .where((element) =>
+    //         element.ongoing_treatment && !element.pending_treatment)
+    //     .toList();
 
-    pending_patients = all_p
-        .where((element) =>
-            element.pending_treatment && !element.ongoing_treatment)
-        .toList();
+    // pending_patients = all_p
+    //     .where((element) =>
+    //         element.pending_treatment && !element.ongoing_treatment)
+    //     .toList();
 
-    my_patients = Provider.of<AppData>(context).doctors_patients;
+    // my_patients = Provider.of<AppData>(context).doctors_patients;
   }
 
   get_patients_2() {
@@ -124,11 +124,11 @@ class _PatientListState extends State<PatientList>
     );
   }
 
-  List<PhysioClientListModel> search_list = [];
+  List<PatientModel> search_list = [];
   bool search_on = false;
 
   // list of patients
-  Widget patients_list(List<PhysioClientListModel> patients,
+  Widget patients_list(List<PatientModel> patients,
       {bool horiz_list = false, bool ong = false, bool my_pat = false}) {
     return Column(
       children: [
@@ -279,24 +279,17 @@ class _PatientListState extends State<PatientList>
   }
 
   // patients tile
-  Widget list_tile(PhysioClientListModel client, bool can_treat, bool my_pat) {
-    String cl_name = '${client.f_name} ${client.l_name}';
-    String cl_name2 = '${client.f_name} ${client.m_name} ${client.l_name}';
+  Widget list_tile(PatientModel patient, bool can_treat, bool my_pat) {
+    String cl_name = '${patient.f_name} ${patient.l_name}';
+    String cl_name2 = '${patient.f_name} ${patient.m_name} ${patient.l_name}';
 
     return InkWell(
       onTap: () {
-        PhysioHealthClientModel client_h = PhysioHealthClientModel(
-            key: client.key!,
-            id: client.id!,
-            name: cl_name2,
-            user_image: client.user_image!,
-            hmo: client.hmo!,
-            baseline_done: client.baseline_done);
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ClinicTab(
-              client: client_h,
+              patient: patient,
               can_treat: can_treat,
             ),
           ),
@@ -319,7 +312,7 @@ class _PatientListState extends State<PatientList>
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
-                child: client.user_image!.isEmpty
+                child: patient.user_image!.isEmpty
                     ? Image.asset(
                         'images/icon/user-alt.png',
                         width: 50,
@@ -328,7 +321,7 @@ class _PatientListState extends State<PatientList>
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
-                          client.user_image!,
+                          patient.user_image!,
                           height: 80,
                           width: 80,
                           fit: BoxFit.cover,
@@ -350,7 +343,7 @@ class _PatientListState extends State<PatientList>
                     children: [
                       // id
                       Text(
-                        client.id!,
+                        patient.patient_id,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 12,
@@ -379,13 +372,13 @@ class _PatientListState extends State<PatientList>
                   SizedBox(height: 8),
 
                   // hmo tag
-                  PhysioHMOTag(hmo: client.hmo!),
+                  PhysioHMOTag(hmo: patient.hmo!),
                 ],
               ),
             ),
 
             // treatment count
-            (my_pat && client.treatment_sessions != 0)
+            (my_pat)
                 ? Container(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     child: Center(
@@ -399,7 +392,7 @@ class _PatientListState extends State<PatientList>
                         width: 40,
                         child: Center(
                           child: Text(
-                            client.treatment_sessions.toString(),
+                            '',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -419,17 +412,17 @@ class _PatientListState extends State<PatientList>
     );
   }
 
-  search_value(String value, List<PhysioClientListModel> patients) {
+  search_value(String value, List<PatientModel> patients) {
     search_on = true;
     search_list.clear();
 
     if (value.isNotEmpty) {
       search_list = patients
           .where((element) =>
-              element.f_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.m_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.l_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.id.toString().toLowerCase().contains(value.toLowerCase()))
+              element.f_name.toLowerCase().contains(value.toLowerCase()) ||
+              element.m_name.toLowerCase().contains(value.toLowerCase()) ||
+              element.l_name.toLowerCase().contains(value.toLowerCase()) ||
+              element.patient_id.toString().toLowerCase().contains(value.toLowerCase()))
           .toList();
     } else {
       search_on = false;

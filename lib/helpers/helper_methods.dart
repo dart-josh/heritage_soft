@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/global_variables.dart';
+import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/enter_password_dialog.dart';
 import 'package:heritage_soft/widgets/loadingScreen.dart';
 import 'package:intl/intl.dart';
@@ -49,6 +50,23 @@ class Helpers {
         child: toast,
         context: context,
         duration: Duration(seconds: 2));
+  }
+
+  // show confirmation
+  static Future<bool> showConfirmation(
+      {required BuildContext context,
+      required String title,
+      required String message, bool barrierDismissible = false,}) async {
+    bool? conf = await showDialog(
+        context: context,
+        barrierDismissible: barrierDismissible,
+        builder: (context) => ConfirmDialog(title: title, subtitle: message));
+
+    if (conf != null) {
+      return conf;
+    } else {
+      return false;
+    }
   }
 
   // enter password
@@ -103,11 +121,11 @@ class Helpers {
 
   // loading screen
   static void showLoadingScreen(
-      {required BuildContext context, bool isDissmissable = false}) {
+      {required BuildContext context, bool isDissmissable = false, String? loadingText}) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => LoadingScreen(),
+      builder: (context) => LoadingScreen(loadingText: loadingText),
     );
   }
 
@@ -153,7 +171,8 @@ class Helpers {
   }
 
   // generate client id
-  static String generate_id(String xx, bool hmo) {
+  static String generate_id(
+      {required String xx, required bool hmo, required int id}) {
     // prefix
     String prx = (xx == 'gym')
         ? 'HFC'
@@ -176,17 +195,7 @@ class Helpers {
 
     if (prx.isEmpty || sfx.isEmpty) return '';
 
-    int last_id = 0;
-
-    if (xx == 'gym') {
-      last_id = last_ft_id;
-    } else if (xx == 'phy') {
-      last_id = last_pt_id;
-    } else if (xx == 'stf') {
-      last_id = last_st_id;
-    }
-
-    last_id++;
+    int last_id = id;
 
     String middle4Digits = '';
 
@@ -285,7 +294,7 @@ class Helpers {
   }
 
   // format amount
-  static String format_amount(int value, {bool naira = false}) => naira
+  static String format_amount(num value, {bool naira = false}) => naira
       ? '₦${NumberFormat('#,###.##').format(value)}'
       : NumberFormat('#,###.##').format(value);
 

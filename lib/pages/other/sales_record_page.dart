@@ -157,22 +157,22 @@ class _SalesRecordState extends State<SalesRecord> {
 
     await AdminDatabaseHelpers.get_accessory_sales_record(active_month!.title)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map map = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map map = snapshot.value as Map;
 
-        if (map.isNotEmpty) {
-          map.forEach((key, value) {
-            Map map_2 = value as Map;
-            List<ShopOrderModel> orders = [];
+      //   if (map.isNotEmpty) {
+      //     map.forEach((key, value) {
+      //       Map map_2 = value as Map;
+      //       List<ShopOrderModel> orders = [];
 
-            map_2.forEach((key_2, value_2) {
-              orders.add(ShopOrderModel.fromMap(value_2));
-            });
+      //       map_2.forEach((key_2, value_2) {
+      //         orders.add(ShopOrderModel.fromMap(value_2));
+      //       });
 
-            active_list.add(ShopRecordModel(date: key, record: orders));
-          });
-        }
-      }
+      //       active_list.add(ShopRecordModel(date: key, record: orders));
+      //     });
+      //   }
+      // }
     });
 
     isLoading = false;
@@ -832,7 +832,7 @@ class ItemsDialog extends StatelessWidget {
                         // name
                         Expanded(
                           child: Text(
-                            e.name,
+                            e.accessory.name,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 14,

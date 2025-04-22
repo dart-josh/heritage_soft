@@ -22,12 +22,12 @@ dependencies:
   provider: ^6.1.1
   flutter_launcher_icons: "^0.13.1"
   shared_preferences: ^2.2.2
-  firebase_core: ^3.6.0
-  cloud_firestore: ^5.4.4
-  firebase_database: ^11.1.4
+  # firebase_core: ^3.6.0
+  # cloud_firestore: ^5.4.4
+  # firebase_database: ^11.1.4
   http: ^1.1.2
   file_picker: ^6.1.1
-  firebase_storage: ^12.3.3
+  # firebase_storage: ^12.3.3
   carousel_slider: ^4.2.1
   audioplayers: ^5.0.0
   camera: ^0.10.5+9
@@ -41,6 +41,7 @@ dependencies:
   esys_flutter_share_plus: ^2.2.0
   printing: ^5.13.3
   int_to_words: ^0.0.4
+  socket_io_client: ^3.1.1
 
 flutter_launcher_icons:
   # android: "launcher_icon"

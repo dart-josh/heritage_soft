@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' as html;
 
 class ClientindemnityVerification extends StatefulWidget {
   final String client_key;
@@ -29,23 +29,23 @@ class _ClientindemnityVerificationState
   bool page_done = false;
 
   listen_to_verification() {
-    GymDatabaseHelpers.get_client_details(widget.client_key).then((event) {
-      if (event.exists) {
-        is_verified = event.data()!['indemnity_verified'] ?? false;
-        client_name = '${event.data()!['f_name']} ${event.data()!['l_name']}';
-        user_exist = true;
-      } else {
-        user_exist = false;
-      }
+    // GymDatabaseHelpers.get_client_details(widget.client_key).then((event) {
+    //   if (event.exists) {
+    //     is_verified = event.data()!['indemnity_verified'] ?? false;
+    //     client_name = '${event.data()!['f_name']} ${event.data()!['l_name']}';
+    //     user_exist = true;
+    //   } else {
+    //     user_exist = false;
+    //   }
 
-      if (is_verified) {
-        window.location.replace(indemnity_replace_url);
-      } else {
-        loading_user = false;
+    //   if (is_verified) {
+    //     window.location.replace(indemnity_replace_url);
+    //   } else {
+    //     loading_user = false;
 
-        setState(() {});
-      }
-    });
+    //     setState(() {});
+    //   }
+    // });
   }
 
   void verify_indemnity() async {
@@ -85,7 +85,7 @@ class _ClientindemnityVerificationState
     setState(() {
       page_done = true;
     });
-    window.location.replace(indemnity_replace_url);
+    html.window.location.replace(indemnity_replace_url);
   }
 
   @override

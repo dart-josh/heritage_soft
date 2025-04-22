@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
@@ -12,14 +14,14 @@ import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
 class UserSetup extends StatefulWidget {
   final bool setup_profile;
-  final bool new_setup;
-  final StaffModel? staff;
+  final bool new_user;
+  final UserModel? user;
 
   const UserSetup({
     super.key,
     this.setup_profile = false,
-    this.new_setup = false,
-    this.staff,
+    this.new_user = false,
+    this.user,
   });
 
   @override
@@ -42,7 +44,7 @@ class _UserSetupState extends State<UserSetup> {
   List<String> office_section = [
     'General Staff',
     'Heritage Physiotherapy clinic',
-    'Heritage fitness',
+    'Heritage Fitness',
     'Delightsome Juice & Smoothies'
   ];
 
@@ -79,10 +81,14 @@ class _UserSetupState extends State<UserSetup> {
 
   Uint8List? image_file;
 
+  late UserModel active_user;
+
   get_values() async {
+    // get active user
+    active_user = AppData.get(context).active_user!;
     // new staff
-    if (widget.new_setup) {
-      id_controller.text = Helpers.generate_id('stf', false);
+    if (widget.new_user) {
+      // id_controller.text = Helpers.generate_id('stf', false);
     }
 
     // setup staff
@@ -111,14 +117,14 @@ class _UserSetupState extends State<UserSetup> {
     }
 
     // staff details
-    if (widget.staff != null) {
-      staff_role = widget.staff!.role;
-      staff_section = widget.staff!.section;
-      first_name = widget.staff!.f_name;
-      middle_name = widget.staff!.m_name;
-      last_name = widget.staff!.l_name;
-      user_image = widget.staff!.user_image;
-      app_role = widget.staff!.app_role;
+    if (widget.user != null) {
+      staff_role = widget.user!.app_role;
+      staff_section = widget.user!.section;
+      first_name = widget.user!.f_name;
+      middle_name = widget.user!.m_name;
+      last_name = widget.user!.l_name;
+      user_image = widget.user!.user_image;
+      app_role = widget.user!.app_role;
     }
   }
 
@@ -175,16 +181,16 @@ class _UserSetupState extends State<UserSetup> {
           SizedBox(height: 8),
 
           // details
-          widget.new_setup || widget.staff == null ? Container() : id_con(),
+          widget.new_user || widget.user == null ? Container() : id_con(),
 
           SizedBox(height: 10),
 
           // form
-          widget.new_setup ? new_staff_setup() : form(),
+          widget.new_user ? new_staff_setup() : form(),
 
           width >= 800 ? SizedBox(height: 20) : Expanded(child: Container()),
 
-          edit || widget.new_setup ? submit_button() : Container(height: 40),
+          edit || widget.new_user ? submit_button() : Container(height: 40),
 
           SizedBox(height: 20),
         ],
@@ -208,7 +214,7 @@ class _UserSetupState extends State<UserSetup> {
           // heading
           Center(
             child: Text(
-              widget.new_setup
+              widget.new_user
                   ? 'New Staff Account'
                   : widget.setup_profile
                       ? 'Setup Profile'
@@ -241,7 +247,9 @@ class _UserSetupState extends State<UserSetup> {
               Expanded(child: Container()),
 
               // settings button
-              widget.new_setup || widget.setup_profile || !active_staff!.full_access
+              widget.new_user ||
+                      widget.setup_profile ||
+                      !active_user.full_access
                   ? Container()
                   : Padding(
                       padding: EdgeInsets.symmetric(horizontal: 6),
@@ -267,7 +275,9 @@ class _UserSetupState extends State<UserSetup> {
                     ),
 
               // delete button
-              widget.new_setup || widget.setup_profile || !active_staff!.full_access
+              widget.new_user ||
+                      widget.setup_profile ||
+                      !active_user.full_access
                   ? Container()
                   : IconButton(
                       onPressed: () async {
@@ -284,7 +294,7 @@ class _UserSetupState extends State<UserSetup> {
                           Helpers.showLoadingScreen(context: context);
 
                           bool ds = await StaffDatabaseHelpers.delete_staff(
-                              widget.staff!.key);
+                              widget.user!.key ?? '');
 
                           Navigator.pop(context);
 
@@ -344,7 +354,7 @@ class _UserSetupState extends State<UserSetup> {
 
           // id
           Text(
-            widget.staff!.user_id,
+            widget.user!.user_id,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -609,7 +619,7 @@ class _UserSetupState extends State<UserSetup> {
                     staff_role = val;
                     setState(() {});
                   },
-                  edit: active_staff!.full_access && edit,
+                  edit: active_user.full_access && edit,
                 ),
               ),
 
@@ -625,7 +635,7 @@ class _UserSetupState extends State<UserSetup> {
                     staff_section = val;
                     setState(() {});
                   },
-                  edit: active_staff!.full_access && edit,
+                  edit: active_user.full_access && edit,
                 ),
               ),
             ],
@@ -644,7 +654,7 @@ class _UserSetupState extends State<UserSetup> {
                 app_role = val;
                 setState(() {});
               },
-              edit: active_staff!.full_access && edit,
+              edit: active_user.full_access && edit,
             ),
           ),
         ],
@@ -655,7 +665,7 @@ class _UserSetupState extends State<UserSetup> {
   Widget submit_button() {
     return InkWell(
       onTap: () async {
-        if (widget.new_setup)
+        if (widget.new_user)
           create_new_account();
         else
           update_profile();
@@ -669,7 +679,7 @@ class _UserSetupState extends State<UserSetup> {
         ),
         child: Center(
           child: Text(
-            widget.new_setup ? 'Create Account' : 'Update Profile',
+            widget.new_user ? 'Create Account' : 'Update Profile',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -754,7 +764,7 @@ class _UserSetupState extends State<UserSetup> {
                       child: Text_field(
                         controller: id_controller,
                         label: 'User ID',
-                        edit: !active_staff!.full_access,
+                        edit: !active_user.full_access,
                       ),
                     ),
 
@@ -884,59 +894,59 @@ class _UserSetupState extends State<UserSetup> {
       // upload image
       if (image_file != null) {
         user_image = await AdminDatabaseHelpers.uploadFile(
-                image_file!, widget.staff!.user_id, false,
+                image_file!, widget.user!.user_id, false,
                 staff: true) ??
             '';
       }
 
       Map<String, dynamic> data = StaffModel(
         key: '',
-        user_id: widget.staff!.user_id,
+        user_id: widget.user!.user_id,
         f_name: first_name,
         m_name: middle_name,
         l_name: last_name,
         user_image: user_image,
-        user_status: widget.staff!.user_status,
+        user_status: widget.user!.user_status,
         role: staff_role,
         section: staff_section,
         app_role: app_role,
       ).toJson();
 
       if (staff_role == 'Physiotherapist') {
-        Map<String, dynamic> data2 = DoctorModel(
-          key: active_doctor?.key ?? widget.staff!.key,
-          user_id: widget.staff!.user_id,
-          fullname: '${first_name} ${middle_name} ${last_name}',
-          is_available: true,
-          active_patients: active_doctor?.active_patients ?? 0,
-          total_sessions: active_doctor?.total_sessions ?? 0,
-          patients: active_doctor?.patients ?? 0,
-          ong_treatment: active_doctor?.ong_treatment ?? 0,
-          pen_treatment: active_doctor?.pen_treatment ?? 0,
-          user_image: user_image,
-          title: staff_role,
-        ).toJson();
+        // Map<String, dynamic> data2 = DoctorModel(
+        //   key: active_doctor?.key ?? widget.user!.key,
+        //   user_id: widget.user!.user_id,
+        //   fullname: '${first_name} ${middle_name} ${last_name}',
+        //   is_available: true,
+        //   active_patients: active_doctor?.active_patients ?? 0,
+        //   total_sessions: active_doctor?.total_sessions ?? 0,
+        //   patients: active_doctor?.patients ?? 0,
+        //   ong_treatment: active_doctor?.ong_treatment ?? 0,
+        //   pen_treatment: active_doctor?.pen_treatment ?? 0,
+        //   user_image: user_image,
+        //   title: staff_role,
+        // ).toJson();
 
-        bool sd = await StaffDatabaseHelpers.update_doctor_details(
-          widget.staff!.key,
-          data2,
-          new_staff: widget.setup_profile,
-        );
+        // bool sd = await StaffDatabaseHelpers.update_doctor_details(
+        //   widget.user!.key,
+        //   data2,
+        //   new_staff: widget.setup_profile,
+        // );
 
-        if (!sd) {
-          Navigator.pop(context);
-          Helpers.showToast(
-            context: context,
-            color: Colors.red,
-            toastText: 'An Error Occurred, Try again',
-            icon: Icons.error,
-          );
-          return;
-        }
+        // if (!sd) {
+        //   Navigator.pop(context);
+        //   Helpers.showToast(
+        //     context: context,
+        //     color: Colors.red,
+        //     toastText: 'An Error Occurred, Try again',
+        //     icon: Icons.error,
+        //   );
+        //   return;
+        // }
       }
 
       bool st = await StaffDatabaseHelpers.update_staff_details(
-          widget.staff!.key, data);
+          widget.user!.key ?? '', data);
 
       if (!st) {
         Navigator.pop(context);

@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:universal_html/html.dart';
+
+String server_url = 'http://localhost:5500';
+
+// ! DB ROUTES
+  String clinicUrl = '${server_url}/api/clinic';
+  String userUrl = '${server_url}/api/user';
+  String salesUrl = '${server_url}/api/sales';
+  String universalUrl = '${server_url}/api/universal';
+  String authUrl = '${server_url}/api/auth';
 
 // app role
 List<String> app_roles = [
@@ -20,8 +30,8 @@ String app_role = '';
 bool full_access = false;
 
 // doctor & staff model
-DoctorModel? active_doctor;
-StaffModel? active_staff;
+// DoctorModel? active_doctor;
+// StaffModel? active_staff;
 
 // force doctor logout
 int doctor_force_logout = 0;

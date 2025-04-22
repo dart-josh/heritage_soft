@@ -53,20 +53,20 @@ class _SPDAState extends State<SPDA> {
 
     await StaffDatabaseHelpers.get_staff_attendance_by_key(att_key)
         .then((snapshot) {
-      if (snapshot.value != null) {
-        Map map = snapshot.value as Map;
+      // if (snapshot.value != null) {
+      //   Map map = snapshot.value as Map;
 
-        if (map.isNotEmpty) {
-          map.forEach((key, value) {
-            Map sess_map = {
-              'timeIn': value['time_in'],
-              'timeOut': value['time_out'],
-            };
+      //   if (map.isNotEmpty) {
+      //     map.forEach((key, value) {
+      //       Map sess_map = {
+      //         'timeIn': value['time_in'],
+      //         'timeOut': value['time_out'],
+      //       };
 
-            _sessions.add(sess_map);
-          });
-        }
-      }
+      //       _sessions.add(sess_map);
+      //     });
+      //   }
+      // }
 
       if (mounted) setState(() {});
     });

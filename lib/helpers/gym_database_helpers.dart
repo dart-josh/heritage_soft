@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_database/firebase_database.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/attendance_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
@@ -9,10 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class GymDatabaseHelpers {
-  static final ft_client_ref = FirebaseFirestore.instance.collection('Clients');
+  static final dynamic ft_client_ref = '';
 
   // client stream
-  static Stream<QuerySnapshot<Map<String, dynamic>>> clients_stream() {
+  static Stream clients_stream() {
     return ft_client_ref.snapshots();
   }
 
@@ -126,10 +126,10 @@ class GymDatabaseHelpers {
 
   // update last gym ID
   static update_last_gym_id(String client_id) async {
-    await FirebaseFirestore.instance
-        .collection('Office')
-        .doc('Last ID')
-        .update({'last_ft_id': Helpers.strip_id(client_id)});
+    // await FirebaseFirestore.instance
+    //     .collection('Office')
+    //     .doc('Last ID')
+    //     .update({'last_ft_id': Helpers.strip_id(client_id)});
   }
 
   // set health details
@@ -162,19 +162,19 @@ class GymDatabaseHelpers {
   }
 
   // client details stream
-  static Stream<DocumentSnapshot<Map<String, dynamic>>> client_details_stream(
+  static Stream client_details_stream(
       String client_key) {
     return ft_client_ref.doc(client_key).snapshots();
   }
 
   // get client details
-  static Future<DocumentSnapshot<Map<String, dynamic>>> get_client_details(
+  static Future get_client_details(
       String client_key) {
     return ft_client_ref.doc(client_key).get();
   }
 
   // client health summary stream
-  static Stream<DocumentSnapshot<Map<String, dynamic>>>
+  static Stream
       client_health_summary_stream(String client_key) {
     return ft_client_ref
         .doc(client_key)
@@ -184,7 +184,7 @@ class GymDatabaseHelpers {
   }
 
   // get health details
-  static Future<QuerySnapshot<Map<String, dynamic>>> client_health_details(
+  static Future client_health_details(
       String client_key) {
     return ft_client_ref.doc(client_key).collection('health_info').get();
   }
@@ -207,7 +207,7 @@ class GymDatabaseHelpers {
   }
 
   // get sub history
-  static Future<QuerySnapshot<Map<String, dynamic>>> get_sub_history(
+  static Future get_sub_history(
       String client_key) {
     return ft_client_ref.doc(client_key).collection('Sub History').get();
   }
@@ -224,21 +224,21 @@ class GymDatabaseHelpers {
   }
 
   // get client personal attendance by month
-  static Future<DataSnapshot> get_client_personal_attendance_by_key(
+  static Future get_client_personal_attendance_by_key(
       String key) async {
-    return FirebaseDatabase.instance
-        .ref('Personal_attendance')
-        .child(key)
-        .get();
+    // return FirebaseDatabase.instance
+    //     .ref('Personal_attendance')
+    //     .child(key)
+    //     .get();
   }
 
   // get general attendance
-  static Future<DataSnapshot> get_daily_attendance_list(
-      String month, String date) {
-    return FirebaseDatabase.instance
-        .ref('General_attendance')
-        .child('$month/$date')
-        .get();
+  static Future get_daily_attendance_list(
+      String month, String date)  async {
+    // return FirebaseDatabase.instance
+    //     .ref('General_attendance')
+    //     .child('$month/$date')
+    //     .get();
   }
 
   // update client details
@@ -255,8 +255,8 @@ class GymDatabaseHelpers {
 
   // reset week for hmo plan clients
   static reset_week_for_hmo_plan_clients(context) {
-    var hmo_week_ref =
-        FirebaseFirestore.instance.collection('Office').doc('hmo_week');
+     dynamic hmo_week_ref =
+        "'FirebaseFirestore.instance.collection('Office').doc('hmo_week')'";
 
     hmo_week_ref.get().then((snap) {
       if (snap.exists) {
@@ -296,134 +296,134 @@ class GymDatabaseHelpers {
     String month = DateFormat("MMMM, yyyy").format(tod_date);
     String date = DateFormat("d MMMM, yyyy").format(tod_date);
 
-    DatabaseReference patt_loc =
-        FirebaseDatabase.instance.ref('Personal_attendance/$key/$month/$date');
+    // DatabaseReference patt_loc =
+    //     FirebaseDatabase.instance.ref('Personal_attendance/$key/$month/$date');
 
-    DatabaseReference gatt_loc =
-        FirebaseDatabase.instance.ref('General_attendance/$month/$date/$key');
+    // DatabaseReference gatt_loc =
+    //     FirebaseDatabase.instance.ref('General_attendance/$month/$date/$key');
 
-    // sign in
-    if (sign_in) {
-      PAH? ss = null;
+    // // sign in
+    // if (sign_in) {
+    //   PAH? ss = null;
 
-      // morning
-      if (current_hour < 12) {
-        ss = PAH(
-          session: 'morning',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // morning
+    //   if (current_hour < 12) {
+    //     ss = PAH(
+    //       session: 'morning',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // afternoon
-      else if (current_hour >= 12 && current_hour < 16) {
-        ss = PAH(
-          session: 'afternoon',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // afternoon
+    //   else if (current_hour >= 12 && current_hour < 16) {
+    //     ss = PAH(
+    //       session: 'afternoon',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // evening
-      else if (current_hour >= 16 && current_hour < 22) {
-        ss = PAH(
-          session: 'evening',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // evening
+    //   else if (current_hour >= 16 && current_hour < 22) {
+    //     ss = PAH(
+    //       session: 'evening',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      // midnight
-      else {
-        ss = PAH(
-          session: 'midnight',
-          time_in: time,
-          time_out: '',
-        );
-      }
+    //   // midnight
+    //   else {
+    //     ss = PAH(
+    //       session: 'midnight',
+    //       time_in: time,
+    //       time_out: '',
+    //     );
+    //   }
 
-      String dt = DateFormat("E, d MMM").format(tod_date);
+    //   String dt = DateFormat("E, d MMM").format(tod_date);
 
-      Map<String, dynamic> ss_map = ss.toJson();
+    //   Map<String, dynamic> ss_map = ss.toJson();
 
-      // save attendance
-      await patt_loc.once().then((value) {
-        if (value.snapshot.exists) {
-          Map valu = value.snapshot.value as Map;
-          Map ss_valu = valu['sessions'];
+    //   // save attendance
+    //   await patt_loc.once().then((value) {
+    //     if (value.snapshot.exists) {
+    //       Map valu = value.snapshot.value as Map;
+    //       Map ss_valu = valu['sessions'];
 
-          int sv = ss_valu.length + 1;
+    //       int sv = ss_valu.length + 1;
 
-          patt_loc.child('sessions/s$sv').set(ss_map);
+    //       patt_loc.child('sessions/s$sv').set(ss_map);
 
-          gatt_loc.child('sessions/s$sv').set(ss_map);
-        } else {
-          patt_loc.child('date').set(dt);
-          patt_loc.child('sessions/s1').set(ss_map);
+    //       gatt_loc.child('sessions/s$sv').set(ss_map);
+    //     } else {
+    //       patt_loc.child('date').set(dt);
+    //       patt_loc.child('sessions/s1').set(ss_map);
 
-          gatt_loc.child('date').set(dt);
-          gatt_loc.child('sessions/s1').set(ss_map);
+    //       gatt_loc.child('date').set(dt);
+    //       gatt_loc.child('sessions/s1').set(ss_map);
 
-          gatt_loc.child('daily_time_in').set(time);
-        }
-      });
+    //       gatt_loc.child('daily_time_in').set(time);
+    //     }
+    //   });
 
-      Map<String, dynamic> last_act = {
-        'date_time': tod_date.toString(),
-        'duration': '',
-      };
+    //   Map<String, dynamic> last_act = {
+    //     'date_time': tod_date.toString(),
+    //     'duration': '',
+    //   };
 
-      Map<String, dynamic> upd_val = {
-        'in_out': false,
-        'in_time': tod_date.toString(),
-        'last_activity': last_act,
-      };
-      // update client
-      update_client_details(key, upd_val);
+    //   Map<String, dynamic> upd_val = {
+    //     'in_out': false,
+    //     'in_time': tod_date.toString(),
+    //     'last_activity': last_act,
+    //   };
+    //   // update client
+    //   update_client_details(key, upd_val);
 
-      // notify desk
-      Map<String, dynamic> mapp = cl.toJson();
-      FirebaseFirestore.instance
-          .collection('Office')
-          .doc('Sign_in_user')
-          .set(mapp);
-    }
+    //   // notify desk
+    //   Map<String, dynamic> mapp = cl.toJson();
+    //   FirebaseFirestore.instance
+    //       .collection('Office')
+    //       .doc('Sign_in_user')
+    //       .set(mapp);
+    // }
 
-    // sign out
-    else {
-      // save attendance
-      await patt_loc.once().then((value) {
-        if (value.snapshot.exists) {
-          Map valu = value.snapshot.value as Map;
-          Map ss_valu = valu['sessions'];
+    // // sign out
+    // else {
+    //   // save attendance
+    //   await patt_loc.once().then((value) {
+    //     if (value.snapshot.exists) {
+    //       Map valu = value.snapshot.value as Map;
+    //       Map ss_valu = valu['sessions'];
 
-          int sv = ss_valu.length;
+    //       int sv = ss_valu.length;
 
-          Map<String, dynamic> ss_map = {
-            'time_out': time,
-          };
+    //       Map<String, dynamic> ss_map = {
+    //         'time_out': time,
+    //       };
 
-          patt_loc.child('sessions/s$sv').update(ss_map);
-          gatt_loc.child('sessions/s$sv').update(ss_map);
+    //       patt_loc.child('sessions/s$sv').update(ss_map);
+    //       gatt_loc.child('sessions/s$sv').update(ss_map);
 
-          gatt_loc.child('daily_time_out').set(time);
-        }
-      });
+    //       gatt_loc.child('daily_time_out').set(time);
+    //     }
+    //   });
 
-      Map<String, dynamic> last_act = {
-        'date_time': in_time,
-        'duration': duration,
-      };
+    //   Map<String, dynamic> last_act = {
+    //     'date_time': in_time,
+    //     'duration': duration,
+    //   };
 
-      Map<String, dynamic> upd_val = {
-        'in_out': true,
-        'in_time': '',
-        'last_activity': last_act,
-      };
+    //   Map<String, dynamic> upd_val = {
+    //     'in_out': true,
+    //     'in_time': '',
+    //     'last_activity': last_act,
+    //   };
 
-      // update client
-      update_client_details(key, upd_val);
-    }
+    //   // update client
+    //   update_client_details(key, upd_val);
+    // }
   }
 
   // verify indemnity
