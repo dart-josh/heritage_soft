@@ -4,6 +4,8 @@ import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/db_helpers/clinic_api.dart';
+import 'package:heritage_soft/helpers/helper_methods.dart';
+import 'package:heritage_soft/pages/physio/clinic_tab.dart';
 import 'package:provider/provider.dart';
 
 class PhysioDatabaseHelpers {
@@ -100,9 +102,9 @@ class PhysioDatabaseHelpers {
   }
 
   // add_update_patient
-  static Future<Map<String, dynamic>> add_update_patient(
+  static Future<Map> add_update_patient(
     BuildContext context, {
-    required Map<String, dynamic> data,
+    required Map data,
     bool showLoading = true,
     bool showToast = true,
   }) async {
@@ -138,8 +140,11 @@ class PhysioDatabaseHelpers {
     String? loadingText,
     bool showToast = false,
   }) async {
-    return await ClinicApi.update_assessment_info(context,
-        data: data, showLoading: showLoading, showToast: showToast, loadingText: loadingText);
+    return await ClinicApi.update_treatment_info(context,
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
   }
 
   // update_assessment_info
@@ -151,7 +156,75 @@ class PhysioDatabaseHelpers {
     bool showToast = false,
   }) async {
     return await ClinicApi.update_assessment_info(context,
-        data: data, showLoading: showLoading, showToast: showToast, loadingText: loadingText);
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
+  }
+
+  // pay for assessment
+  static Future<Map> pay_for_assessment(
+    BuildContext context, {
+    required PatientModel patient,
+    bool showLoading = false,
+    String? loadingText,
+    bool showToast = false,
+  }) async {
+    var conf = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AssessmentPayment(),
+    );
+
+    if (conf != null) {
+      TreatmentInfoModel tre =
+          patient.treatment_info ?? TreatmentInfoModel.gen();
+
+      tre.assessment_paid = true;
+
+      // update assessment paid
+
+      var res_T = await update_treatment_info(
+        context,
+        data: tre.toJson(patientKey: patient.key ?? '', update: false),
+        loadingText: loadingText,
+        showToast: showToast,
+        showLoading: showLoading,
+      );
+
+      if (res_T != null && res_T['patient_data'] != null) {
+        ClinicHistoryModel hist = ClinicHistoryModel(
+          hist_type: 'Assessment payment',
+          amount: conf,
+          amount_b4_discount: 0,
+          date: DateTime.now(),
+          session_paid: 1,
+          history_id: Helpers.generate_order_id(),
+          cost_p_session: 0,
+          old_float: 0,
+          new_float: 0,
+          session_frequency: '',
+        );
+
+        Map data_h = hist.toJson(patientKey: patient.key ?? '');
+
+        update_clinic_history(context, data: data_h);
+
+        return {'status': true, 'data': hist};
+      } else
+        return {'status': false};
+    } else {
+      return {'status': false};
+    }
+  }
+
+  // go to treatment tab
+  static Future goto_treatment_tab() async {
+    // check for case file
+    // if it exist get case file and open
+    // if not open new case file
+
+    // go to treatment tab with case file
   }
 
   // update_clinic_info
@@ -159,10 +232,11 @@ class PhysioDatabaseHelpers {
     BuildContext context, {
     required Map data,
     bool showLoading = false,
+    String? loadingText,
     bool showToast = false,
   }) async {
     return await ClinicApi.update_clinic_info(context,
-        data: data, showLoading: showLoading, showToast: showToast);
+        data: data, showLoading: showLoading, showToast: showToast, loadingText: loadingText,);
   }
 
   // update_clinic_variables

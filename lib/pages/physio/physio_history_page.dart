@@ -569,9 +569,9 @@ class _PhysioHistoryPageState extends State<PhysioHistoryPage> {
     String date =
         '${DateFormat.jm().format(history.date)} ${DateFormat('dd-MM-yyyy').format(history.date)}';
 
-    bool session_set = (history.hist_type.contains('Added') ||
-        history.hist_type.contains('Setup') ||
-        history.hist_type.contains('Updated'));
+    bool session_set = (history.hist_type.contains('added') ||
+        history.hist_type.contains('setup') ||
+        history.hist_type.contains('updated'));
 
     bool is_assessment = history.hist_type.contains('Assessment');
 

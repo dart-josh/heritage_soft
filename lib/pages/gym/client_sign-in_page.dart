@@ -176,7 +176,7 @@ class _ClSignInPageState extends State<ClSignInPage> {
   }
 
   // get last activity
-  String get_last_activity(Map<String, dynamic> lst_act) {
+  String get_last_activity(Map lst_act) {
     if (lst_act.isEmpty) return '';
 
     if (lst_act['date_time'] == 'absent') {
@@ -884,7 +884,7 @@ class _ClSignInPageState extends State<ClSignInPage> {
     // resume sub if paused
     if (in_out && widget.client.sub_paused) {
       String ned = widget.client.sub_date;
-      Map<String, dynamic> nt = {'sub_paused': false};
+      Map nt = {'sub_paused': false};
 
       // sub plan
       if (widget.client.sub_status && widget.client.sub_date.isNotEmpty) {

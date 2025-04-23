@@ -15,7 +15,7 @@ class EquipmentModel {
     required this.status,
   });
 
-  factory EquipmentModel.fromJson(Map<String, dynamic> json) => EquipmentModel(
+  factory EquipmentModel.fromJson(Map json) => EquipmentModel(
         key: json["_id"] ?? "",
         equipmentName: json["equipmentName"] ?? "",
         equipmentId: json["equipmentId"] ?? "",
@@ -24,7 +24,7 @@ class EquipmentModel {
         status: json["status"] ?? 'Available',
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         "id": key,
         "equipmentName": equipmentName,
         "equipmentId": equipmentId,

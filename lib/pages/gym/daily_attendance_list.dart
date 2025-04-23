@@ -26,7 +26,7 @@ class _DALState extends State<DAL> {
       TextStyle(color: Colors.white, fontSize: 16, letterSpacing: 1);
   TextStyle option_style = TextStyle(color: Colors.white, fontSize: 13);
   TextStyle title_style = TextStyle(color: Colors.black, fontSize: 16);
-  Future<List<Map<String, dynamic>>>? cll;
+  Future<List<Map>>? cll;
 
   // Text controller
   TextEditingController searchController = TextEditingController();
@@ -35,9 +35,9 @@ class _DALState extends State<DAL> {
   bool search_on = false;
   bool empty_search = false;
 
-  List<Map<String, dynamic>> flt_cl = [];
-  List<Map<String, dynamic>> all_cl = [];
-  List<Map<String, dynamic>> search_cl = [];
+  List<Map> flt_cl = [];
+  List<Map> all_cl = [];
+  List<Map> search_cl = [];
 
   bool filter_menu_open = false;
   bool filter_on = false;
@@ -75,7 +75,7 @@ class _DALState extends State<DAL> {
   }
 
   // filter function
-  List<Map<String, dynamic>> filter_module() {
+  List<Map> filter_module() {
     if (!filter_on) return all_cl;
 
     return all_cl
@@ -88,7 +88,7 @@ class _DALState extends State<DAL> {
   }
 
   // plan filter
-  bool plan_filter(String value, Map<String, dynamic> element) {
+  bool plan_filter(String value, Map element) {
     if (value == 'Daily') {
       return (element['details']['sub_plan'] == 'Daily');
     } else if (value == 'HMO') {
@@ -108,7 +108,7 @@ class _DALState extends State<DAL> {
   }
 
   // subscription filter
-  bool sub_filter(String value, Map<String, dynamic> element) {
+  bool sub_filter(String value, Map element) {
     if (value == 'Registration') {
       if (element['details']['reg_date'].toString().isNotEmpty)
         return (getDate(element['details']['reg_date']) ==
@@ -471,7 +471,7 @@ class _DALState extends State<DAL> {
 
           // list
           Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
+            child: FutureBuilder<List<Map>>(
                 future: cll,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done)
@@ -946,15 +946,14 @@ class _DALState extends State<DAL> {
   // Functions
 
   // get clients with attendance
-  Future<List<Map<String, dynamic>>> get_clients(String date,
-      {String session = ''}) async {
+  Future<List<Map>> get_clients(String date, {String session = ''}) async {
     String month = date.substring(2).trim();
 
     return GymDatabaseHelpers.get_daily_attendance_list(month, date)
         .then((snap) {
       // if (snap.exists) {
       //   Map val = snap.value as Map;
-      //   List<Map<String, dynamic>> cls = [];
+      //   List<Map> cls = [];
 
       //   val.forEach((key, value) {
       //     if (session.isEmpty) {
@@ -976,7 +975,7 @@ class _DALState extends State<DAL> {
 
       //   return cls;
       // } else {
-        return [];
+      return [];
       // }
     });
   }
@@ -997,13 +996,12 @@ class _DALState extends State<DAL> {
       //   };
       //   return details;
       // } else
-        return {};
+      return {};
     });
   }
 
   // get attendance
-  Future<Map<String, dynamic>> get_att(String date, Map map,
-      {String session = ''}) async {
+  Future<Map> get_att(String date, Map map, {String session = ''}) async {
     if (map.isNotEmpty) {
       // all session
       if (session == '') {
@@ -1121,7 +1119,7 @@ class _DAL_SState extends State<DAL_S> {
       //   else
       //     return false;
       // } else {
-        return false;
+      return false;
       // }
     });
   }

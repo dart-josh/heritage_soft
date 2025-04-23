@@ -72,8 +72,7 @@ class AdminDatabaseHelpers {
   }
 
   // add accessory sales record
-  static Future add_accessory_sales_record(
-      String key, Map<String, dynamic> data) async {
+  static Future add_accessory_sales_record(String key, Map data) async {
     // try {
     //   await FirebaseDatabase.instance
     //       .ref('Accessory Sales Record')
@@ -110,7 +109,7 @@ class AdminDatabaseHelpers {
   }
 
   // add/update accessory
-  static Future add_update_accessory(Map<String, dynamic> data,
+  static Future add_update_accessory(Map data,
       {String key = '', bool sett = false}) async {
     // try {
     //   if (sett)
@@ -149,8 +148,7 @@ class AdminDatabaseHelpers {
   }
 
   // add visitor to record
-  static Future add_visitor_to_record(
-      String key, Map<String, dynamic> data) async {
+  static Future add_visitor_to_record(String key, Map data) async {
     // try {
     //   await FirebaseDatabase.instance
     //       .ref('Visitors')
@@ -200,8 +198,7 @@ class AdminDatabaseHelpers {
   }
 
   // add hmo
-  static Future add_hmo(
-      String collection_key, Map<String, dynamic> map, String key,
+  static Future add_hmo(String collection_key, Map map, String key,
       {bool sett = false}) async {
     // try {
     //   if (sett)
@@ -230,8 +227,7 @@ class AdminDatabaseHelpers {
   }
 
   // set admin password
-  static Future set_admin_passwords(
-      String key, Map<String, dynamic> data) async {
+  static Future set_admin_passwords(String key, Map data) async {
     // try {
     //   FirebaseFirestore.instance
     //       .collection('Admin Passwords')
@@ -403,7 +399,7 @@ class AdminDatabaseHelpers {
     //     .get()
     //     .then((hist_onValue) {
     //       hist_onValue.docs.forEach((hist_doc) {
-    //         Map<String, dynamic> new_data = hist_doc.data();
+    //         Map new_data = hist_doc.data();
     //         new_data.addAll({'client_key': key});
     //         // print(new_data);
     //         GymIncomeModel inc = GymIncomeModel.fromJson(new_data);

@@ -1,5 +1,3 @@
-
-
 // staff model
 class StaffModel {
   String key;
@@ -56,7 +54,7 @@ class StaffModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'user_id': user_id,
         'f_name': f_name,
         'm_name': m_name,
@@ -68,5 +66,3 @@ class StaffModel {
         'app_role': app_role,
       };
 }
-
-

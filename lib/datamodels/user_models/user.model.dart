@@ -50,7 +50,7 @@ class UserModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'id': key,
         'user_id': user_id,
         'f_name': f_name,

@@ -27,7 +27,7 @@ class _PhysioClientsListState extends State<PhysioClientsList> {
 
   dynamic get_patients(dynamic data) async {
     PatientModel patient = PatientModel.fromMap(data);
-
+    
     AppData.set(context).update_patient(patient);
   }
 

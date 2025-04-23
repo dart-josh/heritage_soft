@@ -44,7 +44,6 @@ class _ClinicTabState extends State<ClinicTab> {
     fontSize: 18,
   );
 
-  bool session_set = false;
   int total_session = 0;
   String frequency = '';
   int paid_sess = 0;
@@ -93,32 +92,30 @@ class _ClinicTabState extends State<ClinicTab> {
   UserModel? active_user;
   DoctorModel? active_doctor;
 
-  void get_patient(PatientModel patient) {
-    var res = AppData.get(context)
-        .patients
-        .where((p) => p.key == patient.key)
-        .toList();
+  bool run_timer = false;
+
+  void get_patient(PatientModel pat) {
+    var res =
+        AppData.get(context).patients.where((p) => p.key == pat.key).toList();
 
     if (res.isNotEmpty) {
       patient = res.first;
-    }
 
-    get_treatment_info();
-    get_assessment();
-    get_variables();
-    get_sessions();
+      get_treatment_info();
+      get_assessment();
+      get_variables();
+      get_sessions();
+
+      setState(() {});
+    }
   }
 
   // stream session info
   get_sessions() {
     cost_per_session = patient.clinic_info?.cost_per_session ?? 0;
 
-    _session_details =
-        SessionModel.fromMap(patient.clinic_info?.toJson() ?? {});
-
-    if (_session_details != null) {
-      session_set = true;
-    }
+    _session_details = SessionModel.fromMap(
+        patient.clinic_info?.toJson(patientKey: patient.key ?? '') ?? {});
   }
 
   // stream clinin variables
@@ -178,7 +175,7 @@ class _ClinicTabState extends State<ClinicTab> {
   // assessment stream
   get_assessment() {
     if (patient.assessment_info.isNotEmpty) {
-      assessmentModel = patient.assessment_info[0];
+      assessmentModel = patient.assessment_info.last;
     }
   }
 
@@ -200,7 +197,7 @@ class _ClinicTabState extends State<ClinicTab> {
   refresh() {
     Future.delayed(Duration(seconds: 1), () {
       if (mounted) setState(() {});
-      refresh();
+      if (run_timer) refresh();
     });
   }
 
@@ -292,6 +289,7 @@ class _ClinicTabState extends State<ClinicTab> {
     active_doctor = AppData.get(context).active_doctor;
 
     get_patient(patient);
+
     double width = MediaQuery.of(context).size.width * 0.8;
     double height = MediaQuery.of(context).size.height * 0.7;
     return Scaffold(
@@ -774,8 +772,9 @@ class _ClinicTabState extends State<ClinicTab> {
 
                 if (res != null) {
                   AssessmentInfoModel ass = res;
-                  Map data = ass.toJson();
-                  data.addAll({'patient': patient.key});
+                  ass.assessment_date = DateTime.now();
+                  Map data = ass.toJson(patientKey: patient.key ?? '');
+
                   // save assessment details
                   await PhysioDatabaseHelpers.update_assessment_info(
                     context,
@@ -786,13 +785,14 @@ class _ClinicTabState extends State<ClinicTab> {
                   );
 
                   // update treatment info
-                  treatmentModel?.skip_assessment = true;
+                  TreatmentInfoModel tre =
+                      patient.treatment_info ?? TreatmentInfoModel.gen();
+                  tre.skip_assessment = true;
+
                   await PhysioDatabaseHelpers.update_treatment_info(
                     context,
-                    data: {
-                      'patient': patient.key,
-                      'treatment_info': treatmentModel?.toJson(),
-                    },
+                    data: tre.toJson(
+                        patientKey: patient.key ?? '', update: false),
                     loadingText: 'Updating Treatment info...',
                     showToast: true,
                     showLoading: true,
@@ -811,14 +811,14 @@ class _ClinicTabState extends State<ClinicTab> {
           // else if (assessment_completed != null && assessment_completed!)
 
           // session setup
-          session_setup(
+          clinic_setup(
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.blue.shade100,
                 borderRadius: BorderRadius.circular(25),
               ),
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-              child: Text('Patient Data'),
+              child: Text('Clinic setup'),
             ),
           ),
         ],
@@ -1056,43 +1056,15 @@ class _ClinicTabState extends State<ClinicTab> {
                 if (!assessment_completed!) {
                   // assessment not paid
                   if (!assessment_paid) {
-                    var conf = await showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => AssessmentPayment(),
-                    );
-
-                    if (conf != null) {
-                      Map data = patient.treatment_info?.toJson() ?? {};
-                      data['assessment_paid'] = true;
-
-                      // update assessment paid
-
-                      await PhysioDatabaseHelpers.update_treatment_info(
+                    Map conf = await PhysioDatabaseHelpers.pay_for_assessment(
                         context,
-                        data: data,
+                        patient: patient,
                         showLoading: true,
                         showToast: true,
-                      );
+                        loadingText: 'Paying for Assessment...');
 
-                      ClinicHistoryModel hist = ClinicHistoryModel(
-                        hist_type: 'Assessment Payment',
-                        amount: conf,
-                        amount_b4_discount: 0,
-                        date: DateTime.now(),
-                        session_paid: 1,
-                        history_id: Helpers.generate_order_id(),
-                        cost_p_session: 0,
-                        old_float: 0,
-                        new_float: 0,
-                        session_frequency: '',
-                      );
-
-                      Map data_h = hist.toJson();
-                      data_h['patient'] = patient.key;
-
-                      PhysioDatabaseHelpers.update_clinic_history(context,
-                          data: data_h);
+                    if (conf['status'] == true) {
+                      ClinicHistoryModel hist = conf['data'];
 
                       assessment_print = PhysioPaymentPrintModel(
                         date:
@@ -1124,15 +1096,15 @@ class _ClinicTabState extends State<ClinicTab> {
                 }
 
                 // if session info not set
-                // if (!session_set || _session_details == null) {
-                //   Helpers.showToast(
-                //     context: context,
-                //     color: Colors.redAccent,
-                //     toastText: 'Setup a Session Plan',
-                //     icon: Icons.error,
-                //   );
-                //   return;
-                // }
+                if (_session_details == null) {
+                  Helpers.showToast(
+                    context: context,
+                    color: Colors.redAccent,
+                    toastText: 'Setup a Session Plan',
+                    icon: Icons.error,
+                  );
+                  return;
+                }
 
                 // if billing not set
                 if (cost_per_session == null) {
@@ -1163,84 +1135,78 @@ class _ClinicTabState extends State<ClinicTab> {
                 );
 
                 if (res != null) {
-                  // Map<String, dynamic> map = {
-                  //   'amount_paid': res['total_amount'],
-                  //   'paid_session': res['total_active_session'],
-                  //   'floating_amount': res['floating_amount'],
-                  // };
-
                   int amount_paid = res['discounted_amount'];
                   int amount_b4_discount = res['amount_to_pay'];
                   int new_session = res['new_session'];
 
                   var new_float = res['floating_amount'];
 
-                  Map map = patient.clinic_info?.toJson() ?? {};
-                  map['amount_paid'] = res['total_amount'];
-                  map['paid_session'] = res['total_active_session'];
-                  map['floating_amount'] = res['floating_amount'];
-                  map['patient'] = patient.key;
-
                   // update paid session
-                  await PhysioDatabaseHelpers.update_clinic_info(context,
-                      data: map, showLoading: true, showToast: true);
+                  ClinicInfoModel cli =
+                      patient.clinic_info ?? ClinicInfoModel.gen();
+                  cli.amount_paid = res['total_amount'];
+                  cli.paid_session = res['total_active_session'];
+                  cli.floating_amount = res['floating_amount'];
 
-                  ClinicHistoryModel historyModel = ClinicHistoryModel(
-                    hist_type: 'Session Payment',
-                    amount: amount_paid,
-                    amount_b4_discount: amount_b4_discount,
-                    date: DateTime.now(),
-                    session_paid: new_session,
-                    history_id: Helpers.generate_order_id(),
-                    cost_p_session: cost_per_session?.toDouble() ?? 0,
-                    old_float: old_float.toDouble(),
-                    new_float: new_float,
-                    session_frequency: '',
-                  );
+                  Map data = cli.toJson(patientKey: patient.key ?? '');
 
-                  Map data_h2 = historyModel.toJson();
-                  data_h2['patient'] = patient.key;
+                  // update price per session
+                  var resp = await PhysioDatabaseHelpers.update_clinic_info(
+                      context,
+                      data: data,
+                      showLoading: true,
+                      showToast: true);
 
-                  await PhysioDatabaseHelpers.update_clinic_history(context,
-                      data: data_h2);
-
-                  Navigator.pop(context);
-
-                  var printt = await showDialog(
-                    context: context,
-                    builder: (context) => ConfirmDialog(
-                      title: 'Print Receipt',
-                      subtitle:
-                          'Would you like to print receipt for this payment',
-                      boolean: true,
-                    ),
-                  );
-
-                  if (printt != null && printt) {
-                    //? print
-                    PhysioPaymentPrintModel printModel =
-                        PhysioPaymentPrintModel(
-                      date:
-                          '${DateFormat.jm().format(historyModel.date)} ${DateFormat('dd-MM-yyyy').format(historyModel.date)}',
-                      receipt_id: historyModel.history_id,
-                      client_id: patient.patient_id,
-                      client_name: '${patient.f_name} ${patient.l_name}',
-                      amount: historyModel.amount,
-                      receipt_type: historyModel.hist_type,
-                      session_paid: historyModel.session_paid,
-                      amount_b4_discount: historyModel.amount_b4_discount ?? 0,
-                      cost_p_session: historyModel.cost_p_session.toInt(),
-                      old_float: historyModel.old_float.toInt(),
-                      new_float: historyModel.new_float.toInt(),
+                  if (resp != null && resp['patient_data'] != null) {
+                    ClinicHistoryModel hist = ClinicHistoryModel(
+                      hist_type: 'Session payment',
+                      amount: amount_paid,
+                      amount_b4_discount: amount_b4_discount,
+                      date: DateTime.now(),
+                      session_paid: new_session,
+                      history_id: Helpers.generate_order_id(),
+                      cost_p_session: cost_per_session ?? 0,
+                      old_float: old_float,
+                      new_float: new_float,
+                      session_frequency: '',
                     );
 
-                    await showDialog(
-                        context: context,
-                        builder: (context) =>
-                            PhysioPrintPage(payment_print: printModel));
-                  }
+                    PhysioDatabaseHelpers.update_clinic_history(
+                      context,
+                      data: hist.toJson(patientKey: patient.key ?? ''),
+                    );
 
-                  setState(() {});
+                    var printt = await Helpers.showConfirmation(
+                      context: context,
+                      title: 'Print Receipt',
+                      message:
+                          'Would you like to print receipt for this payment',
+                    );
+
+                    if (printt) {
+                      //? print
+                      PhysioPaymentPrintModel printModel =
+                          PhysioPaymentPrintModel(
+                        date:
+                            '${DateFormat.jm().format(hist.date)} ${DateFormat('dd-MM-yyyy').format(hist.date)}',
+                        receipt_id: hist.history_id,
+                        client_id: patient.patient_id,
+                        client_name: '${patient.f_name} ${patient.l_name}',
+                        amount: hist.amount,
+                        receipt_type: hist.hist_type,
+                        session_paid: hist.session_paid,
+                        amount_b4_discount: hist.amount_b4_discount ?? 0,
+                        cost_p_session: hist.cost_p_session.toInt(),
+                        old_float: hist.old_float.toInt(),
+                        new_float: hist.new_float.toInt(),
+                      );
+
+                      await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              PhysioPrintPage(payment_print: printModel));
+                    }
+                  }
                 }
               },
               child: Container(
@@ -1639,7 +1605,7 @@ class _ClinicTabState extends State<ClinicTab> {
       patient: patient,
     );
 
-    Map<String, dynamic> data = file.toJson_open();
+    Map data = file.toJson_open();
 
     // open case file
     bool dt = await PhysioDatabaseHelpers.add_update_case_file(
@@ -1726,7 +1692,7 @@ class _ClinicTabState extends State<ClinicTab> {
   }
 
   // session setup pop up menu
-  Widget session_setup({required child}) {
+  Widget clinic_setup({required child}) {
     return PopupMenuButton<int>(
       padding: EdgeInsets.all(0),
       offset: Offset(0, 30),
@@ -1739,7 +1705,7 @@ class _ClinicTabState extends State<ClinicTab> {
             context: context,
             barrierDismissible: false,
             builder: (context) => SessionPlanDialog(
-              session_set: session_set,
+              session_set: (total_session != 0),
               total_session:
                   (total_session != 0) ? total_session.toString() : null,
             ),
@@ -1751,32 +1717,18 @@ class _ClinicTabState extends State<ClinicTab> {
             int total = r_map['total'];
             String frequency = r_map['frequency'];
 
-            // update session info
-            if (session_set || (total_session != 0)) {
-              // PhysioDatabaseHelpers.update_clinic_info(
-              //   patient.key,
-              //   {'total_session': total, 'frequency': frequency},
-              // );
-            }
+            ClinicInfoModel cli = patient.clinic_info ?? ClinicInfoModel.gen();
+            cli.total_session = total;
+            cli.frequency = frequency;
+            Map data = cli.toJson(patientKey: patient.key ?? '');
 
-            // set session info
-            else {
-              // PhysioDatabaseHelpers.update_clinic_info(
-              //   patient.key,
-              //   {
-              //     'total_session': total,
-              //     'frequency': frequency,
-              //     'completed_session': 0,
-              //     'paid_session': 0,
-              //   },
-              //   sett: true,
-              // );
-            }
+            // update price per session
+            var resp = await PhysioDatabaseHelpers.update_clinic_info(context,
+                data: data, showLoading: true, showToast: true);
 
-            PhysioHistoryModel hist = PhysioHistoryModel(
-                hist_type: (session_set || (total_session != 0))
-                    ? 'Session Updated'
-                    : 'Session Setup',
+            if (resp != null && resp['patient_data'] != null) {
+              ClinicHistoryModel hist = ClinicHistoryModel(
+                hist_type: 'Session setup',
                 amount: 0,
                 amount_b4_discount: 0,
                 date: DateTime.now(),
@@ -1785,15 +1737,20 @@ class _ClinicTabState extends State<ClinicTab> {
                 cost_p_session: 0,
                 old_float: 0,
                 new_float: 0,
-                session_frequency: frequency);
+                session_frequency: frequency,
+              );
 
-            // PhysioDatabaseHelpers.add_history(patient.key, hist.toJson());
+              PhysioDatabaseHelpers.update_clinic_history(
+                context,
+                data: hist.toJson(patientKey: patient.key ?? ''),
+              );
+            }
           }
         }
 
         // add sessions
         if (value == 2) {
-          if (!session_set) {
+          if (total_session == 0) {
             Helpers.showToast(
               context: context,
               color: Colors.redAccent,
@@ -1807,7 +1764,7 @@ class _ClinicTabState extends State<ClinicTab> {
             context: context,
             barrierDismissible: false,
             builder: (context) => SessionPlanDialog(
-              session_set: session_set,
+              session_set: (total_session != 0),
               add_session: true,
               session_details: {
                 'total_sess': total_session.toString(),
@@ -1818,33 +1775,35 @@ class _ClinicTabState extends State<ClinicTab> {
 
           if (res != null) {
             int new_sess = res;
-
             int added = new_sess - total_session;
 
-            // PhysioDatabaseHelpers.update_clinic_info(
-            //   patient.key,
-            //   {'total_session': new_sess},
-            // );
+            ClinicInfoModel cli = patient.clinic_info ?? ClinicInfoModel.gen();
+            cli.total_session = new_sess;
+            Map data = cli.toJson(patientKey: patient.key ?? '');
 
-            PhysioHistoryModel hist = PhysioHistoryModel(
-              hist_type: 'Session Added',
-              amount: added,
-              amount_b4_discount: 0,
-              date: DateTime.now(),
-              session_paid: new_sess,
-              history_id: Helpers.generate_order_id(),
-              cost_p_session: 0,
-              old_float: 0,
-              new_float: 0,
-            );
+            // update price per session
+            var resp = await PhysioDatabaseHelpers.update_clinic_info(context,
+                data: data, showLoading: true, showToast: true);
 
-            // session added
-            // session frequency
-            // total session
+            if (resp != null && resp['patient_data'] != null) {
+              ClinicHistoryModel hist = ClinicHistoryModel(
+                hist_type: 'Session added',
+                amount: added,
+                amount_b4_discount: 0,
+                date: DateTime.now(),
+                session_paid: new_sess,
+                history_id: Helpers.generate_order_id(),
+                cost_p_session: 0,
+                old_float: 0,
+                new_float: 0,
+                session_frequency: '',
+              );
 
-            // PhysioDatabaseHelpers.add_history(patient.key, hist.toJson());
-
-            setState(() {});
+              PhysioDatabaseHelpers.update_clinic_history(
+                context,
+                data: hist.toJson(patientKey: patient.key ?? ''),
+              );
+            }
           }
         }
 
@@ -1865,36 +1824,45 @@ class _ClinicTabState extends State<ClinicTab> {
 
           if (con != null) {
             int val = con;
-            Map data = patient.clinic_info?.toJson() ?? {};
-            data['cost_per_session'] = val;
-            data['patient'] = patient.key;
+            ClinicInfoModel cli = patient.clinic_info ?? ClinicInfoModel.gen();
+            cli.cost_per_session = val;
+            Map data = cli.toJson(patientKey: patient.key ?? '');
 
             // update price per session
-
-            await PhysioDatabaseHelpers.update_clinic_info(context, data: data);
+            await PhysioDatabaseHelpers.update_clinic_info(context,
+                data: data, showLoading: true, showToast: true);
           }
         }
 
         // take assessment
         if (value == 4) {
           // pay for assessment
+          Map conf = await PhysioDatabaseHelpers.pay_for_assessment(context,
+              patient: patient,
+              showLoading: true,
+              showToast: true,
+              loadingText: 'Paying for Assessment...');
 
-          // enter new assesment info
+          if (conf['status'] == true) {
+            ClinicHistoryModel hist = conf['data'];
 
-          // update treatment info
-          Map data = patient.treatment_info?.toJson() ?? {};
-          data['assessment_completed'] = true;
-          data['assessment_date'] = DateTime.now().toString();
-          data['skip_assessment'] = true;
-          data['assessment_paid'] = true;
-          data['patient'] = patient.key;
+            assessment_print = PhysioPaymentPrintModel(
+              date:
+                  '${DateFormat.jm().format(hist.date)} ${DateFormat('dd-MM-yyyy').format(hist.date)}',
+              receipt_id: hist.history_id,
+              client_id: patient.patient_id,
+              client_name: '${patient.f_name} ${patient.l_name}',
+              amount: hist.amount,
+              receipt_type: hist.hist_type,
+              session_paid: hist.session_paid,
+              amount_b4_discount: hist.amount_b4_discount ?? 0,
+              cost_p_session: hist.cost_p_session.toInt(),
+              old_float: hist.old_float.toInt(),
+              new_float: hist.new_float.toInt(),
+            );
 
-          await PhysioDatabaseHelpers.update_treatment_info(
-            context,
-            data: data,
-            showLoading: true,
-            showToast: true,
-          );
+            // ? Goto Treatment tab
+          }
         }
       },
       itemBuilder: (context) => [
@@ -1904,7 +1872,7 @@ class _ClinicTabState extends State<ClinicTab> {
             value: 1,
             child: Container(
               child: Text(
-                !session_set || total_session == 0
+                total_session == 0
                     ? 'Setup Session Plan'
                     : 'Change Session Frequency',
                 style: TextStyle(),
@@ -1914,7 +1882,7 @@ class _ClinicTabState extends State<ClinicTab> {
 
         // add session
         if (active_user!.app_role == 'Doctor')
-          if (session_set && total_session != 0)
+          if (total_session != 0)
             PopupMenuItem(
               value: 2,
               child: Container(

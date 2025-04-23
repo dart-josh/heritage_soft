@@ -293,7 +293,7 @@ class _MobilePhysioClientListState extends State<MobilePhysioClientList> {
                   '';
             }
 
-            Map<String, dynamic> client_update_details = {
+            Map client_update_details = {
               'user_image': img,
             };
 

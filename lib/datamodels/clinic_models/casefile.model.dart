@@ -44,17 +44,22 @@ class CaseFileModel {
         note: map['note'] ?? '',
         remarks: map['remarks'] ?? '',
         case_type: map['case_type'] ?? '',
-        treatment_date: map['treatment_date'] != null ? DateTime.parse(map['treatment_date']) : null,
-        start_time: map['start_time'] != null ? DateTime.parse(map['start_time']) : null,
-        end_time: map['end_time'] != null ? DateTime.parse(map['end_time']) : null,
+        treatment_date: map['treatment_date'] != null
+            ? DateTime.parse(map['treatment_date'])
+            : null,
+        start_time: map['start_time'] != null
+            ? DateTime.parse(map['start_time'])
+            : null,
+        end_time:
+            map['end_time'] != null ? DateTime.parse(map['end_time']) : null,
         treatment_decision: map['treatment_decision'] ?? '',
         refered_decision: map['refered_decision'] ?? '',
         other_decision: map['other_decision'] ?? '',
       );
 
-  Map<String, dynamic> toJson_open() => {
-        'id': key, 
-    'patient' : patient.key,
+  Map toJson_open() => {
+        'id': key,
+        'patient': patient.key,
         'doctor': doctor.key,
         'bp_reading': bp_reading,
         'note': note,

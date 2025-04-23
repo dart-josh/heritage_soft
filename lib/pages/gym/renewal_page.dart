@@ -1820,7 +1820,7 @@ class _RenewalPageState extends State<RenewalPage> {
 
         if (res_r == null || !res_r) return;
 
-        Map<String, dynamic> ned = {};
+        Map ned = {};
 
         // hmo client
         if (is_hmo) {

@@ -159,7 +159,7 @@ class ClientModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'key': key,
         'id': id,
         'reg_date': reg_date,
@@ -359,7 +359,7 @@ class ClientSignInModel {
   String sub_plan;
   bool pt_status;
   String pt_plan;
-  Map<String, dynamic> last_activity;
+  Map last_activity;
   bool in_out;
   bool boxing;
   bool auto_sign_in;
@@ -424,7 +424,7 @@ class ClientSignInModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'key': key,
         'id': id,
         'name': name,
@@ -521,7 +521,7 @@ class Sub_History_Model {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'sub_plan': sub_plan,
         'sub_type': sub_type,
         'sub_date': sub_date,

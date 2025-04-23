@@ -34,7 +34,7 @@ class PatientModel {
   List<AssessmentInfoModel> assessment_info;
   List<ClinicHistoryModel> clinic_history;
   List<InvoiceModel> invoice_history;
-  double total_amount_paid;
+  int total_amount_paid;
 
   PatientModel({
     this.key,
@@ -74,68 +74,67 @@ class PatientModel {
 
   factory PatientModel.fromMap(Map map) {
     return PatientModel(
-        key: map['_id'] ?? '',
-        patient_id: map['patient_id'] ?? '',
-        reg_date: DateTime.parse(map['reg_date']),
-        user_status: map['user_status'] ?? false,
-        f_name: map['f_name'] ?? '',
-        m_name: map['m_name'] ?? '',
-        l_name: map['l_name'] ?? '',
-        user_image: map['user_image'] ?? '',
-        phone_1: map['phone_1'] ?? '',
-        phone_2: map['phone_2'] ?? '',
-        email: map['email'] ?? '',
-        address: map['address'] ?? '',
-        gender: map['gender'] ?? '',
-        dob: map['dob'] ?? '',
-        age: map['age'] ?? '',
-        occupation: map['occupation'] ?? '',
-        nature_of_work: map['nature_of_work'] ?? '',
-        hykau: map['hykau'] ?? '',
-        hykau_others: map['hykau_others'] ?? '',
-        hmo: map['hmo'] ?? 'No HMO',
-        hmo_id: map['hmo_id'] ?? 'No HMO',
-        baseline_done: map['baseline_done'] ?? false,
-        sponsors: List<SponsorModel>.from(
-          map['sponsors']?.map((e) => SponsorModel.fromMap(e)) ??
-              <SponsorModel>[],
-        ),
-        refferal_code: map['refferal_code'] ?? '',
-        current_doctor: map['current_doctor'] == null
-            ? null
-            : DoctorModel.fromMap(map['current_doctor']),
-        last_doctor: map['last_doctor'] == null
-            ? null
-            : DoctorModel.fromMap(map['last_doctor']),
-        treatment_info: map['treatment_info'] == null
-            ? null
-            : TreatmentInfoModel.fromMap(map['treatment_info']),
-        clinic_info: map['clinic_info'] == null
-            ? null
-            : ClinicInfoModel.fromMap(map['clinic_info']),
-        clinic_variables: map['clinic_variables'] == null
-            ? null
-            : ClinicVariable.fromMap(map['clinic_variables']),
-        assessment_info: List<AssessmentInfoModel>.from(
-          map['assessment_info']?.map((e) =>
-                  AssessmentInfoModel.fromMap(e as Map<String, dynamic>)) ??
-              <AssessmentInfoModel>[],
-        ),
-        clinic_history: List<ClinicHistoryModel>.from(
-          map['clinic_history']?.map((e) =>
-                  ClinicHistoryModel.fromMap(e as Map<String, dynamic>)) ??
-              <ClinicHistoryModel>[],
-        ),
-        invoice_history: List<InvoiceModel>.from(
-          map['invoice_history']?.map(
-                  (e) => InvoiceModel.fromMap(e as Map<String, dynamic>)) ??
-              <InvoiceModel>[],
-        ),
-        total_amount_paid: map['total_amount_paid'] ?? 0,
-        );
+      key: map['_id'] ?? '',
+      patient_id: map['patient_id'] ?? '',
+      reg_date: DateTime.parse(map['reg_date']),
+      user_status: map['user_status'] ?? false,
+      f_name: map['f_name'] ?? '',
+      m_name: map['m_name'] ?? '',
+      l_name: map['l_name'] ?? '',
+      user_image: map['user_image'] ?? '',
+      phone_1: map['phone_1'] ?? '',
+      phone_2: map['phone_2'] ?? '',
+      email: map['email'] ?? '',
+      address: map['address'] ?? '',
+      gender: map['gender'] ?? '',
+      dob: map['dob'] ?? '',
+      age: map['age'] ?? '',
+      occupation: map['occupation'] ?? '',
+      nature_of_work: map['nature_of_work'] ?? '',
+      hykau: map['hykau'] ?? '',
+      hykau_others: map['hykau_others'] ?? '',
+      hmo: map['hmo'] ?? 'No HMO',
+      hmo_id: map['hmo_id'] ?? 'No HMO',
+      baseline_done: map['baseline_done'] ?? false,
+      sponsors: List<SponsorModel>.from(
+        map['sponsors']?.map((e) => SponsorModel.fromMap(e)) ??
+            <SponsorModel>[],
+      ),
+      refferal_code: map['refferal_code'] ?? '',
+      current_doctor: map['current_doctor'] == null
+          ? null
+          : DoctorModel.fromMap(map['current_doctor']),
+      last_doctor: map['last_doctor'] == null
+          ? null
+          : DoctorModel.fromMap(map['last_doctor']),
+      treatment_info: map['treatment_info'] == null
+          ? null
+          : TreatmentInfoModel.fromMap(map['treatment_info']),
+      clinic_info: map['clinic_info'] == null
+          ? null
+          : ClinicInfoModel.fromMap(map['clinic_info']),
+      clinic_variables: map['clinic_variables'] == null
+          ? null
+          : ClinicVariable.fromMap(map['clinic_variables']),
+      assessment_info: List<AssessmentInfoModel>.from(
+        map['assessment_info']
+                ?.map((e) => AssessmentInfoModel.fromMap(e as Map)) ??
+            <AssessmentInfoModel>[],
+      ),
+      clinic_history: List<ClinicHistoryModel>.from(
+        map['clinic_history']
+                ?.map((e) => ClinicHistoryModel.fromMap(e as Map)) ??
+            <ClinicHistoryModel>[],
+      ),
+      invoice_history: List<InvoiceModel>.from(
+        map['invoice_history']?.map((e) => InvoiceModel.fromMap(e as Map)) ??
+            <InvoiceModel>[],
+      ),
+      total_amount_paid: map['total_amount_paid'] ?? 0,
+    );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'id': key,
         'patient_id': patient_id,
         'reg_date': reg_date.toIso8601String(),
@@ -184,7 +183,7 @@ class SponsorModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'name': name,
         'phone': phone,
         'address': address,
@@ -220,6 +219,20 @@ class TreatmentInfoModel {
     required this.skip_assessment,
   });
 
+  factory TreatmentInfoModel.gen() => TreatmentInfoModel(
+        last_bp: '0',
+        last_bp_p: '0',
+        last_treatment_date: DateTime.now(),
+        last_treatment_date_p: DateTime.now(),
+        current_treatment_date: DateTime.now(),
+        treatment_elapse: false,
+        assessment_completed: true,
+        ongoing_treatment: false,
+        assessment_date: DateTime.now(),
+        assessment_paid: false,
+        skip_assessment: true,
+      );
+
   factory TreatmentInfoModel.fromMap(Map map) => TreatmentInfoModel(
         last_bp: map['last_bp'] ?? '',
         last_bp_p: map['last_bp_p'] ?? '',
@@ -242,18 +255,22 @@ class TreatmentInfoModel {
         skip_assessment: map['skip_assessment'] ?? false,
       );
 
-  Map<String, dynamic> toJson() => {
-        'last_bp': last_bp,
-        'last_bp_p': last_bp_p,
-        'last_treatment_date': last_treatment_date,
-        'last_treatment_date_p': last_treatment_date_p,
-        'current_treatment_date': current_treatment_date,
-        'treatment_elapse': treatment_elapse,
-        'assessment_completed': assessment_completed,
-        'ongoing_treatment': ongoing_treatment,
-        'assessment_date': assessment_date,
-        'assessment_paid': assessment_paid,
-        'skip_assessment': skip_assessment,
+  Map toJson({required String patientKey, required bool update}) => {
+        'patient': patientKey,
+        'update': update,
+        'treatment_info': {
+          'last_bp': last_bp,
+          'last_bp_p': last_bp_p,
+          'last_treatment_date': last_treatment_date?.toIso8601String(),
+          'last_treatment_date_p': last_treatment_date_p?.toIso8601String(),
+          'current_treatment_date': current_treatment_date?.toIso8601String(),
+          'treatment_elapse': treatment_elapse,
+          'assessment_completed': assessment_completed,
+          'ongoing_treatment': ongoing_treatment,
+          'assessment_date': assessment_date?.toIso8601String(),
+          'assessment_paid': assessment_paid,
+          'skip_assessment': skip_assessment,
+        }
       };
 }
 
@@ -263,8 +280,8 @@ class ClinicInfoModel {
   int completed_session;
   int paid_session;
   int cost_per_session;
-  double amount_paid;
-  double floating_amount;
+  int amount_paid;
+  int floating_amount;
 
   ClinicInfoModel({
     required this.total_session,
@@ -276,19 +293,30 @@ class ClinicInfoModel {
     required this.floating_amount,
   });
 
-  factory ClinicInfoModel.fromMap(Map<String, dynamic> map) {
+  factory ClinicInfoModel.gen() => ClinicInfoModel(
+        total_session: 0,
+        frequency: '',
+        completed_session: 0,
+        paid_session: 0,
+        cost_per_session: 0,
+        amount_paid: 0,
+        floating_amount: 0,
+      );
+
+  factory ClinicInfoModel.fromMap(Map map) {
     return ClinicInfoModel(
       total_session: map['total_session'] ?? 0,
       frequency: map['frequency'] ?? '',
       completed_session: map['completed_session'] ?? 0,
       paid_session: map['paid_session'] ?? 0,
-      cost_per_session: map['cost_per_session']?.toDouble() ?? 0,
-      amount_paid: map['amount_paid']?.toDouble() ?? 0,
-      floating_amount: map['floating_amount']?.toDouble() ?? 0,
+      cost_per_session: map['cost_per_session'] ?? 0,
+      amount_paid: map['amount_paid'] ?? 0,
+      floating_amount: map['floating_amount'] ?? 0,
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson({required String patientKey}) => {
+        'patient': patientKey,
         'total_session': total_session,
         'frequency': frequency,
         'completed_session': completed_session,
@@ -312,7 +340,7 @@ class ClinicVariable {
     required this.end_time,
   });
 
-  factory ClinicVariable.fromMap(Map<String, dynamic> map) {
+  factory ClinicVariable.fromMap(Map map) {
     return ClinicVariable(
       can_treat: map['can_treat'] ?? false,
       treatment_duration: map['treatment_duration'] ?? 0,
@@ -321,7 +349,7 @@ class ClinicVariable {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map toJson() {
     return {
       'can_treat': can_treat,
       'treatment_duration': treatment_duration,
@@ -352,7 +380,7 @@ class AssessmentInfoModel {
     required this.assessment_date,
   });
 
-  factory AssessmentInfoModel.fromMap(Map<String, dynamic> map) {
+  factory AssessmentInfoModel.fromMap(Map map) {
     return AssessmentInfoModel(
       case_select: map['case_select'] ?? '',
       case_select_others: map['case_select_others'] ?? null,
@@ -361,8 +389,7 @@ class AssessmentInfoModel {
       case_type: map['case_type'] ?? '',
       treatment_type: map['treatment_type'] ?? '',
       equipments: List<EquipmentModel>.from(
-        map['equipment']?.map(
-                (e) => EquipmentModel.fromJson(e as Map<String, dynamic>)) ??
+        map['equipment']?.map((e) => EquipmentModel.fromJson(e as Map)) ??
             <EquipmentModel>[],
       ),
       assessment_date: map['assessment_date'] != null
@@ -371,7 +398,7 @@ class AssessmentInfoModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson({required String patientKey}) => {
         'case_select': case_select,
         'case_select_others': case_select_others,
         'case_description': case_description,
@@ -380,6 +407,7 @@ class AssessmentInfoModel {
         'treatment_type': treatment_type,
         'equipment': equipments.map((e) => e.key).toList(),
         'assessment_date': assessment_date?.toIso8601String(),
+        'patient': patientKey,
       };
 }
 
@@ -390,9 +418,9 @@ class ClinicHistoryModel {
   int? amount_b4_discount;
   DateTime date;
   int session_paid;
-  double cost_p_session;
-  double old_float;
-  double new_float;
+  int cost_p_session;
+  int old_float;
+  int new_float;
   String session_frequency;
 
   ClinicHistoryModel({
@@ -408,32 +436,35 @@ class ClinicHistoryModel {
     required this.session_frequency,
   });
 
-  factory ClinicHistoryModel.fromMap(Map<String, dynamic> map) {
+  factory ClinicHistoryModel.fromMap(Map map) {
     return ClinicHistoryModel(
       history_id: map['history_id'] ?? '',
       hist_type: map['hist_type'] ?? '',
-      amount: map['amount']?.toDouble() ?? 0,
+      amount: map['amount'] ?? 0,
       amount_b4_discount: map['amount_b4_discount'] ?? 0,
       date: DateTime.parse(map['date']),
-      session_paid: map['session_paid']?? 0,
-      cost_p_session: map['cost_p_session']??0,
-      old_float: map['old_float']??0,
-      new_float: map['new_float']??0,
+      session_paid: map['session_paid'] ?? 0,
+      cost_p_session: map['cost_p_session'] ?? 0,
+      old_float: map['old_float'] ?? 0,
+      new_float: map['new_float'] ?? 0,
       session_frequency: map['session_frequency'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'history_id': history_id,
-        'hist_type': hist_type,
-        'amount': amount,
-        'amount_b4_discount': amount_b4_discount,
-        'date': date.toIso8601String(),
-        'session_paid': session_paid,
-        'cost_p_session': cost_p_session,
-        'old_float': old_float,
-        'new_float': new_float,
-        'session_frequency': session_frequency,
+  Map toJson({required String patientKey}) => {
+        'patient': patientKey,
+        'clinic_history': {
+          'history_id': history_id,
+          'hist_type': hist_type,
+          'amount': amount,
+          'amount_b4_discount': amount_b4_discount,
+          'date': date.toIso8601String(),
+          'session_paid': session_paid,
+          'cost_p_session': cost_p_session,
+          'old_float': old_float,
+          'new_float': new_float,
+          'session_frequency': session_frequency,
+        }
       };
 }
 
@@ -466,7 +497,7 @@ class InvoiceModel {
     required this.floating_amount,
   });
 
-  factory InvoiceModel.fromMap(Map<String, dynamic> map) {
+  factory InvoiceModel.fromMap(Map map) {
     return InvoiceModel(
       invoice_id: map['invoice_id'] ?? '',
       invoice_type: map['invoice_type'] ?? '',
@@ -483,7 +514,7 @@ class InvoiceModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'invoice_id': invoice_id,
         'invoice_type': invoice_type,
         'amount': amount,

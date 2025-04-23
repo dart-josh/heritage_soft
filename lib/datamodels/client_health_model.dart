@@ -146,7 +146,7 @@ class HealthModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'height': height,
         'weight': weight,
         'ideal_weight': ideal_weight,

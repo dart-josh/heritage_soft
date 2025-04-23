@@ -29,7 +29,7 @@ class GuestModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'name': name,
         'phone': phone,
         'address': address,

@@ -42,7 +42,7 @@ class DoctorModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'id': key,
         'user': user.key,
         'is_available': is_available,
@@ -70,7 +70,7 @@ class TreatmentPatientModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'patient': patient.key,
         'treatment_type': treatment_type,
         'treatment_duration': treatment_duration,
@@ -93,7 +93,7 @@ class MyPatientModel {
       session_count: map['session_count'] ?? 0,
     );
   }
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'patient': patient.key,
         'session_count': session_count,
       };

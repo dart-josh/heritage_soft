@@ -59,16 +59,15 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
   late PatientModel patient;
   UserModel? active_user;
 
-  void get_patient(PatientModel patient) {
+  void get_patient(PatientModel pat) {
     var res = AppData.get(context)
         .patients
-        .where((p) => p.key == patient.key)
+        .where((p) => p.key == pat.key)
         .toList();
 
     if (res.isNotEmpty) {
       patient = res.first;
     }
-    print('in');
     update_profile_controllers();
   }
 

@@ -16,10 +16,10 @@ class A_ShopModel {
   });
 
   factory A_ShopModel.fromMap(Map map) {
-
     return A_ShopModel(
       key: map['_id'],
-      accessories: List<AccessoryItemModel>.from(map['accessories'].map((x) => AccessoryItemModel.fromMap(x))),
+      accessories: List<AccessoryItemModel>.from(
+          map['accessories'].map((x) => AccessoryItemModel.fromMap(x))),
       patient: PatientModel.fromMap(
         map['patient'],
       ),
@@ -27,8 +27,8 @@ class A_ShopModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': key,
+  Map toJson() => {
+        'id': key,
         'accessories': accessories.map((e) => e.toJson()).toList(),
         'patient': patient!.key,
         'doctor': doctor!.key,
@@ -92,7 +92,7 @@ class ShopOrderModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'order_id': order_id,
         'date': date,
         'items': items.map((e) => e.toJson()).toList(),
@@ -156,7 +156,7 @@ class AccessoryModel {
         limit: map['limit'] ?? 0,
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'name': name,
         'code': code,
         'id': id,
@@ -184,7 +184,7 @@ class AccessoryItemModel {
         qty: map['qty'],
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'accessory': accessory.key,
         'qty': qty,
       };

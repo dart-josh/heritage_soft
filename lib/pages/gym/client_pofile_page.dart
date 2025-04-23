@@ -2136,7 +2136,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             middle_name = res['middle_name'];
             last_name = res['last_name'];
 
-            Map<String, dynamic> client_name_update = {
+            Map client_name_update = {
               'f_name': first_name,
               'm_name': middle_name,
               'l_name': last_name,
@@ -2192,7 +2192,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           if (res != null) {
             // deactivate gym sub
             if (res == 'sub') {
-              Map<String, dynamic> new_upd = {
+              Map new_upd = {
                 'sub_status': false,
               };
 
@@ -2255,7 +2255,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                           : 0;
                   int inc = client!.sub_income + sub_amount;
 
-                  Map<String, dynamic> new_upd = {
+                  Map new_upd = {
                     'pt_plan': res.toString(),
                     'pt_date': get_pt_date(),
                     'pt_status': true,
@@ -2317,7 +2317,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
             // deactivate personal training
             else if (res == 'pt-d') {
-              Map<String, dynamic> new_upd = {
+              Map new_upd = {
                 'pt_status': false,
               };
 
@@ -2368,7 +2368,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
               bool box =
                   (res.toString().split(',').last == 'true') ? true : false;
 
-              Map<String, dynamic> new_upd = {};
+              Map new_upd = {};
               int sub_amount = boxing_fee;
 
               // activate boxing
@@ -2476,7 +2476,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             // resume sub
             if (res == 'resume_sub') {
               String ned = client!.sub_date!;
-              Map<String, dynamic> nt = {'sub_paused': false};
+              Map nt = {'sub_paused': false};
 
               // sub plan
               if (client!.sub_status! && client!.sub_date!.isNotEmpty) {
@@ -2558,7 +2558,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
             // pause sub
             if (res == 'pause_sub') {
-              Map<String, dynamic> nt = {
+              Map nt = {
                 'sub_paused': true,
                 'paused_date': DateFormat('dd/MM/yyyy').format(DateTime.now()),
               };
@@ -2912,17 +2912,17 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
         // delete user
         // if (active_staff!.full_access)
-          PopupMenuItem(
-            value: 0,
-            child: Container(
-              child: Text(
-                'Delete User',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                ),
+        PopupMenuItem(
+          value: 0,
+          child: Container(
+            child: Text(
+              'Delete User',
+              style: TextStyle(
+                color: Colors.redAccent,
               ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -3059,7 +3059,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
       }
     }
 
-    Map<String, dynamic> client_update_details = {
+    Map client_update_details = {
       'phone_1': phone_1_controller.text.trim(),
       'phone_2': phone_2_controller.text.trim(),
       'email': email_controller.text.trim(),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
@@ -530,7 +529,7 @@ class _AddAccessoriesState extends State<AddAccessories> {
             id: id_controller.text.trim(),
           );
 
-          Map<String, dynamic> data = accessoryModel.toJson();
+          Map data = accessoryModel.toJson();
 
           // add/update accessory
           bool acs = await AdminDatabaseHelpers.add_update_accessory(

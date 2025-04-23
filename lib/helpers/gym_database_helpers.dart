@@ -113,8 +113,7 @@ class GymDatabaseHelpers {
   }
 
   // register physio client
-  static Future<bool> register_gym_client(
-      String key, Map<String, dynamic> map) async {
+  static Future<bool> register_gym_client(String key, Map map) async {
     try {
       await ft_client_ref.doc(key).set(map);
     } catch (e) {
@@ -133,11 +132,8 @@ class GymDatabaseHelpers {
   }
 
   // set health details
-  static Future<bool> set_health_details(
-      String client_key,
-      String health_key,
-      Map<String, dynamic> health_data,
-      Map<String, dynamic> summary_data) async {
+  static Future<bool> set_health_details(String client_key, String health_key,
+      Map health_data, Map summary_data) async {
     try {
       await GymDatabaseHelpers.ft_client_ref
           .doc(client_key)
@@ -162,20 +158,17 @@ class GymDatabaseHelpers {
   }
 
   // client details stream
-  static Stream client_details_stream(
-      String client_key) {
+  static Stream client_details_stream(String client_key) {
     return ft_client_ref.doc(client_key).snapshots();
   }
 
   // get client details
-  static Future get_client_details(
-      String client_key) {
+  static Future get_client_details(String client_key) {
     return ft_client_ref.doc(client_key).get();
   }
 
   // client health summary stream
-  static Stream
-      client_health_summary_stream(String client_key) {
+  static Stream client_health_summary_stream(String client_key) {
     return ft_client_ref
         .doc(client_key)
         .collection('others')
@@ -184,14 +177,12 @@ class GymDatabaseHelpers {
   }
 
   // get health details
-  static Future client_health_details(
-      String client_key) {
+  static Future client_health_details(String client_key) {
     return ft_client_ref.doc(client_key).collection('health_info').get();
   }
 
   // add to sub history
-  static Future<bool> add_to_sub_history(
-      String client_key, Map<String, dynamic> data) async {
+  static Future<bool> add_to_sub_history(String client_key, Map data) async {
     try {
       data.addAll({'client_key': client_key});
       AdminDatabaseHelpers.sub_history_ref.push().set(data);
@@ -207,8 +198,7 @@ class GymDatabaseHelpers {
   }
 
   // get sub history
-  static Future get_sub_history(
-      String client_key) {
+  static Future get_sub_history(String client_key) {
     return ft_client_ref.doc(client_key).collection('Sub History').get();
   }
 
@@ -224,8 +214,7 @@ class GymDatabaseHelpers {
   }
 
   // get client personal attendance by month
-  static Future get_client_personal_attendance_by_key(
-      String key) async {
+  static Future get_client_personal_attendance_by_key(String key) async {
     // return FirebaseDatabase.instance
     //     .ref('Personal_attendance')
     //     .child(key)
@@ -233,8 +222,7 @@ class GymDatabaseHelpers {
   }
 
   // get general attendance
-  static Future get_daily_attendance_list(
-      String month, String date)  async {
+  static Future get_daily_attendance_list(String month, String date) async {
     // return FirebaseDatabase.instance
     //     .ref('General_attendance')
     //     .child('$month/$date')
@@ -242,8 +230,7 @@ class GymDatabaseHelpers {
   }
 
   // update client details
-  static Future<bool> update_client_details(
-      String key, Map<String, dynamic> map) async {
+  static Future<bool> update_client_details(String key, Map map) async {
     try {
       await ft_client_ref.doc(key).update(map);
     } catch (e) {
@@ -255,7 +242,7 @@ class GymDatabaseHelpers {
 
   // reset week for hmo plan clients
   static reset_week_for_hmo_plan_clients(context) {
-     dynamic hmo_week_ref =
+    dynamic hmo_week_ref =
         "'FirebaseFirestore.instance.collection('Office').doc('hmo_week')'";
 
     hmo_week_ref.get().then((snap) {
@@ -344,7 +331,7 @@ class GymDatabaseHelpers {
 
     //   String dt = DateFormat("E, d MMM").format(tod_date);
 
-    //   Map<String, dynamic> ss_map = ss.toJson();
+    //   Map ss_map = ss.toJson();
 
     //   // save attendance
     //   await patt_loc.once().then((value) {
@@ -368,12 +355,12 @@ class GymDatabaseHelpers {
     //     }
     //   });
 
-    //   Map<String, dynamic> last_act = {
+    //   Map last_act = {
     //     'date_time': tod_date.toString(),
     //     'duration': '',
     //   };
 
-    //   Map<String, dynamic> upd_val = {
+    //   Map upd_val = {
     //     'in_out': false,
     //     'in_time': tod_date.toString(),
     //     'last_activity': last_act,
@@ -382,7 +369,7 @@ class GymDatabaseHelpers {
     //   update_client_details(key, upd_val);
 
     //   // notify desk
-    //   Map<String, dynamic> mapp = cl.toJson();
+    //   Map mapp = cl.toJson();
     //   FirebaseFirestore.instance
     //       .collection('Office')
     //       .doc('Sign_in_user')
@@ -399,7 +386,7 @@ class GymDatabaseHelpers {
 
     //       int sv = ss_valu.length;
 
-    //       Map<String, dynamic> ss_map = {
+    //       Map ss_map = {
     //         'time_out': time,
     //       };
 
@@ -410,12 +397,12 @@ class GymDatabaseHelpers {
     //     }
     //   });
 
-    //   Map<String, dynamic> last_act = {
+    //   Map last_act = {
     //     'date_time': in_time,
     //     'duration': duration,
     //   };
 
-    //   Map<String, dynamic> upd_val = {
+    //   Map upd_val = {
     //     'in_out': true,
     //     'in_time': '',
     //     'last_activity': last_act,
@@ -440,8 +427,7 @@ class GymDatabaseHelpers {
     var docs = await ft_client_ref.get();
     docs.docs.forEach((e) {
       if (e.data()['registered'] == true) {
-          print('fixing ${e.data()['id']} - ${e.data()['sub_plan']}');
-        
+        print('fixing ${e.data()['id']} - ${e.data()['sub_plan']}');
       }
     });
   }

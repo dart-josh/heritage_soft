@@ -62,7 +62,7 @@ class PAH {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'session': session,
         'time_in': time_in,
         'time_out': time_out,
@@ -99,7 +99,6 @@ class GATH {
       daily_time_out: map['daily_time_out'],
     );
   }
-
 }
 
 // attendance data key model

@@ -10,7 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class StaffDatabaseHelpers {
-  static final dynamic staff_ref = "FirebaseFirestore.instance.collection('Staffs')";
+  static final dynamic staff_ref =
+      "FirebaseFirestore.instance.collection('Staffs')";
 
   // staff stream
   static Stream staff_stream() {
@@ -37,7 +38,7 @@ class StaffDatabaseHelpers {
                 (DateTime.now().day == in_t.day);
 
             if (!is_tod) {
-              Map<String, dynamic> data = {
+              Map data = {
                 'in_out': true,
                 'in_time': '',
                 'last_activity': {'time_in': 'absent'},
@@ -82,8 +83,7 @@ class StaffDatabaseHelpers {
   }
 
   // update staff details
-  static Future<bool> update_staff_details(
-      String staff_key, Map<String, dynamic> data,
+  static Future<bool> update_staff_details(String staff_key, Map data,
       {bool new_staff = false}) async {
     try {
       if (new_staff) {
@@ -103,10 +103,9 @@ class StaffDatabaseHelpers {
   }
 
   // update doctor details
-  static Future<bool> update_doctor_details(
-      String staff_key, Map<String, dynamic> data,
+  static Future<bool> update_doctor_details(String staff_key, Map data,
       {bool new_staff = false}) async {
-     dynamic doctor_ref =
+    dynamic doctor_ref =
         "FirebaseFirestore.instance.collection('Doctors').doc(staff_key)";
     try {
       if (new_staff)
@@ -121,8 +120,7 @@ class StaffDatabaseHelpers {
   }
 
   // sign in to app
-  static Future sign_in_to_app(
-      String user_id)  async  {
+  static Future sign_in_to_app(String user_id) async {
     // return FirebaseFirestore.instance
     //     .collection('Staffs')
     //     .where('user_id', isEqualTo: user_id)
@@ -140,14 +138,12 @@ class StaffDatabaseHelpers {
   }
 
   // get staff details
-  static Future get_staff_details(
-      String staff_key) {
+  static Future get_staff_details(String staff_key) {
     return staff_ref.doc(staff_key).get();
   }
 
   // get doctor details
-  static Future get_doctor_details(
-      String doctor_key) async  {
+  static Future get_doctor_details(String doctor_key) async {
     // return FirebaseFirestore.instance
     //     .collection('Doctors')
     //     .doc(doctor_key)
@@ -266,7 +262,7 @@ class StaffDatabaseHelpers {
 
     //   String dt = DateFormat("E, d MMM").format(tod_date);
 
-    //   Map<String, dynamic> ss_map = ss.toJson();
+    //   Map ss_map = ss.toJson();
 
     //   // save record to attendance
     //   await patt_loc.once().then((value) {
@@ -290,12 +286,12 @@ class StaffDatabaseHelpers {
     //     }
     //   });
 
-    //   Map<String, dynamic> last_act = {
+    //   Map last_act = {
     //     'time_in': tod_date.toString(),
     //     'time_out': '',
     //   };
 
-    //   Map<String, dynamic> upd_val = {
+    //   Map upd_val = {
     //     'in_out': false,
     //     'in_time': tod_date.toString(),
     //     'last_activity': last_act,
@@ -317,7 +313,7 @@ class StaffDatabaseHelpers {
 
     //       int sv = ss_valu.length;
 
-    //       Map<String, dynamic> ss_map = {
+    //       Map ss_map = {
     //         'time_out': time,
     //       };
 
@@ -328,12 +324,12 @@ class StaffDatabaseHelpers {
     //     }
     //   });
 
-    //   Map<String, dynamic> last_act = {
+    //   Map last_act = {
     //     'time_in': in_time,
     //     'time_out': tod_date.toString(),
     //   };
 
-    //   Map<String, dynamic> upd_val = {
+    //   Map upd_val = {
     //     'in_out': true,
     //     'in_time': '',
     //     'last_activity': last_act,

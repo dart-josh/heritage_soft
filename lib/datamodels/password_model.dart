@@ -17,7 +17,7 @@ class PasswordModel {
         key: key,
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'title': title,
         'password': password,
       };

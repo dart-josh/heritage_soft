@@ -844,7 +844,7 @@ class _UserSetupState extends State<UserSetup> {
     if (conf != null && conf) {
       Helpers.showLoadingScreen(context: context);
 
-      Map<String, dynamic> data = StaffModel(
+      Map data = StaffModel(
         key: '',
         user_id: id_controller.text.trim(),
         f_name: first_name,
@@ -899,7 +899,7 @@ class _UserSetupState extends State<UserSetup> {
             '';
       }
 
-      Map<String, dynamic> data = StaffModel(
+      Map data = StaffModel(
         key: '',
         user_id: widget.user!.user_id,
         f_name: first_name,
@@ -913,7 +913,7 @@ class _UserSetupState extends State<UserSetup> {
       ).toJson();
 
       if (staff_role == 'Physiotherapist') {
-        // Map<String, dynamic> data2 = DoctorModel(
+        // Map data2 = DoctorModel(
         //   key: active_doctor?.key ?? widget.user!.key,
         //   user_id: widget.user!.user_id,
         //   fullname: '${first_name} ${middle_name} ${last_name}',

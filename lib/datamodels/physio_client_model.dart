@@ -102,7 +102,7 @@ class PhysioClientModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'key': key,
         'id': id,
         'reg_date': reg_date,
@@ -157,7 +157,7 @@ class PhysioClientModel {
 //         sponsor_role: map['sponsor_role'] ?? '',
 //       );
 
-//   Map<String, dynamic> toJson() => {
+//   Map toJson() => {
 //         'sponsor_name': sponsor_name,
 //         'sponsor_phone': sponsor_phone,
 //         'sponsor_addr': sponsor_addr,
@@ -307,7 +307,7 @@ class PhysioHealthModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'height': height,
         'weight': weight,
         'ideal_weight': ideal_weight,
@@ -438,7 +438,7 @@ class PhysioHealthClientModel {
         baseline_done: map['baseline_done'] ?? false,
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'key': key,
         'id': id,
         'name': name,
@@ -446,8 +446,6 @@ class PhysioHealthClientModel {
         'hmo': hmo,
       };
 }
-
-
 
 // assessment model
 // class AssessmentModel {
@@ -475,7 +473,7 @@ class PhysioHealthClientModel {
 //     );
 //   }
 
-//   Map<String, dynamic> toJson() => {
+//   Map toJson() => {
 //         'case_select': case_select,
 //         'diagnosis': diagnosis,
 //         'case_type': case_type,
@@ -528,7 +526,7 @@ class PhysioHistoryModel {
         session_frequency: map['session_frequency'] ?? '',
       );
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         'hist_type': hist_type,
         'history_id': history_id,
         'amount': amount,

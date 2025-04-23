@@ -127,6 +127,17 @@ class _SignInToAppState extends State<SignInToApp> {
   void get_login_details() async {
     String? user_id = await Utils.get_user_id();
     String? password = await Utils.get_user_pass();
+
+    if (user_id != null && password != null) {
+      user_controller.text = user_id;
+      pass_controller.text = password;
+    }
+    login();
+  }
+
+  initState() {
+    super.initState();
+    get_login_details();
   }
 
   @override

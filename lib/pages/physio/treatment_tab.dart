@@ -106,7 +106,10 @@ class _TreatmentTabState extends State<TreatmentTab> {
       diagnosis_controller.text = widget.assessmentModel!.diagnosis;
       case_type_select = widget.assessmentModel!.case_type;
       treatment_type_select = widget.assessmentModel!.treatment_type;
-      equipment_select_controller.text = widget.assessmentModel!.equipments.map((e) => e.equipmentName).toList().join(',');
+      equipment_select_controller.text = widget.assessmentModel!.equipments
+          .map((e) => e.equipmentName)
+          .toList()
+          .join(',');
       selected_equipment_options = equipment_select_controller.text.split(',');
     }
   }
@@ -270,7 +273,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
     //   other_decision: other_decision_controller.text.trim(),
     // );
 
-    // Map<String, dynamic> data = file.toJson_update();
+    // Map data = file.toJson_update();
 
     // update case file
     // bool cf = await PhysioDatabaseHelpers.save_case_file(
@@ -326,7 +329,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
     Helpers.showLoadingScreen(context: context);
 
     // treatment details
-    Map<String, dynamic> t_data = {
+    Map t_data = {
       'date': date.toString(),
       if (widget.treatmentInfo!.last_treatment_date != null)
         'date_p': widget.treatmentInfo!.last_treatment_date!.toString(),
@@ -752,7 +755,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
                         //   Helpers.showLoadingScreen(context: context);
 
-                          // set clinic info
+                        // set clinic info
                         //   bool ci =
                         //       await PhysioDatabaseHelpers.update_clinic_info(
                         //     widget.client.key,

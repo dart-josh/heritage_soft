@@ -62,7 +62,7 @@ class ClinicApi {
         route: '${clinicUrl}/update_assessment_info',
         data: data,
         showLoading: showLoading,
-        showToast: showToast, 
+        showToast: showToast,
         loadingText: loadingText);
   }
 
@@ -71,13 +71,17 @@ class ClinicApi {
     BuildContext context, {
     required Map data,
     bool showLoading = false,
+    String? loadingText,
     bool showToast = false,
   }) async {
-    return await DBHelpers.postDataToServer(context,
-        route: '${clinicUrl}/update_clinic_info',
-        data: data,
-        showLoading: showLoading,
-        showToast: showToast);
+    return await DBHelpers.postDataToServer(
+      context,
+      route: '${clinicUrl}/update_clinic_info',
+      data: data,
+      showLoading: showLoading,
+      showToast: showToast,
+      loadingText: loadingText,
+    );
   }
 
 // update_treatment_info
@@ -85,13 +89,15 @@ class ClinicApi {
     BuildContext context, {
     required Map data,
     bool showLoading = false,
+    String? loadingText,
     bool showToast = false,
   }) async {
     return await DBHelpers.postDataToServer(context,
         route: '${clinicUrl}/update_treatment_info',
         data: data,
         showLoading: showLoading,
-        showToast: showToast);
+        showToast: showToast,
+        loadingText: loadingText);
   }
 
 // add_update_case_file
@@ -279,7 +285,11 @@ class ClinicApi {
     bool showToast = false,
   }) async {
     return await DBHelpers.deleteFromServer(context,
-        route: '${clinicUrl}/delete_patient', data: {}, id: id, showLoading: showLoading, showToast: showToast);
+        route: '${clinicUrl}/delete_patient',
+        data: {},
+        id: id,
+        showLoading: showLoading,
+        showToast: showToast);
   }
 
 // ! UTILS

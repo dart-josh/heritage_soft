@@ -330,7 +330,7 @@ class _MobileClientListState extends State<MobileClientList> {
                   '';
             }
 
-            Map<String, dynamic> client_update_details = {
+            Map client_update_details = {
               'user_image': img,
             };
 
