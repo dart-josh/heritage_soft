@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
-import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
-import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:universal_html/html.dart';
 
 String server_url = 'http://localhost:5500';

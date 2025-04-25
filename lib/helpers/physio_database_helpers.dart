@@ -219,12 +219,23 @@ class PhysioDatabaseHelpers {
   }
 
   // go to treatment tab
-  static Future goto_treatment_tab() async {
-    // check for case file
-    // if it exist get case file and open
-    // if not open new case file
+  static Future goto_treatment_tab(
+      {required String? id,
+      required PatientModel patient,
+      required DoctorModel doctor}) async {
+    if (id == null) {
+      // open new case file
+      CaseFileModel caseFile =
+          CaseFileModel.open(patient: patient, doctor: doctor);
+          
+      // go to treatment tab with new case file
+    } else {
+      // check for case file
+      // if it exist get case file and open
+      // if not open new case file
 
-    // go to treatment tab with case file
+      // go to treatment tab with case file
+    }
   }
 
   // update_clinic_info
@@ -235,8 +246,13 @@ class PhysioDatabaseHelpers {
     String? loadingText,
     bool showToast = false,
   }) async {
-    return await ClinicApi.update_clinic_info(context,
-        data: data, showLoading: showLoading, showToast: showToast, loadingText: loadingText,);
+    return await ClinicApi.update_clinic_info(
+      context,
+      data: data,
+      showLoading: showLoading,
+      showToast: showToast,
+      loadingText: loadingText,
+    );
   }
 
   // update_clinic_variables

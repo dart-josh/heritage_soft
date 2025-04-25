@@ -35,6 +35,7 @@ class PatientModel {
   List<ClinicHistoryModel> clinic_history;
   List<InvoiceModel> invoice_history;
   int total_amount_paid;
+  String? current_case_id;
 
   PatientModel({
     this.key,
@@ -70,6 +71,7 @@ class PatientModel {
     this.clinic_history = const [],
     this.invoice_history = const [],
     this.total_amount_paid = 0,
+    this.current_case_id,
   });
 
   factory PatientModel.fromMap(Map map) {
@@ -131,6 +133,7 @@ class PatientModel {
             <InvoiceModel>[],
       ),
       total_amount_paid: map['total_amount_paid'] ?? 0,
+      current_case_id: map['current_case_id'] ?? null,
     );
   }
 

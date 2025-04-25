@@ -2,7 +2,7 @@ import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 
 class CaseFileModel {
-  String key;
+  String? key;
   PatientModel patient;
   DoctorModel doctor;
   String bp_reading;
@@ -20,7 +20,7 @@ class CaseFileModel {
   bool expanded;
 
   CaseFileModel({
-    required this.key,
+    this.key,
     required this.patient,
     required this.doctor,
     required this.bp_reading,
@@ -35,6 +35,21 @@ class CaseFileModel {
     required this.other_decision,
     this.expanded = false,
   });
+
+  factory CaseFileModel.open({required PatientModel patient, required DoctorModel doctor}) => CaseFileModel(
+        patient: patient,
+        doctor: doctor,
+        bp_reading: '',
+        note: '',
+        remarks: '',
+        case_type: '',
+        treatment_date: DateTime.now(),
+        start_time: DateTime.now(),
+        end_time: null,
+        treatment_decision: '',
+        refered_decision: '',
+        other_decision: '',
+      );
 
   factory CaseFileModel.fromMap(Map map) => CaseFileModel(
         key: map['_id'] ?? '',
@@ -58,7 +73,7 @@ class CaseFileModel {
       );
 
   Map toJson_open() => {
-        'id': key,
+        // 'id': key,
         'patient': patient.key,
         'doctor': doctor.key,
         'bp_reading': bp_reading,
@@ -66,6 +81,22 @@ class CaseFileModel {
         'remarks': remarks,
         'case_type': case_type,
         'treatment_date': treatment_date?.toIso8601String(),
+        'treatment_decision': treatment_decision,
+        'refered_decision': refered_decision,
+        'other_decision': other_decision,
+        'start_time': start_time?.toIso8601String(),
+        // 'end_time': end_time?.toIso8601String(),
+      };
+
+      Map toJson_update() => {
+        'id': key,
+        // 'patient': patient.key,
+        // 'doctor': doctor.key,
+        'bp_reading': bp_reading,
+        'note': note,
+        'remarks': remarks,
+        // 'case_type': case_type,
+        // 'treatment_date': treatment_date?.toIso8601String(),
         'treatment_decision': treatment_decision,
         'refered_decision': refered_decision,
         'other_decision': other_decision,
