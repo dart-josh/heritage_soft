@@ -24,9 +24,6 @@ List<String> app_roles = [
 
 String app_role = '';
 
-// full app controle
-bool full_access = false;
-
 // doctor & staff model
 // DoctorModel? active_doctor;
 // StaffModel? active_staff;

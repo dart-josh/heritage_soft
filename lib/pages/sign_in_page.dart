@@ -56,8 +56,12 @@ class _SignInToAppState extends State<SignInToApp> {
             // go to homepage
             goto_homepage(user: user, doctor: doctor);
           } else {
-            // go to setup
-            setup_doctor(user: user);
+            //
+            return Helpers.showToast(
+                context: context,
+                color: Colors.red,
+                toastText: 'No Doctor Profile',
+                icon: Icons.error);
           }
         } else {
           setState(() {
@@ -99,21 +103,6 @@ class _SignInToAppState extends State<SignInToApp> {
 
     Navigator.pushAndRemoveUntil(context,
         MaterialPageRoute(builder: (context) => MainTree()), (route) => false);
-  }
-
-  void setup_doctor({required UserModel user}) async {
-    var doctor = await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => UserSetup(
-        setup_profile: true,
-        user: user,
-      ),
-    );
-
-    if (doctor != null) {
-      goto_homepage(user: doctor, doctor: doctor);
-    }
   }
 
   // save  login

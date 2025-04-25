@@ -4,7 +4,6 @@ import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/physio/doctors_profile.dart';
-import 'package:provider/provider.dart';
 
 class DoctorsList extends StatefulWidget {
   const DoctorsList({super.key, this.from_clinic = false});
@@ -201,7 +200,7 @@ class _DoctorsListState extends State<DoctorsList> {
 
   // main box
   Widget main_box() {
-    List<DoctorModel> doctors = Provider.of<AppData>(context).all_doctors;
+    List<DoctorModel> doctors = AppData.get(context).all_doctors;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),

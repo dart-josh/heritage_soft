@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
-import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/helpers/staff_database_helpers.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/helpers/user_helpers.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
-import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
 class UserSetup extends StatefulWidget {
-  final bool setup_profile;
-  final bool new_user;
   final UserModel? user;
 
   const UserSetup({
     super.key,
-    this.setup_profile = false,
-    this.new_user = false,
     this.user,
   });
 
@@ -32,7 +26,7 @@ class _UserSetupState extends State<UserSetup> {
   final TextEditingController id_controller = TextEditingController();
 
   // bool user_active = true;
-  String staff_role = '';
+  String user_role = '';
   String staff_section = '';
   String app_role = '';
 
@@ -83,53 +77,45 @@ class _UserSetupState extends State<UserSetup> {
 
   late UserModel active_user;
 
+  bool new_user = false;
+
+  bool full_access = false;
+  bool can_sign_in = false;
+
   get_values() async {
     // get active user
     active_user = AppData.get(context).active_user!;
-    // new staff
-    if (widget.new_user) {
-      // id_controller.text = Helpers.generate_id('stf', false);
-    }
-
-    // setup staff
-    if (widget.setup_profile) {
-      edit = true;
-
-      Future.delayed(Duration(seconds: 1), () async {
-        var res = await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => EditNameDailog(
-            fn: '',
-            mn: '',
-            ln: '',
-          ),
-        );
-
-        if (res != null) {
-          first_name = res['first_name'];
-          middle_name = res['middle_name'];
-          last_name = res['last_name'];
-
-          if (mounted) setState(() {});
-        }
-      });
-    }
 
     // staff details
     if (widget.user != null) {
-      staff_role = widget.user!.app_role;
+      user_role = widget.user!.user_role;
       staff_section = widget.user!.section;
       first_name = widget.user!.f_name;
       middle_name = widget.user!.m_name;
       last_name = widget.user!.l_name;
       user_image = widget.user!.user_image;
       app_role = widget.user!.app_role;
+      can_sign_in = widget.user!.can_sign_in;
+      full_access = widget.user!.full_access;
+    } else {
+      edit = true;
+    }
+  }
+
+  generate_user_id() async {
+    var res = await UserHelpers.generate_user_id(context);
+    if (res != '') {
+      String id =
+          Helpers.generate_id(xx: 'stf', hmo: false, id: int.parse(res));
+      id_controller.text = id;
+      if (mounted) setState(() {});
     }
   }
 
   @override
   void initState() {
+    new_user = widget.user != null;
+    if (new_user) generate_user_id();
     get_values();
     super.initState();
   }
@@ -181,16 +167,16 @@ class _UserSetupState extends State<UserSetup> {
           SizedBox(height: 8),
 
           // details
-          widget.new_user || widget.user == null ? Container() : id_con(),
+          if (!new_user) id_con(),
 
           SizedBox(height: 10),
 
           // form
-          widget.new_user ? new_staff_setup() : form(),
+          form(),
 
           width >= 800 ? SizedBox(height: 20) : Expanded(child: Container()),
 
-          edit || widget.new_user ? submit_button() : Container(height: 40),
+          edit || new_user ? submit_button() : Container(height: 40),
 
           SizedBox(height: 20),
         ],
@@ -214,13 +200,11 @@ class _UserSetupState extends State<UserSetup> {
           // heading
           Center(
             child: Text(
-              widget.new_user
-                  ? 'New Staff Account'
-                  : widget.setup_profile
-                      ? 'Setup Profile'
-                      : edit
-                          ? 'Edit Profile'
-                          : 'My Profile',
+              new_user
+                  ? 'New User Account'
+                  : edit
+                      ? 'Edit User'
+                      : 'User Profile',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -247,84 +231,59 @@ class _UserSetupState extends State<UserSetup> {
               Expanded(child: Container()),
 
               // settings button
-              widget.new_user ||
-                      widget.setup_profile ||
-                      !active_user.full_access
-                  ? Container()
-                  : Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 6),
-                      child: edit
-                          ? InkWell(
-                              onTap: () {
-                                edit = false;
-                                setState(() {});
-                              },
-                              child: Icon(
-                                Icons.check_circle,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            )
-                          : settings_menu(
-                              child: Icon(
-                                Icons.settings,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                    ),
+              if (!new_user && active_user.full_access)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6),
+                  child: edit
+                      ? InkWell(
+                          onTap: () {
+                            edit = false;
+                            setState(() {});
+                          },
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        )
+                      : settings_menu(
+                          child: Icon(
+                            Icons.settings,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                ),
 
               // delete button
-              widget.new_user ||
-                      widget.setup_profile ||
-                      !active_user.full_access
-                  ? Container()
-                  : IconButton(
-                      onPressed: () async {
-                        var conf = await showDialog(
-                          context: context,
-                          builder: (context) => ConfirmDialog(
-                            title: 'Delete User',
-                            subtitle:
-                                'You are about to delete this user from the database. Would you like to proceed?',
-                          ),
-                        );
+              if (!new_user && active_user.full_access)
+                IconButton(
+                  onPressed: () async {
+                    var conf = await Helpers.showConfirmation(
+                        context: context,
+                        title: 'Delete User',
+                        message:
+                            'You are about to delete this user from the database. Would you like to proceed?');
 
-                        if (conf != null && conf) {
-                          Helpers.showLoadingScreen(context: context);
+                    if (conf) {
+                      Map del = await UserHelpers.delete_user(
+                        context,
+                        user_id: widget.user!.key ?? '',
+                        showLoading: true,
+                        showToast: true,
+                      );
 
-                          bool ds = await StaffDatabaseHelpers.delete_staff(
-                              widget.user!.key ?? '');
-
-                          Navigator.pop(context);
-
-                          if (!ds) {
-                            Helpers.showToast(
-                              context: context,
-                              color: Colors.red,
-                              toastText: 'An Error Occurred, Try again',
-                              icon: Icons.error,
-                            );
-                            return;
-                          }
-
-                          // remove page
-                          Navigator.pop(context);
-
-                          Helpers.showToast(
-                            context: context,
-                            color: Colors.blue,
-                            toastText: 'User Deleted',
-                            icon: Icons.check,
-                          );
-                        }
-                      },
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                        size: 24,
-                      ),
-                    ),
+                      if (del['status'] == true) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                  icon: Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                    size: 24,
+                  ),
+                ),
             ],
           ),
         ],
@@ -354,7 +313,7 @@ class _UserSetupState extends State<UserSetup> {
 
           // id
           Text(
-            widget.user!.user_id,
+            widget.user?.user_id ?? '',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -604,7 +563,19 @@ class _UserSetupState extends State<UserSetup> {
             ],
           ),
 
-          SizedBox(height: 20),
+          SizedBox(height: 10),
+
+          // id
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text_field(
+              controller: id_controller,
+              label: 'User ID',
+              edit: !active_user.full_access && edit,
+            ),
+          ),
+
+          SizedBox(height: 10),
 
           // role & section
           Row(
@@ -612,11 +583,11 @@ class _UserSetupState extends State<UserSetup> {
               // role
               Expanded(
                 child: Select_form(
-                  label: 'Job Title',
+                  label: 'Job Role',
                   options: roles,
-                  text_value: staff_role,
+                  text_value: user_role,
                   setval: (val) {
-                    staff_role = val;
+                    user_role = val;
                     setState(() {});
                   },
                   edit: active_user.full_access && edit,
@@ -643,7 +614,7 @@ class _UserSetupState extends State<UserSetup> {
 
           SizedBox(height: 15),
 
-          // role
+          // app role
           Container(
             width: 200,
             child: Select_form(
@@ -657,6 +628,37 @@ class _UserSetupState extends State<UserSetup> {
               edit: active_user.full_access && edit,
             ),
           ),
+
+          SizedBox(height: 20),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // can sign in
+              Switch(
+                value: can_sign_in,
+                onChanged: (val) {
+                  if (edit)
+                    setState(() {
+                      can_sign_in = val;
+                    });
+                },
+              ),
+
+              SizedBox(width: 30),
+
+              // ful access
+              Switch(
+                value: full_access,
+                onChanged: (val) {
+                  if (edit)
+                    setState(() {
+                      full_access = val;
+                    });
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -665,7 +667,7 @@ class _UserSetupState extends State<UserSetup> {
   Widget submit_button() {
     return InkWell(
       onTap: () async {
-        if (widget.new_user)
+        if (new_user)
           create_new_account();
         else
           update_profile();
@@ -679,7 +681,7 @@ class _UserSetupState extends State<UserSetup> {
         ),
         child: Center(
           child: Text(
-            widget.new_user ? 'Create Account' : 'Update Profile',
+            new_user ? 'Create Account' : 'Update Profile',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -706,6 +708,10 @@ class _UserSetupState extends State<UserSetup> {
             edit = true;
           });
         }
+
+        if (value == 2) {
+          create_doctor_profile(widget.user!);
+        }
       },
       itemBuilder: (context) => [
         // edit profile
@@ -724,99 +730,25 @@ class _UserSetupState extends State<UserSetup> {
             ),
           ),
         ),
-      ],
-    );
-  }
 
-  // new staff setup
-  Widget new_staff_setup() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              // profile image
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFf3f0da).withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: EdgeInsets.all(30),
-                child: Center(
-                  child: Image.asset(
-                    'images/icon/material-person.png',
-                    width: 90,
-                    height: 90,
+        // create doctor profile
+        if ((user_role == 'Physiotherapist') && active_user.full_access)
+          PopupMenuItem(
+            value: 2,
+            child: Container(
+              child: Row(
+                children: [
+                  Icon(Icons.person, size: 22),
+                  SizedBox(width: 4),
+                  Text(
+                    'Doctor Profile',
+                    style: TextStyle(),
                   ),
-                ),
+                ],
               ),
-
-              SizedBox(width: 50),
-
-              // details
-              Expanded(
-                child: Column(
-                  children: [
-                    // id
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text_field(
-                        controller: id_controller,
-                        label: 'User ID',
-                        edit: !active_user.full_access,
-                      ),
-                    ),
-
-                    // role
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Select_form(
-                        label: 'Office section',
-                        options: office_section,
-                        text_value: staff_section,
-                        setval: (val) {
-                          staff_section = val;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-
-                    // section
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Select_form(
-                        label: 'Job Title',
-                        options: roles,
-                        text_value: staff_role,
-                        setval: (val) {
-                          staff_role = val;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-
-                    // app role
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      width: 200,
-                      child: Select_form(
-                        label: 'App role',
-                        options: app_roles,
-                        text_value: app_role,
-                        setval: (val) {
-                          app_role = val;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -833,149 +765,99 @@ class _UserSetupState extends State<UserSetup> {
       return;
     }
 
-    var conf = await showDialog(
-      context: context,
-      builder: (context) => ConfirmDialog(
+    var conf = await Helpers.showConfirmation(
+        context: context,
         title: 'Create new account',
-        subtitle: 'Make sure you entered the correct info before proceeding.',
-      ),
-    );
+        message: 'Make sure you entered the correct info before proceeding.');
 
-    if (conf != null && conf) {
-      Helpers.showLoadingScreen(context: context);
-
-      Map data = StaffModel(
-        key: '',
+    if (conf) {
+      Map data = UserModel(
         user_id: id_controller.text.trim(),
         f_name: first_name,
         m_name: middle_name,
         l_name: last_name,
         user_image: user_image,
         user_status: true,
-        role: staff_role,
+        user_role: user_role,
         section: staff_section,
         app_role: app_role,
+        full_access: full_access,
+        can_sign_in: can_sign_in,
       ).toJson();
 
-      bool ns = await StaffDatabaseHelpers.update_staff_details('', data,
-          new_staff: true);
+      Map ns = await UserHelpers.add_update_user(
+        context,
+        data: data,
+        showLoading: true,
+        showToast: true,
+      );
 
-      Navigator.pop(context);
-
-      if (!ns) {
-        Helpers.showToast(
-          context: context,
-          color: Colors.red,
-          toastText: 'An Error Occurred, Try again',
-          icon: Icons.error,
-        );
-        return;
-      }
-
-      // remove page
-      Navigator.pop(context);
+      if (ns['user'] != null) Navigator.pop(context);
     }
   }
 
   // update staff
   void update_profile() async {
-    var conf = await showDialog(
-      context: context,
-      builder: (context) => ConfirmDialog(
-        title: 'Update Profile',
-        subtitle:
-            'Make sure you entered the correct details before proceeding.',
-      ),
-    );
+    var conf = await Helpers.showConfirmation(
+        context: context,
+        title: 'Update User',
+        message:
+            'Make sure you entered the correct details before proceeding.');
 
-    if (conf != null && conf) {
-      Helpers.showLoadingScreen(context: context);
-
+    if (conf) {
       // upload image
       if (image_file != null) {
-        user_image = await AdminDatabaseHelpers.uploadFile(
-                image_file!, widget.user!.user_id, false,
-                staff: true) ??
-            '';
+        user_image = '';
       }
 
-      Map data = StaffModel(
-        key: '',
-        user_id: widget.user!.user_id,
+      Map data = UserModel(
+        user_id: id_controller.text.trim(),
         f_name: first_name,
         m_name: middle_name,
         l_name: last_name,
         user_image: user_image,
-        user_status: widget.user!.user_status,
-        role: staff_role,
+        user_status: true,
+        user_role: user_role,
         section: staff_section,
         app_role: app_role,
+        full_access: full_access,
+        can_sign_in: can_sign_in,
       ).toJson();
 
-      if (staff_role == 'Physiotherapist') {
-        // Map data2 = DoctorModel(
-        //   key: active_doctor?.key ?? widget.user!.key,
-        //   user_id: widget.user!.user_id,
-        //   fullname: '${first_name} ${middle_name} ${last_name}',
-        //   is_available: true,
-        //   active_patients: active_doctor?.active_patients ?? 0,
-        //   total_sessions: active_doctor?.total_sessions ?? 0,
-        //   patients: active_doctor?.patients ?? 0,
-        //   ong_treatment: active_doctor?.ong_treatment ?? 0,
-        //   pen_treatment: active_doctor?.pen_treatment ?? 0,
-        //   user_image: user_image,
-        //   title: staff_role,
-        // ).toJson();
+      Map ns = await UserHelpers.add_update_user(
+        context,
+        data: data,
+        showLoading: true,
+        showToast: true,
+      );
 
-        // bool sd = await StaffDatabaseHelpers.update_doctor_details(
-        //   widget.user!.key,
-        //   data2,
-        //   new_staff: widget.setup_profile,
-        // );
-
-        // if (!sd) {
-        //   Navigator.pop(context);
-        //   Helpers.showToast(
-        //     context: context,
-        //     color: Colors.red,
-        //     toastText: 'An Error Occurred, Try again',
-        //     icon: Icons.error,
-        //   );
-        //   return;
-        // }
-      }
-
-      bool st = await StaffDatabaseHelpers.update_staff_details(
-          widget.user!.key ?? '', data);
-
-      if (!st) {
-        Navigator.pop(context);
-        Helpers.showToast(
-          context: context,
-          color: Colors.red,
-          toastText: 'An Error Occurred, Try again',
-          icon: Icons.error,
-        );
-        return;
-      }
-
-      Navigator.pop(context);
-
-      if (widget.setup_profile)
-        // remove page
-        Navigator.pop(context);
-      else
+      if (ns['user'] != null) {
         setState(() {
           edit = false;
         });
-
-      Helpers.showToast(
-        context: context,
-        color: Colors.blue,
-        toastText: 'Profile Updated',
-        icon: Icons.check,
-      );
+      }
     }
+  }
+
+  // create doctor profile
+  void create_doctor_profile(UserModel user) async {
+    Map data_2 = DoctorModel(
+      user: user,
+      is_available: false,
+      title: 'Physiotherapist',
+      my_patients: [],
+      ong_patients: [],
+      pen_patients: [],
+    ).toJson();
+
+    Map dc = await UserHelpers.add_update_doctor(
+      context,
+      data: data_2,
+      showLoading: true,
+      showToast: true,
+    );
+
+    if (dc['doctor'] != null) {}
   }
 
   //

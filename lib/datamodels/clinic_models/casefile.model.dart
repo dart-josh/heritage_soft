@@ -36,13 +36,13 @@ class CaseFileModel {
     this.expanded = false,
   });
 
-  factory CaseFileModel.open({required PatientModel patient, required DoctorModel doctor}) => CaseFileModel(
+  factory CaseFileModel.open({required PatientModel patient, required DoctorModel doctor, required String case_type,}) => CaseFileModel(
         patient: patient,
         doctor: doctor,
         bp_reading: '',
         note: '',
         remarks: '',
-        case_type: '',
+        case_type: case_type,
         treatment_date: DateTime.now(),
         start_time: DateTime.now(),
         end_time: null,

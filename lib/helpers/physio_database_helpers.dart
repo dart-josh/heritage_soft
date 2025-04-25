@@ -68,10 +68,18 @@ class PhysioDatabaseHelpers {
 
   // get_case_file_by_date
   static Future<List<CaseFileModel>?> get_case_file_by_date(
-      BuildContext context,
-      {required Map data}) async {
+    BuildContext context, {
+    required String patient_id,
+    required DateTime treatment_date,
+    bool showLoading = false,
+    String? loadingText,
+    bool showToast = false,
+  }) async {
     List<CaseFileModel> files = [];
-    var response = await ClinicApi.get_case_file_by_date(context, data: data);
+    var response = await ClinicApi.get_case_file_by_date(context, data: {
+      'patient': patient_id,
+      'treatment_date': treatment_date.toIso8601String()
+    });
 
     if (response != null) {
       List data = response['caseFiles'];
@@ -84,6 +92,42 @@ class PhysioDatabaseHelpers {
     }
 
     return null;
+  }
+
+  // get_case_file_by_id
+  static Future<CaseFileModel?> get_case_file_by_id(
+    BuildContext context, {
+    required Map data,
+    bool showLoading = false,
+    String? loadingText,
+    bool showToast = false,
+  }) async {
+    var response = await ClinicApi.get_case_file_by_id(context,
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
+
+    if (response != null) {
+      Map data = response['caseFile'];
+      CaseFileModel caseFile = CaseFileModel.fromMap(data);
+
+      return caseFile;
+    }
+
+    return null;
+  }
+
+  // check for case matches
+  static bool check_cases_by_type(
+      {required List<CaseFileModel> cases, required String case_type}) {
+    var response =
+        cases.where((caseFile) => caseFile.case_type == case_type).toList();
+
+    if (response.isNotEmpty) {
+      return true;
+    }
+    return false;
   }
 
   //
@@ -126,10 +170,14 @@ class PhysioDatabaseHelpers {
     BuildContext context, {
     required Map data,
     bool showLoading = false,
+    String? loadingText,
     bool showToast = false,
   }) async {
     return await ClinicApi.add_update_case_file(context,
-        data: data, showLoading: showLoading, showToast: showToast);
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
   }
 
   // update_treatment_info
@@ -219,22 +267,47 @@ class PhysioDatabaseHelpers {
   }
 
   // go to treatment tab
-  static Future goto_treatment_tab(
-      {required String? id,
-      required PatientModel patient,
-      required DoctorModel doctor}) async {
-    if (id == null) {
+  static Future<CaseFileModel?> start_treatment(BuildContext context,
+      {required PatientModel patient,
+      required DoctorModel doctor,
+      required String case_type}) async {
+    if (patient.current_case_id == null) {
       // open new case file
-      CaseFileModel caseFile =
-          CaseFileModel.open(patient: patient, doctor: doctor);
-          
+      CaseFileModel caseFile = CaseFileModel.open(
+          patient: patient, doctor: doctor, case_type: case_type);
+
+      var res = await add_update_case_file(
+        context,
+        data: caseFile.toJson_open(),
+        showLoading: true,
+        showToast: true,
+        loadingText: 'Creating new case file...',
+      );
+      if (res != null && res['caseFile'] != null) {
+        CaseFileModel caseFile = CaseFileModel.fromMap(res['caseFile']);
+
+        // go to treatment tab with new case file
+        return caseFile;
+      } else {
+        // show error message
+        return null;
+      }
+
       // go to treatment tab with new case file
     } else {
       // check for case file
-      // if it exist get case file and open
-      // if not open new case file
+      var res = await get_case_file_by_id(context, data: {
+        'patient': patient.key,
+        'case_id': patient.current_case_id,
+      });
 
-      // go to treatment tab with case file
+      if (res != null) {
+        // get case file and open
+
+        // go to treatment tab with case file
+        return res;
+      } else
+        return null;
     }
   }
 
@@ -278,25 +351,130 @@ class PhysioDatabaseHelpers {
   }
 
   // send to clinic
-  static Future send_to_clinic(
+  static Future<bool> send_to_clinic(
     BuildContext context, {
-    required Map data,
+    required String doctor_key,
+    required String patient_key,
+    required String treatment_type,
+    required String treatment_duration,
     bool showLoading = false,
     bool showToast = false,
   }) async {
-    return await ClinicApi.update_ong_patients(context,
-        data: data, showLoading: showLoading, showToast: showToast);
+    var res_1 = await ClinicApi.update_pen_patients(context,
+        data: {
+          'doctor': doctor_key,
+          'patient': {
+            'patient': patient_key,
+            'treatment_type': treatment_type,
+            'treatment_duration': treatment_duration,
+          }
+        },
+        showLoading: showLoading,
+        showToast: showToast);
+
+    var res_2 = await ClinicApi.assign_current_doctor(context,
+        data: {'patient': patient_key, 'doctor': doctor_key, 'sett': true});
+
+    if (res_1 && res_2 != null) {
+      if (res_1['doctor'] != null && res_2['patient_data'] != null) {
+        var res_3 = await ClinicApi.update_clinic_variables(context,
+            data: {
+              'patient': patient_key,
+              'treatment_duration': treatment_duration,
+            },
+            showLoading: true);
+        if (res_3 != null && res_3['patient_data'] != null)
+          return true;
+        else
+          return false;
+      } else
+        return false;
+    } else
+      return false;
   }
 
-  // remove from clinic
-  static Future remove_from_clinic(
+  // change treatment_duration
+  static Future<bool> change_treatment_duration(
     BuildContext context, {
-    required Map data,
+    required String doctor_key,
+    required String patient_key,
+    required String treatment_type,
+    required String treatment_duration,
     bool showLoading = false,
     bool showToast = false,
   }) async {
-    return await ClinicApi.remove_pen_patients(context,
-        data: data, showLoading: showLoading, showToast: showToast);
+    var res_1 = await ClinicApi.update_pen_patients(context,
+        data: {
+          'doctor': doctor_key,
+          'patient': {
+            'patient': patient_key,
+            'treatment_type': treatment_type,
+            'treatment_duration': treatment_duration,
+          }
+        },
+        showLoading: showLoading,
+        showToast: showToast);
+
+    if (res_1 != null) {
+      if (res_1['doctor'] != null) {
+        var res_3 = await ClinicApi.update_clinic_variables(context,
+            data: {
+              'patient': patient_key,
+              'treatment_duration': treatment_duration,
+            },
+            showLoading: true);
+        if (res_3 != null && res_3['patient_data'] != null)
+          return true;
+        else
+          return false;
+      } else
+        return false;
+    } else
+      return false;
+  }
+  
+
+  // remove from clinic
+  static Future<bool> remove_from_clinic(
+    BuildContext context, {
+    required String doctor_key,
+    required String patient_key,
+    required String treatment_type,
+    required String treatment_duration,
+    bool showLoading = false,
+    bool showToast = false,
+  }) async {
+    var res_1 = await ClinicApi.remove_pen_patients(context,
+        data: {
+          'doctor': doctor_key,
+          'patient': {
+            'patient': patient_key,
+            'treatment_type': treatment_type,
+            'treatment_duration': treatment_duration,
+          }
+        },
+        showLoading: showLoading,
+        showToast: showToast);
+
+    var res_2 = await ClinicApi.assign_current_doctor(context,
+        data: {'patient': patient_key, 'doctor': doctor_key, 'sett': false});
+
+    if (res_1 && res_2 != null) {
+      if (res_1['doctor'] != null && res_2['patient_data'] != null) {
+        var res_3 = await ClinicApi.update_clinic_variables(context,
+            data: {
+              'patient': patient_key,
+              'treatment_duration': null,
+            },
+            showLoading: true);
+        if (res_3 != null && res_3['patient_data'] != null)
+          return true;
+        else
+          return false;
+      } else
+        return false;
+    } else
+      return false;
   }
 
   // add to doctor ong patient

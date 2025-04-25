@@ -267,7 +267,7 @@ class _AddAccessoriesState extends State<AddAccessories> {
           ),
 
           // key
-          if (full_access)
+          // if (full_access)
             Container(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Text_field(

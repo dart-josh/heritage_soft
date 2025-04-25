@@ -25,11 +25,36 @@ class ClinicApi {
         route: '${clinicUrl}/get_case_file_by_patient', data: data);
   }
 
-  // get_case_file_by_date
-  static Future get_case_file_by_date(BuildContext context,
-      {required Map data}) async {
+  // get_case_file_by_id
+  static Future get_case_file_by_id(
+    BuildContext context, {
+    required Map data,
+    bool showLoading = false,
+    String? loadingText,
+    bool showToast = false,
+  }) async {
     return await DBHelpers.postDataToServer(context,
-        route: '${clinicUrl}/get_case_file_by_date', data: data);
+        route: '${clinicUrl}/get_case_file_by_id',
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
+  }
+
+  //get_case_file_by_date
+  static Future get_case_file_by_date(
+    BuildContext context, {
+    required Map data,
+    bool showLoading = false,
+    String? loadingText,
+    bool showToast = false,
+  }) async {
+    return await DBHelpers.postDataToServer(context,
+        route: '${clinicUrl}/get_case_file_by_date',
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast,
+        loadingText: loadingText);
   }
 
   // !
@@ -105,13 +130,15 @@ class ClinicApi {
     BuildContext context, {
     required Map data,
     bool showLoading = false,
+    String? loadingText,
     bool showToast = false,
   }) async {
     return await DBHelpers.postDataToServer(context,
         route: '${clinicUrl}/add_update_case_file',
         data: data,
         showLoading: showLoading,
-        showToast: showToast);
+        showToast: showToast,
+        loadingText: loadingText);
   }
 
 // assign_current_doctor

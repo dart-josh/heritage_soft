@@ -44,53 +44,24 @@ class _ClinicTabState extends State<ClinicTab> {
     fontSize: 18,
   );
 
-  int total_session = 0;
-  String frequency = '';
-  int paid_sess = 0;
-  int active_sess = 0;
-  int completed_session = 0;
-
-  int? cost_per_session;
-
-  SessionModel? _session_details;
-
-  String treatment_duration = '30 Mins';
-  DateTime? start_time;
-
   bool can_treat = true;
 
   bool? assessment_completed = null;
-  bool? ongoing_treatment = null;
+  bool ongoing_treatment = false;
   DateTime? assessment_date;
   bool assessment_paid = false;
 
   TreatmentInfoModel? treatmentModel;
   AssessmentInfoModel? assessmentModel;
-
-  StreamSubscription? trt_stream_sub;
-  StreamSubscription? ass_stream_sub;
-
-  StreamSubscription? var_stream_sub;
-  StreamSubscription? session_stream_sub;
-
-  bool treatment_done_today = false;
-  bool treatment_elapse = false;
-
-  bool pending_treatment = false;
-  List<DoctorModel> doctors = [];
-
-  bool treatment_completed = false;
-
-  String current_doctor = '';
-
   PhysioPaymentPrintModel? assessment_print;
-
   //?
   bool skip_assessment = false;
 
   late PatientModel patient;
   UserModel? active_user;
   DoctorModel? active_doctor;
+
+  String? case_type;
 
   bool run_timer = false;
 
@@ -111,35 +82,14 @@ class _ClinicTabState extends State<ClinicTab> {
   }
 
   // stream session info
-  get_sessions() {
-    cost_per_session = patient.clinic_info?.cost_per_session ?? 0;
-
-    _session_details = SessionModel.fromMap(
-        patient.clinic_info?.toJson(patientKey: patient.key ?? '') ?? {});
-  }
+  get_sessions() {}
 
   // stream clinin variables
   get_variables() {
-    // if patient is removed from doctor
-    // pop the page off
-    if (active_user!.app_role == 'Doctor' && can_treat) {
-      if (patient.clinic_variables != null &&
-          patient.clinic_variables?.can_treat == false) {
-        if (mounted) Navigator.pop(context);
-      }
-    }
-
-    treatment_duration =
-        patient.clinic_variables?.treatment_duration ?? treatment_duration;
-    start_time = patient.clinic_variables?.start_time;
-    can_treat = patient.clinic_variables?.can_treat ?? true;
-    current_doctor = patient.current_doctor?.key ?? '';
-
-    if (current_doctor != '') {
-      pending_treatment = true;
-    } else {
-      pending_treatment = false;
-    }
+    can_treat = patient.current_doctor == active_doctor?.key;
+    case_type = patient.clinic_variables?.case_type;
+    run_timer = patient.current_case_id != null &&
+        patient.clinic_variables?.start_time != null;
   }
 
   // stream treatment info
@@ -150,7 +100,7 @@ class _ClinicTabState extends State<ClinicTab> {
           patient.treatment_info?.assessment_completed ?? false;
 
       // ongoing treatment
-      ongoing_treatment = patient.treatment_info?.ongoing_treatment ?? false;
+      ongoing_treatment = patient.current_case_id != null;
 
       // assessment date
       if (patient.treatment_info?.assessment_date != null) {
@@ -203,11 +153,12 @@ class _ClinicTabState extends State<ClinicTab> {
 
   // time countdown
   Widget time() {
-    if (start_time == null) return Container();
+    if (patient.clinic_variables?.start_time == null) return Container();
 
     // get current Time count
     List<String> _timer = PhysioHelpers.update_timer(PhysioHelpers.get_duration(
-        treatment_duration: treatment_duration, start_time: start_time!));
+        treatment_duration: patient.clinic_variables?.treatment_duration ?? '',
+        start_time: patient.clinic_variables?.start_time ?? DateTime.now()));
 
     TextStyle time_style = TextStyle(
       color: (int.parse(_timer[1]) < 6 && int.parse(_timer[0]) < 1)
@@ -228,7 +179,7 @@ class _ClinicTabState extends State<ClinicTab> {
               if (active_user!.app_role == 'CSU' ||
                   active_user!.app_role == 'ICT')
                 Text(
-                  'Duration: $treatment_duration',
+                  'Duration: ${patient.clinic_variables?.treatment_duration}',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
@@ -388,7 +339,7 @@ class _ClinicTabState extends State<ClinicTab> {
           patient_data(),
 
           // session info area
-          Expanded(child: Center(child: session_tab(_session_details))),
+          Expanded(child: Center(child: session_tab())),
 
           SizedBox(height: 30),
 
@@ -480,7 +431,7 @@ class _ClinicTabState extends State<ClinicTab> {
 
                   // session details
                   if (active_user!.app_role != 'Doctor')
-                    if (_session_details != null &&
+                    if (patient.clinic_info != null &&
                         assessmentModel != null &&
                         assessment_completed!)
                       Padding(
@@ -488,16 +439,17 @@ class _ClinicTabState extends State<ClinicTab> {
                         child: InkWell(
                           onTap: () {
                             Map map = {
-                              'total_session': _session_details!.total_session,
-                              'frequency': _session_details!.frequency,
+                              'total_session':
+                                  patient.clinic_info!.total_session,
+                              'frequency': patient.clinic_info!.frequency,
                               'utilized_session':
-                                  _session_details!.completed_session,
-                              'paid_session': _session_details!.paid_session,
-                              'amount_paid': _session_details!.amount_paid,
+                                  patient.clinic_info!.completed_session,
+                              'paid_session': patient.clinic_info!.paid_session,
+                              'amount_paid': patient.clinic_info!.amount_paid,
                               'cost_p_session':
-                                  _session_details!.cost_per_session,
+                                  patient.clinic_info!.cost_per_session,
                               'floating_amount':
-                                  _session_details!.floating_amount,
+                                  patient.clinic_info!.floating_amount,
                             };
 
                             showDialog(
@@ -827,24 +779,16 @@ class _ClinicTabState extends State<ClinicTab> {
   }
 
   // session tab
-  Widget session_tab(SessionModel? session) {
-    var val = NumberFormat('#,###');
-
-    if (session != null) {
-      total_session = session.total_session;
-      frequency = session.frequency;
-      paid_sess = session.paid_session;
-      completed_session = session.completed_session;
-      active_sess = session.paid_session - session.completed_session;
-    }
-
-    int balance = (session == null)
-        ? 0
-        : session.total_session - session.completed_session;
-
-    int current_cost = (session == null || cost_per_session == null)
-        ? 0
-        : cost_per_session! * (total_session - session.paid_session);
+  Widget session_tab() {
+    int total_session = patient.clinic_info?.total_session ?? 0;
+    String frequency = patient.clinic_info?.frequency ?? '';
+    int paid_session = patient.clinic_info?.paid_session ?? 0;
+    int completed_session = patient.clinic_info?.completed_session ?? 0;
+    int cost_per_session = patient.clinic_info?.cost_per_session ?? 0;
+    int active_sess = paid_session - completed_session;
+    int amount_paid = patient.clinic_info?.amount_paid ?? 0;
+    int balance = total_session - completed_session;
+    int current_cost = cost_per_session * (total_session - paid_session);
 
     // assessment not yet completed
     if (assessment_completed == null || !assessment_completed!)
@@ -886,52 +830,19 @@ class _ClinicTabState extends State<ClinicTab> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // no of session
-              Column(
-                children: [
-                  // title
-                  Text('Total Sessions', style: title_style),
-                  SizedBox(height: 2),
-                  Text(
-                      (session == null) ? '' : session.total_session.toString(),
-                      style: value_style),
-                ],
-              ),
+              session_info_tile(
+                  label: 'Total Sessions', value: total_session.toString()),
 
               // frequency
-              Column(
-                children: [
-                  // title
-                  Text('Frequency', style: title_style),
-                  SizedBox(height: 2),
-                  Text((session == null) ? '' : session.frequency,
-                      style: value_style),
-                ],
-              ),
+              session_info_tile(label: 'Frequency', value: frequency),
 
-              // completed
-              Column(
-                children: [
-                  // title
-                  Text('Utilized', style: title_style),
-                  SizedBox(height: 2),
-                  Text(
-                      (session == null)
-                          ? ''
-                          : session.completed_session.toString(),
-                      style: value_style),
-                ],
-              ),
+              // Utilized
+              session_info_tile(
+                  label: 'Utilized', value: completed_session.toString()),
 
               // balance
-              Column(
-                children: [
-                  // title
-                  Text('Remainder', style: title_style),
-                  SizedBox(height: 2),
-                  Text((session == null) ? '' : balance.toString(),
-                      style: value_style),
-                ],
-              ),
+              session_info_tile(
+                  label: 'Sessions Left', value: balance.toString()),
             ],
           ),
 
@@ -945,56 +856,24 @@ class _ClinicTabState extends State<ClinicTab> {
             children: [
               // total cost
               if (active_user!.app_role != 'Doctor')
-                Column(
-                  children: [
-                    // title
-                    Text('Current cost', style: title_style),
-                    SizedBox(height: 2),
-                    Text(
-                        (session == null) ? '' : '₦${val.format(current_cost)}',
-                        style: value_style),
-                  ],
-                ),
+                session_info_tile(
+                    label: 'Current cost',
+                    value: Helpers.format_amount(current_cost, naira: true)),
 
-              // total paid
               if (active_user!.app_role != 'Doctor')
-                Column(
-                  children: [
-                    // title
-                    Text('Amount paid', style: title_style),
-                    SizedBox(height: 2),
-                    Text(
-                        (session == null)
-                            ? ''
-                            : '₦${val.format(session.amount_paid)}',
-                        style: value_style),
-                  ],
-                ),
+                // total paid
+                session_info_tile(
+                    label: 'Amount paid',
+                    value: Helpers.format_amount(amount_paid, naira: true)),
 
               // paid
-              Column(
-                children: [
-                  // title
-                  Text('Paid Sessions', style: title_style),
-                  SizedBox(height: 2),
-                  Text((session == null) ? '' : session.paid_session.toString(),
-                      style: value_style),
-                ],
-              ),
+              session_info_tile(label: 'label', value: paid_session.toString()),
 
               if (active_user!.app_role == 'Doctor') SizedBox(width: 150),
 
               // active
-              Column(
-                children: [
-                  // title
-                  Text('Active Session', style: title_style),
-                  SizedBox(height: 2),
-                  Text((session == null) ? '' : active_sess.toString(),
-                      style: value_style),
-                ],
-              ),
-              // Container(width: 100),
+              session_info_tile(
+                  label: 'Active Session', value: active_sess.toString()),
             ],
           )
         ],
@@ -1002,54 +881,28 @@ class _ClinicTabState extends State<ClinicTab> {
     );
   }
 
-  // validate treatment based on date
-  void validate_treatment() {
-    if (ongoing_treatment != null &&
-        assessment_completed != null &&
-        treatmentModel != null) {
-      // if not ongoin treatment && assessment completed
-      if (!ongoing_treatment! && assessment_completed!) {
-        if (assessment_date != null &&
-            treatmentModel!.last_treatment_date != null) {
-          // if last treatment is today
-          if (Helpers.date_format(treatmentModel!.last_treatment_date!) ==
-                  Helpers.date_format(DateTime.now()) &&
-              (completed_session > 0)) {
-            // if treatment elapsed till today
-            if (treatmentModel!.treatment_elapse) {
-              treatment_done_today = false;
-            } else {
-              treatment_done_today = true;
-            }
-          }
-        }
-      }
-
-      if (treatmentModel!.current_treatment_date != null) if (Helpers
-                  .date_format(treatmentModel!.current_treatment_date!) !=
-              Helpers.date_format(DateTime.now()) &&
-          (ongoing_treatment!)) {
-        treatment_elapse = true;
-      }
-    }
+  // session info tile
+  Widget session_info_tile({required String label, required String value}) {
+    return Column(
+      children: [
+        // title
+        Text(label, style: title_style),
+        SizedBox(height: 2),
+        Text(value, style: value_style),
+      ],
+    );
   }
 
   // action tab
   Widget action_tab() {
-    // validate treatment
-    validate_treatment();
-
-    bool my_patient_to_treat = (active_user!.app_role == 'Doctor')
-        ? current_doctor == active_doctor!.key
-        : false;
-
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           /// TAB 1
-          // pay for session (CSU user only)
+          // (CSU user only)
           if (active_user!.app_role == 'CSU' || active_user!.app_role == 'ICT')
+            // payment
             InkWell(
               onTap: () async {
                 // assessment payment
@@ -1096,18 +949,20 @@ class _ClinicTabState extends State<ClinicTab> {
                 }
 
                 // if session info not set
-                if (_session_details == null) {
+                if (patient.clinic_info != null
+                    // && patient.clinic_info!.total_session == 0
+                    ) {
                   Helpers.showToast(
                     context: context,
                     color: Colors.redAccent,
-                    toastText: 'Setup a Session Plan',
+                    toastText: 'Setup Clinic',
                     icon: Icons.error,
                   );
                   return;
                 }
 
                 // if billing not set
-                if (cost_per_session == null) {
+                if (patient.clinic_info!.cost_per_session == 0) {
                   Helpers.showToast(
                     context: context,
                     color: Colors.redAccent,
@@ -1117,7 +972,7 @@ class _ClinicTabState extends State<ClinicTab> {
                   return;
                 }
 
-                var old_float = _session_details!.floating_amount;
+                var old_float = patient.clinic_info!.floating_amount;
 
                 // session plan dialog for payment
                 var res = await showDialog(
@@ -1125,11 +980,11 @@ class _ClinicTabState extends State<ClinicTab> {
                   barrierDismissible: false,
                   builder: (context) => SessionPaymentDialog(
                     session_details: {
-                      'cost_p_session': _session_details!.cost_per_session,
-                      'total_session': _session_details!.total_session,
-                      'session_paid': _session_details!.paid_session,
-                      'amount_paid': _session_details!.amount_paid,
-                      'floating_amount': _session_details!.floating_amount,
+                      'cost_p_session': patient.clinic_info!.cost_per_session,
+                      'total_session': patient.clinic_info!.total_session,
+                      'session_paid': patient.clinic_info!.paid_session,
+                      'amount_paid': patient.clinic_info!.amount_paid,
+                      'floating_amount': patient.clinic_info!.floating_amount,
                     },
                   ),
                 );
@@ -1165,7 +1020,8 @@ class _ClinicTabState extends State<ClinicTab> {
                       date: DateTime.now(),
                       session_paid: new_session,
                       history_id: Helpers.generate_order_id(),
-                      cost_p_session: cost_per_session ?? 0,
+                      cost_p_session:
+                          patient.clinic_info?.cost_per_session ?? 0,
                       old_float: old_float,
                       new_float: new_float,
                       session_frequency: '',
@@ -1230,143 +1086,33 @@ class _ClinicTabState extends State<ClinicTab> {
               ),
             )
 
-          // treatment duration (doctor only) (if doctor can treat)
-          else if ((active_user!.app_role == 'Doctor') &&
-              widget.can_treat &&
-              can_treat &&
-              my_patient_to_treat)
+          // (doctor only) (if doctor can treat)
+          else if ((active_user!.app_role == 'Doctor') && can_treat)
             // treatment duration
-            if (!treatment_completed)
-              Center(
-                child: Text(
-                  treatment_duration,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+            Center(
+              child: Text(
+                patient.clinic_variables?.treatment_duration ?? '',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-              )
-            else
-              Container()
+              ),
+            )
           else
             Container(),
 
           ///
 
           /// TAB 2
-          // send to clinic (CSU user only)
+          // (CSU user only)
           if (active_user!.app_role == 'CSU' || active_user!.app_role == 'ICT')
-            InkWell(
-              onTap: () async {
-                if (ongoing_treatment == null) return;
-
-                // error if ongoing treatment
-                if (ongoing_treatment!) {
-                  Helpers.showToast(
-                    context: context,
-                    color: Colors.redAccent,
-                    toastText: 'Treatment ongoing',
-                    icon: Icons.error,
-                  );
-                  return;
-                }
-
-                // error if treatment done for today
-                if (treatment_done_today) {
-                  Helpers.showToast(
-                    context: context,
-                    color: Colors.redAccent,
-                    toastText: 'Treatment done for today',
-                    icon: Icons.error,
-                  );
-                  return;
-                }
-
-                // patient.key
-                DoctorModel? selected_doctor = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DoctorsList(
-                      from_clinic: true,
-                    ),
-                  ),
-                );
-
-                if (selected_doctor != null) {
-                  // select duration
-                  var dur = await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => OptionsDialog(
-                      title: 'Select Duration',
-                      options: treatment_time,
-                    ),
-                  );
-
-                  if (dur == null) return;
-
-                  String treatment_duration = dur;
-
-                  // remove from clinic
-                  PhysioDatabaseHelpers.remove_from_clinic(
-                    context,
-                    data: {'patient': patient.key, 'Doctor': current_doctor},
-                  );
-
-                  // assign to doctor
-                  PhysioDatabaseHelpers.send_to_clinic(
-                    context,
-                    data: {'patient': patient.key, 'Doctor': current_doctor},
-                  );
-
-                  // set treatment duration
-
-                  pending_treatment = true;
-
-                  setState(() {});
-                }
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.purple.shade400.withOpacity(.6),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Center(
-                  child: Text('Send to Clinic', style: action_style),
-                ),
-              ),
-            )
-
-          // treatment countdoun (doctor only) (if ongoing treatment)
-          else if ((active_user!.app_role == 'Doctor') &&
-              widget.can_treat &&
-              can_treat &&
-              my_patient_to_treat)
-            if (ongoing_treatment!) time() else Container()
-          else
-            Container(),
-
-          ///
-
-          /// Tab 3
-          // doctor's action (if doctor can treat)
-          if ((active_user!.app_role == 'Doctor') &&
-              widget.can_treat &&
-              my_patient_to_treat)
-            // treatment done
-            if (treatment_completed || !can_treat)
-              Container()
-            // go to treatment tab
-            else
+            // send to clinic
+            if (patient.current_case_id == null)
               InkWell(
                 onTap: () async {
-                  if (assessment_completed == null || ongoing_treatment == null)
-                    return;
-
                   // session plan not set
-                  if (assessment_completed! && total_session == 0) {
+                  if (patient.clinic_info?.total_session == 0) {
                     Helpers.showToast(
                       context: context,
                       color: Colors.redAccent,
@@ -1377,76 +1123,164 @@ class _ClinicTabState extends State<ClinicTab> {
                   }
 
                   // treatment ended
-                  if (treatment_done_today) {
+                  var res = await PhysioDatabaseHelpers.get_case_file_by_date(
+                      context,
+                      patient_id: patient.patient_id,
+                      treatment_date: DateTime.now(),
+                      showLoading: true,
+                      loadingText: 'Checking Previous Cases...');
+
+                  if (res != null && res.isNotEmpty) if (PhysioDatabaseHelpers
+                      .check_cases_by_type(
+                          cases: res, case_type: 'Treatment')) {
                     Helpers.showToast(
                       context: context,
                       color: Colors.redAccent,
-                      toastText: 'Treatment for today Ended',
+                      toastText: 'Treatment done today',
                       icon: Icons.error,
                     );
                     return;
                   }
 
-                  // treatment elapse
-                  if (treatment_elapse) {
-                    var conf_elap = await showDialog(
+                  // patient.key
+                  DoctorModel? selected_doctor = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DoctorsList(
+                        from_clinic: true,
+                      ),
+                    ),
+                  );
+
+                  if (selected_doctor != null) {
+                    // select duration
+                    var dur = await showDialog(
                       context: context,
-                      builder: (context) => ConfirmDialog(
-                        title:
-                            '${(!assessment_completed!) ? 'Assessment' : 'Treatment'} Elapsed',
-                        subtitle:
-                            'The previous ${(!assessment_completed!) ? 'assessment' : 'treatment'}'
-                            ' for this client has not ended,\nYou need to end this '
-                            '${(!assessment_completed!) ? 'assessment' : 'treatment'} before proceeding.',
+                      barrierDismissible: false,
+                      builder: (context) => OptionsDialog(
+                        title: 'Select Duration',
+                        options: treatment_time,
                       ),
                     );
 
-                    if (conf_elap != null && conf_elap) {
-                      start_treatment(
-                          continue_treatment: true,
-                          current_treatment_date:
-                              treatmentModel!.current_treatment_date ??
-                                  DateTime.now());
-                    }
-                  }
-                  // same day treatment
-                  else {
-                    var conf = await showDialog(
-                      context: context,
-                      builder: (context) => ConfirmDialog(
-                        title:
-                            'Go To ${(!assessment_completed!) ? 'Assessment' : 'Treatment'} Tab',
-                        subtitle:
-                            'You are about to open the ${(!assessment_completed!) ? 'assessment' : 'treatment'} tab for this client, Would you like to proceed?',
-                      ),
-                    );
+                    if (dur == null) return;
 
-                    if (conf != null && conf == true) {
-                      start_treatment(
-                          continue_treatment: false,
-                          current_treatment_date:
-                              treatmentModel!.current_treatment_date ??
-                                  DateTime.now());
-                    }
+                    String treatment_duration = dur;
+                    // send to selected doctor & save current doctor
+
+                    await PhysioDatabaseHelpers.send_to_clinic(
+                      context,
+                      doctor_key: selected_doctor.key ?? '',
+                      patient_key: patient.key ?? '',
+                      treatment_type: 'Treatment',
+                      treatment_duration: treatment_duration,
+                      showLoading: true,
+                      showToast: true,
+                    );
                   }
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade400.withOpacity(.6),
+                    color: Colors.purple.shade400.withOpacity(.6),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Center(
-                    child: Text(treatment_action_title(), style: action_style),
+                    child: Text('Send to Clinic', style: action_style),
+                  ),
+                ),
+              )
+            else
+              // Awaiting doctor/ Duration
+              Center(
+                child: Text(
+                  (patient.current_case_id == null)
+                      ? 'Awaiting Doctor'
+                      : patient.clinic_variables?.treatment_duration ?? '',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               )
 
+          // (Doctor only && can treat)
+          // treatment countdoun
+          else if ((active_user!.app_role == 'Doctor') && can_treat)
+            if (patient.current_case_id != null) time() else Container()
+          else
+            Container(),
+
+          ///
+
+          /// Tab 3
+          // doctor's action (if doctor can treat)
+          if ((active_user!.app_role == 'Doctor') && can_treat)
+            InkWell(
+              onTap: () async {
+                // session plan not set
+                if (patient.clinic_info?.total_session == 0) {
+                  Helpers.showToast(
+                    context: context,
+                    color: Colors.redAccent,
+                    toastText: 'Setup a treatment plan',
+                    icon: Icons.error,
+                  );
+                  return;
+                }
+
+                if (patient.current_case_id == null) {
+                  // treatment ended
+                  var res = await PhysioDatabaseHelpers.get_case_file_by_date(
+                      context,
+                      patient_id: patient.patient_id,
+                      treatment_date: DateTime.now());
+
+                  if (res != null && res.isNotEmpty) if (PhysioDatabaseHelpers
+                      .check_cases_by_type(
+                          cases: res, case_type: 'Treatment')) {
+                    Helpers.showToast(
+                      context: context,
+                      color: Colors.redAccent,
+                      toastText: 'Treatment done today',
+                      icon: Icons.error,
+                    );
+                    return;
+                  }
+                }
+
+                if (patient.current_case_id == null) {
+                  var conf = await Helpers.showConfirmation(
+                      context: context,
+                      title: 'Go To TreatmentTab',
+                      message:
+                          'You are about to open the treatment tab for this client, Would you like to proceed?',
+                      barrierDismissible: true);
+
+                  if (conf) {
+                    start_treatment(case_type: 'Treatment');
+                  }
+                } else
+                  start_treatment(case_type: 'Treatment');
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade400.withOpacity(.6),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Center(
+                  child: Text(treatment_action_title(), style: action_style),
+                ),
+              ),
+            )
+
           // CSU user action
           else if (active_user!.app_role == 'CSU' ||
               active_user!.app_role == 'ICT')
-            // ongoing treatment label & treatmnet countdown
-            if (ongoing_treatment != null && ongoing_treatment!)
+            // treatmnet countdown
+            if (patient.current_case_id != null)
               Container(
                 child: Row(
                   children: [
@@ -1464,7 +1298,7 @@ class _ClinicTabState extends State<ClinicTab> {
               )
 
             // pending treatment
-            else if (pending_treatment)
+            else if (patient.current_doctor != null)
               Row(
                 children: [
                   // treatment duration
@@ -1491,13 +1325,19 @@ class _ClinicTabState extends State<ClinicTab> {
                       );
 
                       if (dur == null) return;
-
-                      Helpers.showLoadingScreen(context: context);
                       String treatment_duration = dur;
 
                       // change treatment duration
-
-                      Navigator.pop(context);
+                      await PhysioDatabaseHelpers.change_treatment_duration(
+                        context,
+                        doctor_key: patient.current_doctor?.key ?? '',
+                        patient_key: patient.key ?? '',
+                        treatment_type:
+                            patient.clinic_variables?.case_type ?? '',
+                        treatment_duration: treatment_duration,
+                        showLoading: true,
+                        showToast: true,
+                      );
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -1506,7 +1346,10 @@ class _ClinicTabState extends State<ClinicTab> {
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       child: Center(
-                        child: Text(treatment_duration, style: action_style),
+                        child: Text(
+                            patient.clinic_variables?.treatment_duration ??
+                                'No Duration',
+                            style: action_style),
                       ),
                     ),
                   ),
@@ -1516,26 +1359,27 @@ class _ClinicTabState extends State<ClinicTab> {
                   // remove from clinic
                   InkWell(
                     onTap: () async {
-                      var conf = await showDialog(
+                      var conf = await Helpers.showConfirmation(
                         context: context,
-                        builder: (context) => ConfirmDialog(
-                          title: 'Remove From Clinic',
-                          subtitle:
-                              'You are about to remove this patient from the waiting list of the doctors. Would you like to proceed?',
-                        ),
+                        title: 'Remove From Clinic',
+                        message:
+                            'You are about to remove this patient from the waiting list of the doctors. Would you like to proceed?',
+                        barrierDismissible: true,
                       );
 
-                      if (conf == null || !conf) return;
+                      if (!conf) return;
 
                       await PhysioDatabaseHelpers.remove_from_clinic(
                         context,
-                        data: {'id': current_doctor, 'patient': patient.key},
+                        doctor_key: patient.current_doctor?.key ?? '',
+                        patient_key: patient.key ?? '',
+                        treatment_type:
+                            patient.clinic_variables?.case_type ?? '',
+                        treatment_duration:
+                            patient.clinic_variables?.treatment_duration ?? '',
                         showLoading: true,
                         showToast: true,
                       );
-
-                      pending_treatment = false;
-                      setState(() {});
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -1562,133 +1406,12 @@ class _ClinicTabState extends State<ClinicTab> {
     );
   }
 
-  // FUNCTIONS
-  start_treatment(
-      {required bool continue_treatment,
-      required DateTime current_treatment_date}) async {
-    // assign case file key
-    String sv_date = (!assessment_completed!)
-        ? '${Helpers.date_format(continue_treatment ? current_treatment_date : DateTime.now())} (Assessment)'
-        : Helpers.date_format(
-            continue_treatment ? current_treatment_date : DateTime.now());
-
-    // check for case file
-    // if it exist get case file and open
-    // if not open new case file
-
-    Map data1 = {'treatment_date': sv_date, 'patient': patient.key};
-    // try to get case file
-    List<CaseFileModel>? cases =
-        await PhysioDatabaseHelpers.get_case_file_by_date(context, data: data1);
-
-    if (cases == null || cases.isEmpty) {
-      return;
-    }
-
-    CaseFileModel file = cases[0];
-
-    // new case file data
-
-    file = CaseFileModel(
-      treatment_date: DateTime.now(),
-      bp_reading: '',
-      note: '',
-      remarks: '',
-      doctor: active_doctor!,
-      case_type: (assessment_completed!) ? 'Treatment' : 'Assessment',
-      key: sv_date,
-      start_time: DateTime.now(),
-      end_time: null,
-      treatment_decision: '',
-      refered_decision: '',
-      other_decision: '',
-      patient: patient,
-    );
-
-    Map data = file.toJson_open();
-
-    // open case file
-    bool dt = await PhysioDatabaseHelpers.add_update_case_file(
-      context,
-      data: data,
-    );
-
-    if (!dt) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return;
-    }
-
-    // set start time
-
-    // set current treatment date
-
-    // set ongoing treatment = true
-
-    // add patient to doctors tab
-    PhysioDatabaseHelpers.update_doc_ongoing_patient(
-      context,
-      data: {'id': active_doctor?.key ?? '', 'patient': patient.key ?? ''},
-    );
-
-    // remove loading screen
-    Navigator.pop(context);
-
-    // go to treatment page
-    var bac = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TreatmentTab(
-          patient: patient,
-          treatmentInfo: treatmentModel,
-          assessmentModel: assessmentModel,
-          case_file: file,
-          assessment_completed: assessment_completed!,
-          completed_session: completed_session,
-          session_details: _session_details,
-          treatment_duration: treatment_duration,
-          treatment_elapse: treatment_elapse,
-        ),
-      ),
-    );
-
-    // if treatment ended
-    if (bac != null) {
-      if (bac == 'done') {
-        treatment_completed = true;
-        setState(() {});
-
-        Helpers.showToast(
-          context: context,
-          color: Colors.blue,
-          toastText: 'Session Ended',
-          icon: Icons.error,
-        );
-      }
-    }
-  }
-
   // doctor treatment action title
   String treatment_action_title() {
-    if (assessment_completed == null || ongoing_treatment == null)
-      return '...';
-    else if (!assessment_completed!) if (ongoing_treatment!)
-      return 'Continue Assessment';
+    if (patient.current_case_id != null)
+      return 'Continue ${case_type}';
     else
-      return 'Clinical Assessment';
-    else if (ongoing_treatment!) if (treatment_elapse)
-      return 'Treatment Elapsed';
-    else
-      return 'Continue Treatment';
-    else if (treatment_done_today)
-      return 'Treatment done';
-    else
-      return 'Start Treatment';
+      return 'Start ${case_type}';
   }
 
   // session setup pop up menu
@@ -1705,9 +1428,10 @@ class _ClinicTabState extends State<ClinicTab> {
             context: context,
             barrierDismissible: false,
             builder: (context) => SessionPlanDialog(
-              session_set: (total_session != 0),
-              total_session:
-                  (total_session != 0) ? total_session.toString() : null,
+              session_set: (patient.clinic_info!.total_session != 0),
+              total_session: (patient.clinic_info!.total_session != 0)
+                  ? patient.clinic_info!.total_session.toString()
+                  : null,
             ),
           );
 
@@ -1750,7 +1474,7 @@ class _ClinicTabState extends State<ClinicTab> {
 
         // add sessions
         if (value == 2) {
-          if (total_session == 0) {
+          if (patient.clinic_info?.total_session == 0) {
             Helpers.showToast(
               context: context,
               color: Colors.redAccent,
@@ -1764,18 +1488,18 @@ class _ClinicTabState extends State<ClinicTab> {
             context: context,
             barrierDismissible: false,
             builder: (context) => SessionPlanDialog(
-              session_set: (total_session != 0),
+              session_set: (patient.clinic_info?.total_session != 0),
               add_session: true,
               session_details: {
-                'total_sess': total_session.toString(),
-                'frequency': frequency,
+                'total_sess': patient.clinic_info?.total_session.toString(),
+                'frequency': patient.clinic_info?.frequency,
               },
             ),
           );
 
           if (res != null) {
             int new_sess = res;
-            int added = new_sess - total_session;
+            int added = new_sess - (patient.clinic_info?.total_session ?? 0);
 
             ClinicInfoModel cli = patient.clinic_info ?? ClinicInfoModel.gen();
             cli.total_session = new_sess;
@@ -1809,16 +1533,17 @@ class _ClinicTabState extends State<ClinicTab> {
 
         // billing setup
         if (value == 3) {
+          int total_session = patient.clinic_info?.total_session ?? 0;
+          int cost_per_session = patient.clinic_info?.cost_per_session ?? 0;
+          int paid_session = patient.clinic_info?.paid_session ?? 0;
+          int current_cost = cost_per_session * (total_session - paid_session);
+
           var con = await showDialog(
             context: context,
             barrierDismissible: false,
             builder: (context) => BillingDialog(
               cost_per_session: cost_per_session,
-              current_cost: _session_details != null && cost_per_session != null
-                  ? ((_session_details!.total_session -
-                          _session_details!.paid_session) *
-                      cost_per_session!)
-                  : 0,
+              current_cost: current_cost,
             ),
           );
 
@@ -1872,7 +1597,7 @@ class _ClinicTabState extends State<ClinicTab> {
             value: 1,
             child: Container(
               child: Text(
-                total_session == 0
+                patient.clinic_info?.total_session == 0
                     ? 'Setup Session Plan'
                     : 'Change Session Frequency',
                 style: TextStyle(),
@@ -1882,7 +1607,7 @@ class _ClinicTabState extends State<ClinicTab> {
 
         // add session
         if (active_user!.app_role == 'Doctor')
-          if (total_session != 0)
+          if (patient.clinic_info?.total_session != 0)
             PopupMenuItem(
               value: 2,
               child: Container(
@@ -1923,6 +1648,65 @@ class _ClinicTabState extends State<ClinicTab> {
   }
 
   //
+
+  // FUNCTIONS
+  start_treatment({required String case_type}) async {
+    // try to get case file
+    CaseFileModel? caseFile = await PhysioDatabaseHelpers.start_treatment(
+        context,
+        patient: patient,
+        doctor: active_doctor!,
+        case_type: case_type);
+
+    if (caseFile == null) {
+      Helpers.showToast(
+        context: context,
+        color: Colors.redAccent,
+        toastText: 'Treatment error, Try again',
+        icon: Icons.error,
+      );
+      return;
+    }
+
+    // add patient to doctors tab
+    PhysioDatabaseHelpers.update_doc_ongoing_patient(
+      context,
+      data: {'id': active_doctor?.key ?? '', 'patient': patient.key ?? ''},
+    );
+
+    // go to treatment page
+    var bac = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TreatmentTab(
+          patient: patient,
+          treatmentInfo: treatmentModel,
+          assessmentModel: assessmentModel,
+          case_file: caseFile,
+          assessment_completed: assessment_completed!,
+          completed_session: patient.clinic_info?.completed_session ?? 0,
+          session_details: null,
+          treatment_duration:
+              patient.clinic_variables?.treatment_duration ?? '',
+          treatment_elapse: false,
+        ),
+      ),
+    );
+
+    // if treatment ended
+    if (bac != null) {
+      if (bac == 'done') {
+        Helpers.showToast(
+          context: context,
+          color: Colors.blue,
+          toastText: 'Session Ended',
+          icon: Icons.error,
+        );
+      }
+    }
+  }
+
+//
 }
 
 class SessionModel {

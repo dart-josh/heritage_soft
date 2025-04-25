@@ -25,8 +25,8 @@ class UserModel {
     required this.user_role,
     required this.section,
     required this.full_access,
-    required this.last_activity,
-    required this.fresh_day,
+    this.last_activity = const {},
+    this.fresh_day = false,
     required this.app_role,
     required this.can_sign_in,
   });

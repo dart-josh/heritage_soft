@@ -331,33 +331,29 @@ class ClinicInfoModel {
 }
 
 class ClinicVariable {
-  bool can_treat;
   String treatment_duration;
-  DateTime start_time;
-  DateTime end_time;
+  DateTime? start_time;
+  String case_type;
 
   ClinicVariable({
-    required this.can_treat,
     required this.treatment_duration,
-    required this.start_time,
-    required this.end_time,
+    this.start_time,
+    required this.case_type,
   });
 
   factory ClinicVariable.fromMap(Map map) {
     return ClinicVariable(
-      can_treat: map['can_treat'] ?? false,
-      treatment_duration: map['treatment_duration'] ?? 0,
-      start_time: DateTime.parse(map['start_time']),
-      end_time: DateTime.parse(map['end_time']),
+      treatment_duration: map['treatment_duration'] ?? '',
+      start_time:
+          map['start_time'] != null ? DateTime.parse(map['start_time']) : null,
+      case_type: map['case_type'] ?? '',
     );
   }
 
   Map toJson() {
     return {
-      'can_treat': can_treat,
       'treatment_duration': treatment_duration,
-      'start_time': start_time.toIso8601String(),
-      'end_time': end_time.toIso8601String(),
+      'start_time': start_time?.toIso8601String(),
     };
   }
 }
