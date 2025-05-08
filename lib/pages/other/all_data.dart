@@ -5,11 +5,13 @@ import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
+import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/pages/gym/clients_list.dart';
-import 'package:heritage_soft/pages/physio/doctors_list.dart';
-import 'package:heritage_soft/pages/physio/physio_clients_list.dart';
-import 'package:heritage_soft/pages/staff/staff_list.dart';
+import 'package:heritage_soft/pages/clinic/doctors_list.dart';
+import 'package:heritage_soft/pages/clinic/all_patient_list.dart';
+import 'package:heritage_soft/pages/staff/user_list.dart';
 import 'dart:ui' as ui;
 
 import 'package:intl/intl.dart';
@@ -38,7 +40,7 @@ class _AllDataState extends State<AllData> {
   List<HMO_Model> physio_hmos = [];
   int total_phy_session = 0;
 
-  List<StaffModel> staffs = [];
+  List<UserModel> users = [];
   List<DoctorModel> doctors = [];
 
   int current_page = 0;
@@ -70,15 +72,20 @@ class _AllDataState extends State<AllData> {
     physio_hmos = Provider.of<AppData>(context).physio_hmo.toList();
 
     total_phy_session = 0;
-    Provider.of<AppData>(context).all_doctors.forEach((el) {
-      total_phy_session += el.my_patients.reduce((element, next) => MyPatientModel(patient: el.my_patients[0].patient, session_count: element.session_count + next.session_count,)).session_count;
+    Provider.of<AppData>(context).doctors.forEach((el) {
+      total_phy_session += el.my_patients
+          .reduce((element, next) => MyPatientModel(
+                patient: el.my_patients[0].patient,
+                session_count: element.session_count + next.session_count,
+              ))
+          .session_count;
     });
   }
 
   // get staff data
   get_staff_data() {
-    staffs = Provider.of<AppData>(context).staffs;
-    doctors = Provider.of<AppData>(context).all_doctors;
+    users = Provider.of<AppData>(context).users;
+    doctors = Provider.of<AppData>(context).doctors;
   }
 
   //
@@ -399,7 +406,7 @@ class _AllDataState extends State<AllData> {
                   SizedBox(height: 20),
 
                   // staff
-                  figure_tile(label: 'HMO\'s', figure: physio_hmos.length),
+                  figure_tile(label: 'HMO\'s', figure: physio_hmo.length),
                 ],
               ),
             ],
@@ -429,7 +436,7 @@ class _AllDataState extends State<AllData> {
               Column(
                 children: [
                   // total
-                  figure_tile(label: 'Staffs', figure: staffs.length),
+                  figure_tile(label: 'Staffs', figure: users.length),
 
                   SizedBox(height: 20),
 
@@ -482,7 +489,7 @@ class _AllDataState extends State<AllData> {
               letterSpacing: 0.5,
             ),
           ),
-          
+
           SizedBox(height: 0),
 
           // label
@@ -530,6 +537,7 @@ class _AllDataState extends State<AllData> {
                   // client list
                   InkWell(
                     onTap: () {
+                      return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ClientsList()),
@@ -585,7 +593,7 @@ class _AllDataState extends State<AllData> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PhysioClientsList()),
+                            builder: (context) => AllPatientList()),
                       );
                     },
                     child: Container(
@@ -637,7 +645,7 @@ class _AllDataState extends State<AllData> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StaffList()),
+                        MaterialPageRoute(builder: (context) => UserList()),
                       );
                     },
                     child: Container(

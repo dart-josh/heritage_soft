@@ -5,8 +5,8 @@ import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
-import 'package:heritage_soft/pages/physio/physio_pofile_page.dart';
-import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
+import 'package:heritage_soft/pages/clinic/patient_pofile_page.dart';
+import 'package:heritage_soft/pages/clinic/widgets/physio_hmo_tag.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 

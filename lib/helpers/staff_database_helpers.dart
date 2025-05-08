@@ -65,7 +65,7 @@ class StaffDatabaseHelpers {
         }
       });
 
-      Provider.of<AppData>(context, listen: false).update_staffs(staffs);
+      // Provider.of<AppData>(context, listen: false).update_staffs(staffs);
     });
   }
 

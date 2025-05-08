@@ -9,12 +9,11 @@ import 'package:heritage_soft/helpers/user_helpers.dart';
 import 'package:heritage_soft/helpers/utils.dart';
 import 'package:heritage_soft/maintree.dart';
 import 'package:heritage_soft/pages/other/attendance_page.dart';
-import 'package:heritage_soft/pages/staff/user_setup_page.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
-import 'package:provider/provider.dart';
 
 class SignInToApp extends StatefulWidget {
-  const SignInToApp({super.key});
+  final bool logout;
+  const SignInToApp({super.key, this.logout = false});
 
   @override
   State<SignInToApp> createState() => _SignInToAppState();
@@ -38,6 +37,20 @@ class _SignInToAppState extends State<SignInToApp> {
         password: pass_controller.text.trim());
 
     if (user != null) {
+      if (!user.can_sign_in) {
+        setState(() {
+          isLoading = false;
+          loadingText = '';
+        });
+
+        Helpers.showToast(
+            context: context,
+            color: Colors.red,
+            toastText: 'You are not allowed to Sign in',
+            icon: Icons.error);
+        return;
+      }
+
       save_login(user_controller.text.trim(), pass_controller.text.trim());
 
       if (user.app_role == 'Doctor') {
@@ -56,6 +69,10 @@ class _SignInToAppState extends State<SignInToApp> {
             // go to homepage
             goto_homepage(user: user, doctor: doctor);
           } else {
+            setState(() {
+              isLoading = false;
+              loadingText = '';
+            });
             //
             return Helpers.showToast(
                 context: context,
@@ -81,7 +98,8 @@ class _SignInToAppState extends State<SignInToApp> {
     }
   }
 
-  void goto_homepage({required UserModel user, DoctorModel? doctor}) {
+  Future<void> goto_homepage(
+      {required UserModel user, DoctorModel? doctor}) async {
     if (!user.can_sign_in) {
       setState(() {
         isLoading = false;
@@ -97,9 +115,17 @@ class _SignInToAppState extends State<SignInToApp> {
       return;
     }
 
-    // asign user
-    if (doctor != null) AppData.set(context).update_active_doctor(doctor);
     AppData.set(context).update_active_user(user);
+
+    // asign user
+    if (doctor != null) {
+      // update doctor availablity
+      doctor.is_available = true;
+
+      await UserHelpers.add_update_doctor(context,
+          data: doctor.toJson(), showLoading: true, showToast: true);
+      AppData.set(context).update_active_doctor(doctor);
+    }
 
     Navigator.pushAndRemoveUntil(context,
         MaterialPageRoute(builder: (context) => MainTree()), (route) => false);
@@ -120,13 +146,14 @@ class _SignInToAppState extends State<SignInToApp> {
     if (user_id != null && password != null) {
       user_controller.text = user_id;
       pass_controller.text = password;
+
+      login();
     }
-    login();
   }
 
   initState() {
     super.initState();
-    get_login_details();
+    if (!widget.logout) get_login_details();
   }
 
   @override
@@ -266,6 +293,20 @@ class _SignInToAppState extends State<SignInToApp> {
           return;
         }
 
+        int? id = int.tryParse(user_controller.text);
+
+        if (id != null) {
+          user_controller.text = 'DHI-${fine_id(id.toString())}-ST';
+        } else {
+          user_controller.text = user_controller.text.toUpperCase();
+
+          if (!user_controller.text.toLowerCase().contains('dhi-'))
+            user_controller.text = 'DHI-${user_controller.text}';
+
+          if (!user_controller.text.toLowerCase().contains('-st'))
+            user_controller.text = '${user_controller.text}-ST';
+        }
+
         login();
       },
       child: Container(
@@ -287,6 +328,20 @@ class _SignInToAppState extends State<SignInToApp> {
         ),
       ),
     );
+  }
+
+  // get fine_id
+  String fine_id(String id) {
+    if (id.length >= 4)
+      return id;
+    else if (id.length == 3)
+      return '0$id';
+    else if (id.length == 2)
+      return '00$id';
+    else if (id.length == 1)
+      return '000$id';
+    else
+      return id;
   }
 
   //

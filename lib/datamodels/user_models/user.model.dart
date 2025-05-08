@@ -31,6 +31,23 @@ class UserModel {
     required this.can_sign_in,
   });
 
+  factory UserModel.gen(String key) {
+    return UserModel(
+      key: key,
+      user_id: 'Empty',
+      f_name: 'Empty',
+      l_name: 'Empty',
+      m_name: 'Empty',
+      user_image: '',
+      user_status: true,
+      user_role: '',
+      section: '',
+      full_access: false,
+      app_role: '',
+      can_sign_in: false,
+    );
+  }
+
   factory UserModel.fromMap(Map map) {
     return UserModel(
       key: map['_id'],

@@ -3,14 +3,11 @@ import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/helpers/utils.dart';
-import 'package:heritage_soft/pages/other/accessories_shop_page.dart';
+import 'package:heritage_soft/helpers/helper_methods.dart';
+import 'package:heritage_soft/pages/store/shop_page.dart';
 import 'package:heritage_soft/pages/other/birthday_list.dart';
-import 'package:heritage_soft/pages/physio/physio_registration_page.dart';
-import 'package:heritage_soft/pages/sign_in_page.dart';
-import 'package:heritage_soft/pages/physio/widgets/accessories_request_list.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
-import 'package:heritage_soft/pages/physio/widgets/waiting_patients_list.dart';
+import 'package:heritage_soft/pages/clinic/widgets/accessories_request_list.dart';
+import 'package:heritage_soft/pages/clinic/widgets/waiting_patients_list.dart';
 import 'package:provider/provider.dart';
 
 class MyAppBar extends StatefulWidget {
@@ -27,6 +24,7 @@ class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
     UserModel? user = AppData.get(context).active_user;
+    DoctorModel? doctor = AppData.get(context).active_doctor;
 
     if (user == null)
       return Container(
@@ -51,13 +49,17 @@ class _MyAppBarState extends State<MyAppBar> {
                 : receptionist_row(),
           ),
         ),
-        (user.app_role == 'Doctor')
+
+        // pending patients
+        (user.app_role == 'Doctor' && doctor != null)
             ? Positioned(
                 top: 40,
                 right: 20,
                 child: waiting_list_open ? WaitingPatientsList() : Container(),
               )
-            : (user.app_role == 'CSU' || user.app_role == 'ICT')
+
+            // accessory request list
+            : (user.app_role == 'CSU' || user.full_access)
                 ? Positioned(
                     top: 40,
                     right: 20,
@@ -227,83 +229,28 @@ class _MyAppBarState extends State<MyAppBar> {
                   fontSize: 14,
                 ),
               ),
+
+              SizedBox(width: 15),
+
+              Text(
+                '[ ${user.user_id} ]',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),
 
         Expanded(child: Container()),
 
-        InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                PhysioRegistrationPage()));
-                  },
-                  child: Icon(
-                    Icons.add,
-                    color: Colors.black,
-                    size: 24,
-                  ),
-                ),
-
         // birthday
-        Container(
-          padding: EdgeInsets.only(right: 10),
-          child: InkWell(
-            onTap: () {
-              if (accessories_request_open) return;
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BirthdayList()),
-              );
-            },
-            child: Stack(
-              children: [
-                // birthday icon
-                Container(
-                  padding: EdgeInsets.only(top: 12, right: 8),
-                  child: Icon(
-                    Icons.card_giftcard,
-                    color: accessories_request_open
-                        ? Colors.white38
-                        : birthday_count > 0
-                            ? Colors.green
-                            : Colors.white60,
-                    size: 24,
-                  ),
-                ),
-
-                // notification
-                if (birthday_count > 0)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      height: 18,
-                      width: 18,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          birthday_count.toString(),
-                          style: TextStyle(
-                              color: Colors.white, fontSize: 11, height: 1),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        // accessories shop
-        if (app_role == 'desk' || app_role == 'ict')
+        if (user.app_role == 'CSU' ||
+            user.app_role == 'Admin' ||
+            user.app_role == 'Management' ||
+            user.app_role == 'ICT' ||
+            user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: InkWell(
@@ -312,8 +259,62 @@ class _MyAppBarState extends State<MyAppBar> {
 
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => AccessoriesShopPage()),
+                  MaterialPageRoute(builder: (context) => BirthdayList()),
+                );
+              },
+              child: Stack(
+                children: [
+                  // birthday icon
+                  Container(
+                    padding: EdgeInsets.only(top: 12, right: 8),
+                    child: Icon(
+                      Icons.card_giftcard,
+                      color: accessories_request_open
+                          ? Colors.white38
+                          : birthday_count > 0
+                              ? Colors.green
+                              : Colors.white60,
+                      size: 24,
+                    ),
+                  ),
+
+                  // notification
+                  if (birthday_count > 0)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        height: 18,
+                        width: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            birthday_count.toString(),
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 11, height: 1),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+        // accessories shop
+        if (user.app_role == 'CSU' || user.full_access)
+          Container(
+            padding: EdgeInsets.only(right: 10),
+            child: InkWell(
+              onTap: () {
+                if (accessories_request_open) return;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ShopPage()),
                 );
               },
               child: Container(
@@ -329,7 +330,7 @@ class _MyAppBarState extends State<MyAppBar> {
           ),
 
         // accessory requests
-        if (app_role == 'desk' || app_role == 'ict')
+        if (user.app_role == 'CSU' || user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: Row(
@@ -400,25 +401,15 @@ class _MyAppBarState extends State<MyAppBar> {
         // logout
         IconButton(
           onPressed: () async {
-            var conf = await showDialog(
-              context: context,
-              builder: (context) => ConfirmDialog(
+            var conf = await Helpers.showConfirmation(
+                context: context,
                 title: 'Log out',
-                subtitle:
-                    'You are about to log out. Would you like to proceed?',
-                boolean: true,
-              ),
-            );
+                message: 'You are about to log out. Would you like to proceed?',
+                boolean: true);
 
-            if (conf == null || !conf) return;
+            if (!conf) return;
 
-            await Utils.remove_user();
-
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => SignInToApp()),
-              (route) => false,
-            );
+            Helpers.logout(context);
           },
           icon: Icon(Icons.logout, color: Colors.white),
         ),

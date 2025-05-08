@@ -8,8 +8,8 @@ class DoctorModel {
   bool is_available;
   String title;
   List<MyPatientModel> my_patients = [];
-  List<TreatmentPatientModel> ong_patients = [];
-  List<TreatmentPatientModel> pen_patients = [];
+  List<PatientModel> ong_patients = [];
+  List<PatientModel> pen_patients = [];
 
   DoctorModel({
     this.key,
@@ -21,10 +21,26 @@ class DoctorModel {
     required this.pen_patients,
   });
 
+  factory DoctorModel.gen(String id) {
+    return DoctorModel(
+      key: id,
+      user: UserModel.gen(id),
+      is_available: true,
+      title: '',
+      my_patients: [],
+      ong_patients: [],
+      pen_patients: [],
+    );
+  }
+
   factory DoctorModel.fromMap(Map map) {
+    var ty = map['user'].runtimeType;
+
     return DoctorModel(
       key: map['_id'] ?? '',
-      user: UserModel.fromMap(map['user']),
+      user: (ty == String)
+          ? UserModel.gen(map['user'])
+          : UserModel.fromMap(map['user']),
       is_available: map['is_available'] ?? false,
       title: map['title'] ?? 'Physiotherapist',
       my_patients: map['my_patients'] != null
@@ -32,12 +48,16 @@ class DoctorModel {
               map['my_patients'].map((x) => MyPatientModel.fromMap(x)))
           : [],
       ong_patients: map['ong_patients'] != null
-          ? List<TreatmentPatientModel>.from(
-              map['ong_patients'].map((x) => TreatmentPatientModel.fromMap(x)))
+          ? List<PatientModel>.from(map['ong_patients'].map((x) {
+              if (x.runtimeType == String) return PatientModel.gen(x);
+              return PatientModel.fromMap(x);
+            }))
           : [],
       pen_patients: map['pen_patients'] != null
-          ? List<TreatmentPatientModel>.from(
-              map['pen_patients'].map((x) => TreatmentPatientModel.fromMap(x)))
+          ? List<PatientModel>.from(map['pen_patients'].map((x) {
+              if (x.runtimeType == String) return PatientModel.gen(x);
+              return PatientModel.fromMap(x);
+            }))
           : [],
     );
   }
@@ -51,35 +71,8 @@ class DoctorModel {
 }
 
 // doctor's patient model
-class TreatmentPatientModel {
-  PatientModel patient;
-  String treatment_type;
-  String treatment_duration;
-
-  TreatmentPatientModel({
-    required this.patient,
-    required this.treatment_type,
-    required this.treatment_duration,
-  });
-
-  factory TreatmentPatientModel.fromMap(Map map) {
-    return TreatmentPatientModel(
-      patient: PatientModel.fromMap(map['patient']),
-      treatment_type: map['treatment_type'] ?? 'Physiotherapy',
-      treatment_duration: map['treatment_duration'] ?? '30 minutes',
-    );
-  }
-
-  Map toJson() => {
-        'patient': patient.key,
-        'treatment_type': treatment_type,
-        'treatment_duration': treatment_duration,
-      };
-}
-
-// doctor's patient model
 class MyPatientModel {
-  PatientModel patient;
+  PatientModel? patient;
   int session_count;
 
   MyPatientModel({
@@ -88,13 +81,14 @@ class MyPatientModel {
   });
 
   factory MyPatientModel.fromMap(Map map) {
+    var pen = map['patient'].runtimeType;
     return MyPatientModel(
-      patient: PatientModel.fromMap(map['patient']),
+      patient: (pen == String) ? null : PatientModel.fromMap(map['patient']),
       session_count: map['session_count'] ?? 0,
     );
   }
   Map toJson() => {
-        'patient': patient.key,
+        'patient': patient?.key,
         'session_count': session_count,
       };
 }

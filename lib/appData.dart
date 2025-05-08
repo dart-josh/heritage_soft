@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/password_model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
+import 'package:heritage_soft/datamodels/store_models/accessory.model.dart';
+import 'package:heritage_soft/datamodels/store_models/accessory_request.model.dart';
+import 'package:heritage_soft/datamodels/store_models/restock_accessory_record.model.dart';
+import 'package:heritage_soft/datamodels/store_models/sales_record.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
+import 'package:heritage_soft/pages/store/sales_record_page.dart';
 import 'package:provider/provider.dart';
 
 class AppData extends ChangeNotifier {
@@ -31,14 +35,17 @@ class AppData extends ChangeNotifier {
 
   List<AccessoryModel> accessories = [];
 
-  List<A_ShopModel> accessory_request = [];
+  List<AccessoryRequestModel> accessory_request = [];
 
-  List<DoctorModel> all_doctors = [];
+  List<SalesRecordModel> sales_record = [];
+  List<RestockAccessoryRecordModel> restock_record = [];
+
+  List<DoctorModel> doctors = [];
 
   List<PhysioClientListModel> doctors_patients = [];
   List<PhysioClientListModel> doctors_ong_patients = [];
 
-  List<StaffModel> staffs = [];
+  List<UserModel> users = [];
 
   List<HMO_Model> gym_hmo = [];
   List<HMO_Model> physio_hmo = [];
@@ -67,10 +74,62 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void update_staffs(List<StaffModel> value) {
-    staffs = value;
+  // ? USERS
+  void update_users(List<UserModel> value) {
+    users = value;
     notifyListeners();
   }
+
+  void update_user(UserModel value) {
+    var user = users.indexWhere((p) => p.key == value.key);
+
+    if (user != -1) {
+      users[user] = value;
+    } else {
+      users.add(value);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_user(String value) {
+    var user = users.indexWhere((p) => p.key == value);
+
+    if (user != -1) {
+      users.removeAt(user);
+    }
+
+    notifyListeners();
+  }
+
+  void update_doctors(List<DoctorModel> value) {
+    doctors = value;
+    notifyListeners();
+  }
+
+  void update_doctor(DoctorModel value) {
+    var doctor = doctors.indexWhere((p) => p.key == value.key);
+
+    if (doctor != -1) {
+      doctors[doctor] = value;
+    } else {
+      doctors.add(value);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_doctor(String value) {
+    var doctor = doctors.indexWhere((p) => p.key == value);
+
+    if (doctor != -1) {
+      doctors.removeAt(doctor);
+    }
+
+    notifyListeners();
+  }
+
+// ?
 
   void update_clients(List<ClientListModel> value) {
     clients = value;
@@ -82,6 +141,7 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
+  //? CLINIC
   void update_all_patients(List<PatientModel> value) {
     patients = value;
     notifyListeners();
@@ -109,28 +169,89 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
+  void update_accessory_requests(List<AccessoryRequestModel> value) {
+    accessory_request = value;
+    notifyListeners();
+  }
+
+  void update_accessory_request(AccessoryRequestModel value) {
+    var acc = accessory_request.indexWhere((p) => p.key == value.key);
+
+    if (acc != -1) {
+      accessory_request[acc] = value;
+    } else {
+      accessory_request.add(value);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_accessory_request(String value) {
+    var pat = accessory_request.indexWhere((p) => p.key == value);
+
+    if (pat != -1) {
+      accessory_request.removeAt(pat);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_all_accessory_request() {
+    accessory_request.clear();
+
+    notifyListeners();
+  }
+
+  //?
+
+  //? STORE
+  
   void update_accessories(List<AccessoryModel> value) {
     accessories = value;
     notifyListeners();
   }
 
-  void update_accessory_request(List<A_ShopModel> value) {
-    accessory_request = value;
+  void update_accessory(AccessoryModel value) {
+    var acc = accessories.indexWhere((p) => p.key == value.key);
+
+    if (acc != -1) {
+      accessories[acc] = value;
+    } else {
+      accessories.add(value);
+    }
+
     notifyListeners();
   }
+
+  void delete_accessory(String value) {
+    var pat = accessories.indexWhere((p) => p.key == value);
+
+    if (pat != -1) {
+      accessories.removeAt(pat);
+    }
+
+    notifyListeners();
+  }
+
+  void update_sales_record(List<SalesRecordModel> value) {
+    sales_record = value;
+    notifyListeners();
+  }
+
+  void update_restock_record(List<RestockAccessoryRecordModel> value) {
+    restock_record = value;
+    notifyListeners();
+  }
+
+  //?
 
   void update_active_user(UserModel value) {
     active_user = value;
     notifyListeners();
   }
 
-  void update_all_doctors(List<DoctorModel> value) {
-    all_doctors = value;
-    notifyListeners();
-  }
-
   void update_single_doctor(DoctorModel value) {
-    all_doctors.where((e) => e.key == value.key).toList().first = value;
+    doctors.where((e) => e.key == value.key).toList().first = value;
     notifyListeners();
   }
 

@@ -4,7 +4,7 @@ import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 class PatientModel {
   String? key;
   String patient_id;
-  DateTime reg_date;
+  DateTime? reg_date;
   bool user_status;
   String f_name;
   String m_name;
@@ -33,7 +33,7 @@ class PatientModel {
   ClinicVariable? clinic_variables;
   List<AssessmentInfoModel> assessment_info;
   List<ClinicHistoryModel> clinic_history;
-  List<InvoiceModel> invoice_history;
+  List<InvoiceModel> clinic_invoice;
   int total_amount_paid;
   String? current_case_id;
 
@@ -69,16 +69,20 @@ class PatientModel {
     this.clinic_variables,
     this.assessment_info = const [],
     this.clinic_history = const [],
-    this.invoice_history = const [],
+    this.clinic_invoice = const [],
     this.total_amount_paid = 0,
     this.current_case_id,
   });
 
   factory PatientModel.fromMap(Map map) {
+    var las_doc = map['last_doctor'].runtimeType;
+    var cur_doc = map['current_doctor'].runtimeType;
+
     return PatientModel(
       key: map['_id'] ?? '',
       patient_id: map['patient_id'] ?? '',
-      reg_date: DateTime.parse(map['reg_date']),
+      reg_date:
+          map['reg_date'] != null ? DateTime.parse(map['reg_date']) : null,
       user_status: map['user_status'] ?? false,
       f_name: map['f_name'] ?? '',
       m_name: map['m_name'] ?? '',
@@ -105,10 +109,14 @@ class PatientModel {
       refferal_code: map['refferal_code'] ?? '',
       current_doctor: map['current_doctor'] == null
           ? null
-          : DoctorModel.fromMap(map['current_doctor']),
+          : cur_doc == String
+              ? DoctorModel.gen(map['current_doctor'])
+              : DoctorModel.fromMap(map['current_doctor']),
       last_doctor: map['last_doctor'] == null
           ? null
-          : DoctorModel.fromMap(map['last_doctor']),
+          : las_doc == String
+              ? DoctorModel.gen(map['last_doctor'])
+              : DoctorModel.fromMap(map['last_doctor']),
       treatment_info: map['treatment_info'] == null
           ? null
           : TreatmentInfoModel.fromMap(map['treatment_info']),
@@ -128,8 +136,8 @@ class PatientModel {
                 ?.map((e) => ClinicHistoryModel.fromMap(e as Map)) ??
             <ClinicHistoryModel>[],
       ),
-      invoice_history: List<InvoiceModel>.from(
-        map['invoice_history']?.map((e) => InvoiceModel.fromMap(e as Map)) ??
+      clinic_invoice: List<InvoiceModel>.from(
+        map['clinic_invoice']?.map((e) => InvoiceModel.fromMap(e as Map)) ??
             <InvoiceModel>[],
       ),
       total_amount_paid: map['total_amount_paid'] ?? 0,
@@ -137,10 +145,39 @@ class PatientModel {
     );
   }
 
+  factory PatientModel.gen(String key) {
+    return PatientModel(
+      key: key,
+      patient_id: '',
+      reg_date: null,
+      user_status: true,
+      f_name: '',
+      m_name: '',
+      l_name: '',
+      user_image: '',
+      phone_1: '',
+      phone_2: '',
+      email: '',
+      address: '',
+      gender: '',
+      dob: '',
+      age: '',
+      occupation: '',
+      nature_of_work: '',
+      hykau: '',
+      hykau_others: '',
+      hmo: '',
+      hmo_id: '',
+      baseline_done: false,
+      sponsors: [],
+      refferal_code: '',
+    );
+  }
+
   Map toJson() => {
         'id': key,
         'patient_id': patient_id,
-        'reg_date': reg_date.toIso8601String(),
+        'reg_date': reg_date?.toIso8601String(),
         'user_status': user_status,
         'f_name': f_name,
         'm_name': m_name,
@@ -200,10 +237,7 @@ class TreatmentInfoModel {
   String last_bp_p;
   DateTime? last_treatment_date;
   DateTime? last_treatment_date_p;
-  DateTime? current_treatment_date;
-  bool treatment_elapse;
   bool assessment_completed;
-  bool ongoing_treatment;
   DateTime? assessment_date;
   bool assessment_paid;
   bool skip_assessment;
@@ -213,10 +247,7 @@ class TreatmentInfoModel {
     required this.last_bp_p,
     required this.last_treatment_date,
     required this.last_treatment_date_p,
-    required this.current_treatment_date,
-    required this.treatment_elapse,
     required this.assessment_completed,
-    required this.ongoing_treatment,
     required this.assessment_date,
     required this.assessment_paid,
     required this.skip_assessment,
@@ -227,13 +258,10 @@ class TreatmentInfoModel {
         last_bp_p: '0',
         last_treatment_date: DateTime.now(),
         last_treatment_date_p: DateTime.now(),
-        current_treatment_date: DateTime.now(),
-        treatment_elapse: false,
         assessment_completed: true,
-        ongoing_treatment: false,
         assessment_date: DateTime.now(),
         assessment_paid: false,
-        skip_assessment: true,
+        skip_assessment: false,
       );
 
   factory TreatmentInfoModel.fromMap(Map map) => TreatmentInfoModel(
@@ -245,12 +273,7 @@ class TreatmentInfoModel {
         last_treatment_date_p: map['last_treatment_date_p'] != null
             ? DateTime.parse(map['last_treatment_date_p'])
             : null,
-        current_treatment_date: map['current_treatment_date'] != null
-            ? DateTime.parse(map['current_treatment_date'])
-            : null,
-        treatment_elapse: map['treatment_elapse'] ?? false,
         assessment_completed: map['assessment_completed'] ?? false,
-        ongoing_treatment: map['ongoing_treatment'] ?? false,
         assessment_date: map['assessment_date'] != null
             ? DateTime.parse(map['assessment_date'])
             : null,
@@ -266,10 +289,7 @@ class TreatmentInfoModel {
           'last_bp_p': last_bp_p,
           'last_treatment_date': last_treatment_date?.toIso8601String(),
           'last_treatment_date_p': last_treatment_date_p?.toIso8601String(),
-          'current_treatment_date': current_treatment_date?.toIso8601String(),
-          'treatment_elapse': treatment_elapse,
           'assessment_completed': assessment_completed,
-          'ongoing_treatment': ongoing_treatment,
           'assessment_date': assessment_date?.toIso8601String(),
           'assessment_paid': assessment_paid,
           'skip_assessment': skip_assessment,
@@ -470,16 +490,16 @@ class ClinicHistoryModel {
 class InvoiceModel {
   String invoice_id;
   String invoice_type;
-  double? amount;
-  double? discount;
+  int? amount;
+  int? discount;
   DateTime date;
   int total_session;
   String frequency;
   int completed_session;
   int paid_session;
-  double cost_per_session;
-  double amount_paid;
-  double floating_amount;
+  int cost_per_session;
+  int amount_paid;
+  int floating_amount;
 
   InvoiceModel({
     required this.invoice_id,
@@ -500,16 +520,16 @@ class InvoiceModel {
     return InvoiceModel(
       invoice_id: map['invoice_id'] ?? '',
       invoice_type: map['invoice_type'] ?? '',
-      amount: map['amount']?.toDouble(),
-      discount: map['discount']?.toDouble(),
+      amount: map['amount']?? 0,
+      discount: map['discount']?? 0,
       date: DateTime.parse(map['date']),
-      total_session: map['total_session']?.toInt() ?? 0,
+      total_session: map['total_session']?? 0,
       frequency: map['frequency'] ?? '',
-      completed_session: map['completed_session']?.toInt() ?? 0,
-      paid_session: map['paid_session']?.toInt() ?? 0,
-      cost_per_session: map['cost_per_session']?.toDouble() ?? 0,
-      amount_paid: map['amount_paid']?.toDouble() ?? 0,
-      floating_amount: map['floating_amount']?.toDouble() ?? 0,
+      completed_session: map['completed_session'] ?? 0,
+      paid_session: map['paid_session'] ?? 0,
+      cost_per_session: map['cost_per_session'] ?? 0,
+      amount_paid: map['amount_paid'] ?? 0,
+      floating_amount: map['floating_amount'] ?? 0,
     );
   }
 

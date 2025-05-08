@@ -1,4 +1,3 @@
-
 import 'package:intl/intl.dart';
 
 class PhysioHelpers {
@@ -15,20 +14,22 @@ class PhysioHelpers {
       int min = int.parse(_lst[1].trim());
 
       DateTime new_t = start_time.add(Duration(hours: hr, minutes: min));
-      Duration dur = new_t.difference(DateTime.now());
+
+      Duration dur = new_t.difference(DateTime.now()) - (Duration(hours: 1));
+      
 
       return dur;
     } else if (treatment_duration.contains('Mins')) {
       int min = int.parse(treatment_duration.replaceAll('Mins', '').trim());
       DateTime new_t = start_time.add(Duration(minutes: min));
-      Duration dur = new_t.difference(DateTime.now());
+      Duration dur = new_t.difference(DateTime.now()) - (Duration(hours: 1));
 
       return dur;
     } else if (treatment_duration.contains('Hr')) {
       int hr = int.parse(treatment_duration.replaceAll('Hr', '').trim());
       DateTime new_t = start_time.add(Duration(hours: hr));
-      Duration dur = new_t.difference(DateTime.now());
-
+      Duration dur = new_t.difference(DateTime.now()) - (Duration(hours: 1));
+      
       return dur;
     } else {
       return Duration(minutes: 30);
@@ -68,7 +69,7 @@ class PhysioHelpers {
 
     return [hou, minn, secc];
   }
-  
+
   // format date
   static String fmt_date(String date) {
     return DateFormat('d MMM, y').format(DateFormat('dd_MM_yyyy').parse(date));

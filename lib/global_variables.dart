@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:universal_html/html.dart';
 
-String server_url = 'http://localhost:5500';
+GlobalKey<ScaffoldState> doctor_profile_key = GlobalKey();
+
+String server_url = 'http://192.168.1.111:5500'; // http://192.168.1.111 http://localhost
 
 // ! DB ROUTES
-  String clinicUrl = '${server_url}/api/clinic';
-  String userUrl = '${server_url}/api/user';
-  String salesUrl = '${server_url}/api/sales';
-  String universalUrl = '${server_url}/api/universal';
-  String authUrl = '${server_url}/api/auth';
+String clinicUrl = '${server_url}/api/clinic';
+String userUrl = '${server_url}/api/user';
+String salesUrl = '${server_url}/api/sales';
+String universalUrl = '${server_url}/api/universal';
+String authUrl = '${server_url}/api/auth';
 
 // app role
 List<String> app_roles = [
@@ -39,7 +41,13 @@ String news = '';
 
 // hmos
 List<HMO_Model> gym_hmo = [];
-List<HMO_Model> physio_hmo = [];
+List<String> physio_hmo = [
+  'THT',
+  'Redcare',
+  'Reliance',
+  'Hygeia',
+  'AXA',
+];
 
 // how you heard about us
 List<String> hykau_options = [
@@ -146,12 +154,22 @@ List<String> equipment_options = [
   '*Interferential Current machine',
 ];
 
-List<String> decision_select_options = [
+List<String> assessment_decision_select_options = [
   'Booked for Treatment',
   'Refer',
   'Others',
   'Not a Physio Patient'
 ];
+List<String> treatment_decision_select_options = [
+  'Booked for Treatment',
+  'Refer',
+  'Others',
+  'Continue Treatment',
+  'End Treatment',
+  'Schedule Treatment for Anoda date',
+  'Patient not Responsive'
+];
+
 List<String> decision_refered_options = [
   'Orthopedic',
   'Phycisian',

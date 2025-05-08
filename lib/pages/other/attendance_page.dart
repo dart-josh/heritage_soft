@@ -253,7 +253,7 @@ class _AttendancePageState extends State<AttendancePage> {
                 String val = response;
 
                 var staf_check = Provider.of<AppData>(context, listen: false)
-                    .staffs
+                    .users
                     .where(
                       (element) =>
                           element.user_id.toLowerCase() == val.toLowerCase(),
@@ -273,12 +273,12 @@ class _AttendancePageState extends State<AttendancePage> {
                     return;
                   }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StaffSignInPage(staff: staff),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => StaffSignInPage(staff: staff),
+                  //   ),
+                  // );
                 }
 
                 // client sign in

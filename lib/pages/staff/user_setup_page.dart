@@ -83,11 +83,9 @@ class _UserSetupState extends State<UserSetup> {
   bool can_sign_in = false;
 
   get_values() async {
-    // get active user
-    active_user = AppData.get(context).active_user!;
-
     // staff details
     if (widget.user != null) {
+      id_controller.text = widget.user?.user_id ?? '';
       user_role = widget.user!.user_role;
       staff_section = widget.user!.section;
       first_name = widget.user!.f_name;
@@ -114,7 +112,7 @@ class _UserSetupState extends State<UserSetup> {
 
   @override
   void initState() {
-    new_user = widget.user != null;
+    new_user = widget.user == null;
     if (new_user) generate_user_id();
     get_values();
     super.initState();
@@ -129,6 +127,8 @@ class _UserSetupState extends State<UserSetup> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    // get active user
+    active_user = AppData.get(context).active_user!;
 
     if (width >= 800)
       return Dialog(
@@ -138,14 +138,14 @@ class _UserSetupState extends State<UserSetup> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            main_body(width),
+            Expanded(child: main_body(width)),
           ],
         ),
       );
     else
       return Scaffold(
         backgroundColor: Color.fromARGB(255, 10, 63, 124),
-        body: main_body(width),
+        body: Expanded(child: main_body(width)),
       );
   }
 
@@ -159,7 +159,7 @@ class _UserSetupState extends State<UserSetup> {
         color: Color.fromARGB(255, 10, 63, 124).withOpacity(.8),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        // mainAxisSize: MainAxisSize.min,
         children: [
           // top bar
           top_bar(),
@@ -169,10 +169,15 @@ class _UserSetupState extends State<UserSetup> {
           // details
           if (!new_user) id_con(),
 
-          SizedBox(height: 10),
-
-          // form
-          form(),
+          Expanded(
+              child: SingleChildScrollView(
+                  child: Column(
+            children: [
+              SizedBox(height: 10),
+              // form
+              form(),
+            ],
+          ))),
 
           width >= 800 ? SizedBox(height: 20) : Expanded(child: Container()),
 
@@ -635,6 +640,8 @@ class _UserSetupState extends State<UserSetup> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // can sign in
+              Text('Can Sign In', style: labelStyle),
+
               Switch(
                 value: can_sign_in,
                 onChanged: (val) {
@@ -648,6 +655,8 @@ class _UserSetupState extends State<UserSetup> {
               SizedBox(width: 30),
 
               // ful access
+              Text('Full access', style: labelStyle),
+
               Switch(
                 value: full_access,
                 onChanged: (val) {
@@ -792,7 +801,10 @@ class _UserSetupState extends State<UserSetup> {
         showToast: true,
       );
 
-      if (ns['user'] != null) Navigator.pop(context);
+      if (ns['user'] != null)
+        setState(() {
+          edit = false;
+        });
     }
   }
 
@@ -811,6 +823,7 @@ class _UserSetupState extends State<UserSetup> {
       }
 
       Map data = UserModel(
+        key: widget.user!.key,
         user_id: id_controller.text.trim(),
         f_name: first_name,
         m_name: middle_name,

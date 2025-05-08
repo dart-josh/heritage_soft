@@ -14,8 +14,8 @@ import 'package:heritage_soft/pages/gym/clients_attendance_history.dart';
 import 'package:heritage_soft/pages/gym/indemnity_page.dart';
 import 'package:heritage_soft/pages/gym/renewal_page.dart';
 import 'package:heritage_soft/pages/gym/sub_history_page.dart';
-import 'package:heritage_soft/pages/physio/physio_pofile_page.dart';
-import 'package:heritage_soft/pages/physio/physio_registration_page.dart';
+import 'package:heritage_soft/pages/clinic/patient_pofile_page.dart';
+import 'package:heritage_soft/pages/clinic/patient_registration_page.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/edit_name_dialog.dart';
 import 'package:heritage_soft/pages/gym/Widgets/gym_health_selector_dialog.dart';
@@ -2691,7 +2691,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             // Navigator.push(
             //   context,
             //   MaterialPageRoute(
-            //       builder: (context) => PhysioRegistrationPage(
+            //       builder: (context) => PatientRegistrationPage(
             //             cl_id: Helpers.generate_id(
             //                 'phy', (hmo_select != 'No HMO')),
             //             new_ft: new_pt_cl,

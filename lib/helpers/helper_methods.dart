@@ -2,7 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/global_variables.dart';
+import 'package:heritage_soft/helpers/utils.dart';
+import 'package:heritage_soft/pages/sign_in_page.dart';
 import 'package:heritage_soft/widgets/confirm_dailog.dart';
 import 'package:heritage_soft/widgets/enter_password_dialog.dart';
 import 'package:heritage_soft/widgets/loadingScreen.dart';
@@ -13,11 +14,12 @@ import 'package:fl_toast/fl_toast.dart';
 
 class Helpers {
   // show toast
-  static void showToast(
+  static List<Toast> toast_list = [];
+  static Future<void> showToast(
       {required BuildContext context,
       required Color color,
       required String toastText,
-      required IconData icon}) {
+      required IconData icon}) async {
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       decoration: BoxDecoration(
@@ -50,23 +52,48 @@ class Helpers {
         child: toast,
         context: context,
         duration: Duration(seconds: 2));
+    
+    
+
+    
   }
 
   // show confirmation
-  static Future<bool> showConfirmation(
-      {required BuildContext context,
-      required String title,
-      required String message, bool barrierDismissible = false,}) async {
+  static Future<bool> showConfirmation({
+    required BuildContext context,
+    required String title,
+    required String message,
+    bool barrierDismissible = false,
+    bool boolean = false,
+  }) async {
     bool? conf = await showDialog(
         context: context,
         barrierDismissible: barrierDismissible,
-        builder: (context) => ConfirmDialog(title: title, subtitle: message));
+        builder: (context) =>
+            ConfirmDialog(title: title, subtitle: message, boolean: boolean));
 
     if (conf != null) {
       return conf;
     } else {
       return false;
     }
+  }
+
+  // logout
+  static Future logout(BuildContext context) async {
+    // removed saved user
+    await Utils.remove_user();
+
+    // go to sign in page
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SignInToApp(
+          logout: true,
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   // enter password
@@ -121,7 +148,9 @@ class Helpers {
 
   // loading screen
   static void showLoadingScreen(
-      {required BuildContext context, bool isDissmissable = false, String? loadingText}) {
+      {required BuildContext context,
+      bool isDissmissable = false,
+      String? loadingText}) {
     showDialog(
       context: context,
       barrierDismissible: false,

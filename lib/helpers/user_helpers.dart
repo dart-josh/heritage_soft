@@ -5,9 +5,9 @@ import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/db_helpers/user_api.dart';
 
 class UserHelpers {
-  // get_all_doctors
-  static Future get_all_doctors(BuildContext context) async {
-    var response = await UserApi.get_all_doctors(context);
+  // get_doctors
+  static Future get_doctors(BuildContext context) async {
+    var response = await UserApi.get_doctors(context);
 
     List<DoctorModel> doctors = [];
 
@@ -19,7 +19,7 @@ class UserHelpers {
         doctors.add(doctor);
       });
 
-      AppData.set(context).update_all_doctors(doctors);
+      AppData.set(context).update_doctors(doctors);
     }
 
     return doctors;
@@ -39,7 +39,7 @@ class UserHelpers {
         users.add(user);
       });
 
-      // AppData.set(context)
+      AppData.set(context).update_users(users);
     }
   }
 
@@ -99,7 +99,9 @@ class UserHelpers {
         data: data, showLoading: showLoading, showToast: showToast);
 
     if (response != null && response['doctor'] != null) {
-      DoctorModel doctor = DoctorModel.fromMap(response['doctor']);
+      DoctorModel doctor = DoctorModel.fromMap(
+        response['doctor'],
+      );
 
       // AppData.set(context)
       //     .update_patient(patient);
@@ -116,6 +118,23 @@ class UserHelpers {
     bool showToast = false,
   }) async {
     var response = await UserApi.delete_user(context,
+        showLoading: showLoading, showToast: showToast, id: user_id);
+
+    if (response != null && response['id'] != null) {
+      return {'status': true, 'id': response['id']};
+    } else {
+      return {'status': false};
+    }
+  }
+
+  // delete_doctor
+  static Future<Map> delete_doctor(
+    BuildContext context, {
+    required String user_id,
+    bool showLoading = false,
+    bool showToast = false,
+  }) async {
+    var response = await UserApi.delete_doctor(context,
         showLoading: showLoading, showToast: showToast, id: user_id);
 
     if (response != null && response['id'] != null) {

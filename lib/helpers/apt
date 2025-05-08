@@ -11,7 +11,7 @@ import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:provider/provider.dart';
 
-class PhysioDatabaseHelpers {
+class ClinicDatabaseHelpers {
   static final pt_client_ref =
       FirebaseFirestore.instance.collection('Physio Clients');
 
@@ -49,7 +49,7 @@ class PhysioDatabaseHelpers {
   // get all doctors & listen
   static get_doctors(context) async {
     List<DoctorModel> docs =
-        Provider.of<AppData>(context, listen: false).all_doctors;
+        Provider.of<AppData>(context, listen: false).doctors;
 
     await FirebaseFirestore.instance
         .collection('Doctors')
@@ -73,7 +73,7 @@ class PhysioDatabaseHelpers {
         }
       });
 
-      Provider.of<AppData>(context, listen: false).update_all_doctors(docs);
+      Provider.of<AppData>(context, listen: false).update_doctors(docs);
     });
 
     // listen to all doctors
@@ -116,7 +116,7 @@ class PhysioDatabaseHelpers {
           });
 
           var doc = Provider.of<AppData>(context, listen: false)
-              .all_doctors
+              .doctors
               .where((doc) => dd.id == doc.key)
               .first;
 
@@ -149,7 +149,7 @@ class PhysioDatabaseHelpers {
           });
 
           var doc = Provider.of<AppData>(context, listen: false)
-              .all_doctors
+              .doctors
               .where((doc) => dd.id == doc.key)
               .first;
 
@@ -178,7 +178,7 @@ class PhysioDatabaseHelpers {
         .collection('Doctors')
         .doc(active_doctor!.key);
 
-    // pending pateints
+    // pending patients
     doc_ref.collection('Patients').snapshots().listen((event) {
       List<PhysioClientListModel> ong_patients = [];
       int ong_treatment = 0;
@@ -618,7 +618,7 @@ class PhysioDatabaseHelpers {
   static Future<bool> set_health_data(
       String client_key, String health_key, Map<String, dynamic> data) async {
     try {
-      await PhysioDatabaseHelpers.pt_client_ref
+      await ClinicDatabaseHelpers.pt_client_ref
           .doc(client_key)
           .collection('health_info')
           .doc(health_key)

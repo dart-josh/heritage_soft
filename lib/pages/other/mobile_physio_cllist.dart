@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
-import 'package:heritage_soft/helpers/physio_database_helpers.dart';
+import 'package:heritage_soft/helpers/clinic_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
-import 'package:heritage_soft/pages/physio/widgets/physio_hmo_tag.dart';
+import 'package:heritage_soft/pages/clinic/widgets/physio_hmo_tag.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
@@ -29,7 +29,7 @@ class _MobilePhysioClientListState extends State<MobilePhysioClientList> {
   get_clients() async {
     is_loading = true;
 
-    // sub = PhysioDatabaseHelpers.physio_clients_stream().listen((snap) {
+    // sub = ClinicDatabaseHelpers.physio_clients_stream().listen((snap) {
     //   clients.clear();
     //   snap.docs.forEach((e) {
     //     PhysioClientListModel cli =
@@ -297,7 +297,7 @@ class _MobilePhysioClientListState extends State<MobilePhysioClientList> {
               'user_image': img,
             };
 
-            // bool ed = await PhysioDatabaseHelpers.edit_physio_client(
+            // bool ed = await ClinicDatabaseHelpers.edit_physio_client(
             //     user_id, client_update_details);
 
             // Navigator.pop(context);

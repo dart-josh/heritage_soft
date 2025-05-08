@@ -90,13 +90,13 @@ class CaseFileModel {
 
       Map toJson_update() => {
         'id': key,
-        // 'patient': patient.key,
-        // 'doctor': doctor.key,
+        'patient': patient.key,
+        'doctor': doctor.key,
         'bp_reading': bp_reading,
         'note': note,
         'remarks': remarks,
-        // 'case_type': case_type,
-        // 'treatment_date': treatment_date?.toIso8601String(),
+        'case_type': case_type,
+        'treatment_date': treatment_date?.toIso8601String(),
         'treatment_decision': treatment_decision,
         'refered_decision': refered_decision,
         'other_decision': other_decision,

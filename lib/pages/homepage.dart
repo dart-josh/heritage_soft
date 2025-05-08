@@ -3,23 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/pages/other/accessories_list_page.dart';
+import 'package:heritage_soft/pages/store/accessories_list_page.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/other/attendance_page.dart';
 import 'package:heritage_soft/pages/other/birthday_list.dart';
 import 'package:heritage_soft/pages/other/data_report_page.dart';
 import 'package:heritage_soft/pages/other/guest_record.dart';
-import 'package:heritage_soft/pages/other/sales_record_page.dart';
+import 'package:heritage_soft/pages/store/restock_accessories_page.dart';
+import 'package:heritage_soft/pages/store/restock_accessory_record_page.dart';
+import 'package:heritage_soft/pages/store/sales_record_page.dart';
 import 'package:heritage_soft/pages/staff/general_staff_attendance.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/pages/gym/clients_list.dart';
 import 'package:heritage_soft/pages/gym/general_attendance_history_table.dart';
 import 'package:heritage_soft/pages/other/all_data.dart';
-import 'package:heritage_soft/pages/physio/doctors_list.dart';
-import 'package:heritage_soft/pages/physio/physio_clients_list.dart';
-import 'package:heritage_soft/pages/physio/physio_registration_page.dart';
+import 'package:heritage_soft/pages/clinic/doctors_list.dart';
+import 'package:heritage_soft/pages/clinic/all_patient_list.dart';
+import 'package:heritage_soft/pages/clinic/patient_registration_page.dart';
 import 'package:heritage_soft/pages/gym/registration_page.dart';
-import 'package:heritage_soft/pages/staff/staff_list.dart';
+import 'package:heritage_soft/pages/staff/user_list.dart';
 import 'package:heritage_soft/widgets/app_bar.dart';
 import 'package:heritage_soft/widgets/manage_hmo_dialog.dart';
 import 'package:heritage_soft/widgets/manage_passwords.dart';
@@ -187,22 +189,23 @@ class _HomePageState extends State<HomePage> {
         // slider
         Expanded(
           child: cs.CarouselSlider(
-            items:
-            user!.full_access ? [
-              full_access_tab_1(),
-              full_access_tab_2(),
-              full_access_tab_3(),
-            ] :  
-            (user.app_role == 'Admin' || user.app_role == 'Management')
+            items: user!.full_access
                 ? [
-                    admin_tab_1(),
-                    admin_tab_2(),
+                    full_access_tab_1(),
+                    full_access_tab_2(),
+                    full_access_tab_3(),
                   ]
-                : (user.app_role == 'CSU') ? [
-                    main_page_0(),
-                    main_page_1(),
-                    main_page_2(),
-                  ] : [],
+                : (user.app_role == 'Admin' || user.app_role == 'Management')
+                    ? [
+                        admin_tab_1(),
+                        admin_tab_2(),
+                      ]
+                    : (user.app_role == 'CSU')
+                        ? [
+                            main_page_0(),
+                            main_page_1(),
+                          ]
+                        : [],
             carouselController: buttonCarouselController,
             options: cs.CarouselOptions(
               viewportFraction: 1,
@@ -247,9 +250,11 @@ class _HomePageState extends State<HomePage> {
           runAlignment: WrapAlignment.center,
           children: [
             ft_client_list(),
-            register_ft_client(),
-            mark_attendance(),
+            pt_client_list(),
+            doctors(),
+            birthday_list(),
             attendance_history(),
+            guest_record(),
           ],
         ),
       ),
@@ -266,33 +271,12 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            pt_client_list(),
-            register_pt_client(),
-            doctors(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget main_page_2() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Wrap(
-          spacing: 20,
-          runSpacing: 20,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
             data_report(),
             accessories(),
+            restock_accessories(),
+            restock_accessories_record(),
             sales_record(),
-            mark_attendance(),
-            attendance_history(),
-            guest_record(),
             manage_hmo(),
-            birthday_list(),
           ],
         ),
       ),
@@ -312,18 +296,10 @@ class _HomePageState extends State<HomePage> {
             all_data(),
             data_report(),
             birthday_list(),
-
             ft_client_list(),
             pt_client_list(),
             staff_list(),
             doctors(),
-
-            
-            
-            
-            
-            
-            
           ],
         ),
       ),
@@ -343,10 +319,10 @@ class _HomePageState extends State<HomePage> {
             attendance_history(),
             staff_attendance_history(),
             guest_record(),
-
             accessories(),
+            restock_accessories(),
+            restock_accessories_record(),
             sales_record(),
-
             manage_hmo(),
             manage_password(),
           ],
@@ -392,6 +368,8 @@ class _HomePageState extends State<HomePage> {
             staff_attendance_history(),
             guest_record(),
             accessories(),
+            restock_accessories(),
+            restock_accessories_record(),
             sales_record(),
             manage_hmo(),
             manage_password(),
@@ -411,8 +389,6 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            register_ft_client(),
-            register_pt_client(),
             mark_attendance(),
           ],
         ),
@@ -426,6 +402,7 @@ class _HomePageState extends State<HomePage> {
   Widget ft_client_list() {
     return InkWell(
       onTap: () {
+        return;
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ClientsList()),
@@ -494,7 +471,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PhysioClientsList()),
+          MaterialPageRoute(builder: (context) => AllPatientList()),
         );
       },
       child: Container(
@@ -558,6 +535,7 @@ class _HomePageState extends State<HomePage> {
   Widget attendance_history() {
     return InkWell(
       onTap: () async {
+        return;
         var conf = await Helpers.enter_password(context,
             title: 'General Attendance password');
 
@@ -628,6 +606,7 @@ class _HomePageState extends State<HomePage> {
   Widget staff_attendance_history() {
     return InkWell(
       onTap: () async {
+        return;
         var conf = await Helpers.enter_password(context,
             title: 'Staff Attendance password');
 
@@ -677,163 +656,6 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 10),
                   Text(
                     'Staff Attendance History',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                ],
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // register client
-  Widget register_ft_client() {
-    return InkWell(
-      onTap: () {
-        if (!is_loaded) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.red,
-            toastText: 'Please wait...',
-            icon: Icons.error,
-          );
-          return;
-        }
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => RegistrationPage(
-                    cl_id: Helpers.generate_id(xx: 'gym', hmo: false, id: 1289),
-                  )),
-        );
-      },
-      child: Container(
-        width: 220,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Stack(
-          children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/new_gym.jpg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 10),
-                  Text(
-                    'New Gym Client',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                ],
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // register client
-  Widget register_pt_client() {
-    return InkWell(
-      onTap: () {
-        if (!is_loaded) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.red,
-            toastText: 'Please wait...',
-            icon: Icons.error,
-          );
-          return;
-        }
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PhysioRegistrationPage(
-                  )),
-        );
-      },
-      child: Container(
-        width: 220,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Stack(
-          children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/new_pt.jpg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 10),
-                  Text(
-                    'New Physio Client',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -1058,6 +880,136 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget restock_accessories() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RestockAccessoriesPage()),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/accessories.jpg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 10),
+                  Text(
+                    'Restock Accessories',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget restock_accessories_record() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RestockAccessoryRecordPage()),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/accessories.jpg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 10),
+                  Text(
+                    'Restock Accessories Record',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   //
   Widget sales_record() {
     return InkWell(
@@ -1130,7 +1082,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StaffList()),
+          MaterialPageRoute(builder: (context) => UserList()),
         );
       },
       child: Container(
@@ -1330,6 +1282,7 @@ class _HomePageState extends State<HomePage> {
   Widget manage_hmo() {
     return InkWell(
       onTap: () {
+        return;
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -1396,6 +1349,7 @@ class _HomePageState extends State<HomePage> {
   Widget manage_password() {
     return InkWell(
       onTap: () async {
+        return;
         // Delete User password
         // Staff Attendance password
         // Heritage024
@@ -1470,6 +1424,7 @@ class _HomePageState extends State<HomePage> {
   Widget birthday_list() {
     return InkWell(
       onTap: () {
+        return;
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => BirthdayList()));
       },
@@ -1534,6 +1489,7 @@ class _HomePageState extends State<HomePage> {
   Widget data_report() {
     return InkWell(
       onTap: () {
+        return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -1597,8 +1553,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-
 
   //
 }

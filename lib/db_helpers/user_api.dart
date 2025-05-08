@@ -5,10 +5,10 @@ import 'package:heritage_soft/global_variables.dart';
 class UserApi {
   // ? GETTERS
 
-  // get_all_doctors
-  static Future get_all_doctors(BuildContext context) async {
+  // get_doctors
+  static Future get_doctors(BuildContext context) async {
     return await DBHelpers.getDataFromServer(context,
-        route: '${userUrl}/get_all_doctors');
+        route: '${userUrl}/get_doctors');
   }
 
   // get_all_users
@@ -75,6 +75,23 @@ class UserApi {
     return await DBHelpers.deleteFromServer(
       context,
       route: '${userUrl}/delete_user',
+      data: {},
+      id: id,
+      showLoading: showLoading,
+      showToast: showToast,
+    );
+  }
+
+  // delete_doctor
+  static Future delete_doctor(
+    BuildContext context, {
+    required String id,
+    bool showLoading = false,
+    bool showToast = false,
+  }) async {
+    return await DBHelpers.deleteFromServer(
+      context,
+      route: '${userUrl}/delete_doctor',
       data: {},
       id: id,
       showLoading: showLoading,

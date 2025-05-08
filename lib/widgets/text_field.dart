@@ -108,7 +108,7 @@ class _Text_fieldState extends State<Text_field> {
             readOnly: widget.edit,
             controller: widget.controller,
             focusNode: widget.node,
-            textInputAction:
+            textInputAction: widget.obscure!= null && widget.obscure! ? TextInputAction.done :
                 (widget.maxLine == 1) ? TextInputAction.next : null,
             maxLines: widget.maxLine,
             inputFormatters: widget.format,

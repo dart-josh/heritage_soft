@@ -30,18 +30,21 @@ class DBHelpers {
       }
 
       // add current user to data
-      data["user"] = active_user?.key ;
+      data["active_user"] = active_user?.key;
     }
 
     // Json encode data
     var body = jsonEncode(data);
 
-    if (showLoading) Helpers.showLoadingScreen(context: context, loadingText: loadingText);
+    if (showLoading)
+      Helpers.showLoadingScreen(context: context, loadingText: loadingText);
     try {
       var response = await http.post(Uri.parse('${route}'),
           headers: {"Content-Type": "application/json"}, body: body);
 
       var jsonResponse = jsonDecode(response.body);
+
+      
 
       // throw error message
       if (response.statusCode != 200) {
@@ -49,7 +52,7 @@ class DBHelpers {
       }
 
       if (showLoading) Navigator.pop(context);
-      if (showToast)
+      if (showToast && jsonResponse['message'] != null)
         Helpers.showToast(
           context: context,
           color: Colors.green.shade500,
@@ -57,6 +60,7 @@ class DBHelpers {
           icon: Icons.check,
         );
 
+      
       return jsonResponse;
     } catch (e) {
       if (showLoading) Navigator.pop(context);
@@ -126,19 +130,24 @@ class DBHelpers {
   }
 
   // Delete Data from sever
-  static Future<dynamic> deleteFromServer(context,
-      {required String route, required Map data, required String id,
+  static Future<dynamic> deleteFromServer(
+    context, {
+    required String route,
+    required Map data,
+    required String id,
     bool showLoading = false,
-    bool showToast = false,}) async {
+    bool showToast = false,
+  }) async {
     UserModel? active_user = AppData.get(context, listen: false).active_user;
 
     if (active_user == null) {
-      if (showToast) Helpers.showToast(
-        context: context,
-        color: Colors.red,
-        toastText: 'No User Found',
-        icon: Icons.error,
-      );
+      if (showToast)
+        Helpers.showToast(
+          context: context,
+          color: Colors.red,
+          toastText: 'No User Found',
+          icon: Icons.error,
+        );
       return null;
     }
 
@@ -149,7 +158,7 @@ class DBHelpers {
 
     if (showLoading) Helpers.showLoadingScreen(context: context);
     try {
-      var response = await http.delete(Uri.parse('${route}/$id'),
+      var response = await http.delete(Uri.parse('${route}${id != '' ? '/$id' : ''}'),
           headers: {"Content-Type": "application/json"}, body: body);
 
       var jsonResponse = jsonDecode(response.body);
@@ -159,27 +168,29 @@ class DBHelpers {
       }
 
       if (showLoading) Navigator.pop(context);
-      if (showToast) Helpers.showToast(
-        context: context,
-        color: Colors.green.shade500,
-        toastText: jsonResponse['message'],
-        icon: Icons.check,
-      );
+      if (showToast)
+        Helpers.showToast(
+          context: context,
+          color: Colors.green.shade500,
+          toastText: jsonResponse['message'],
+          icon: Icons.check,
+        );
 
       return jsonResponse;
     } catch (e) {
       if (showLoading) Navigator.pop(context);
-      if (showToast) Helpers.showToast(
-        context: context,
-        color: Colors.red,
-        toastText: (e.toString().toLowerCase().contains('formatexception') ||
-                e.toString().toLowerCase().contains('clientexception') ||
-                e.toString().toLowerCase().contains('socketexception') ||
-                e.toString().toLowerCase().contains('connection'))
-            ? 'Connection Error. Try again later'
-            : e.toString(),
-        icon: Icons.error,
-      );
+      if (showToast)
+        Helpers.showToast(
+          context: context,
+          color: Colors.red,
+          toastText: (e.toString().toLowerCase().contains('formatexception') ||
+                  e.toString().toLowerCase().contains('clientexception') ||
+                  e.toString().toLowerCase().contains('socketexception') ||
+                  e.toString().toLowerCase().contains('connection'))
+              ? 'Connection Error. Try again later'
+              : e.toString(),
+          icon: Icons.error,
+        );
 
       return null;
     }

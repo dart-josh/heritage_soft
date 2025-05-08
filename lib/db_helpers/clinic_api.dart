@@ -12,10 +12,16 @@ class ClinicApi {
         route: '${clinicUrl}/get_all_patients');
   }
 
+  static Future get_patient_by_id(BuildContext context,
+      {required Map data}) async {
+    return await DBHelpers.postDataToServer(context,
+        route: '${clinicUrl}/get_patient_by_id', data: data);
+  }
+
   // get all doctors
-  static Future get_all_doctors(BuildContext context) async {
+  static Future get_doctors(BuildContext context) async {
     return await DBHelpers.getDataFromServer(context,
-        route: '${userUrl}/get_all_doctors');
+        route: '${userUrl}/get_doctors');
   }
 
   // get case file by patient
@@ -33,12 +39,14 @@ class ClinicApi {
     String? loadingText,
     bool showToast = false,
   }) async {
-    return await DBHelpers.postDataToServer(context,
-        route: '${clinicUrl}/get_case_file_by_id',
-        data: data,
-        showLoading: showLoading,
-        showToast: showToast,
-        loadingText: loadingText);
+    return await DBHelpers.postDataToServer(
+      context,
+      route: '${clinicUrl}/get_case_file_by_id',
+      data: data,
+      showLoading: showLoading,
+      showToast: showToast,
+      loadingText: loadingText,
+    );
   }
 
   //get_case_file_by_date
@@ -55,6 +63,12 @@ class ClinicApi {
         showLoading: showLoading,
         showToast: showToast,
         loadingText: loadingText);
+  }
+
+  // get_all_accessory_requests
+  static Future get_all_accessory_requests(BuildContext context) async {
+    return await DBHelpers.getDataFromServer(context,
+        route: '${clinicUrl}/get_all_accessory_requests');
   }
 
   // !
@@ -289,9 +303,17 @@ class ClinicApi {
     BuildContext context, {
     required Map data,
     required String id,
+    bool showLoading = true,
+    bool showToast = true,
   }) async {
-    return await DBHelpers.deleteFromServer(context,
-        route: '${clinicUrl}/delete_accessory_request', data: data, id: id);
+    return await DBHelpers.deleteFromServer(
+      context,
+      route: '${clinicUrl}/delete_accessory_request',
+      data: data,
+      id: id,
+      showLoading: showLoading,
+      showToast: showToast,
+    );
   }
 
 // delete_all_accessory_request
@@ -299,9 +321,17 @@ class ClinicApi {
     BuildContext context, {
     required Map data,
     required String id,
+    bool showLoading = true,
+    bool showToast = true,
   }) async {
-    return await DBHelpers.deleteFromServer(context,
-        route: '${clinicUrl}/delete_all_accessory_request', data: data, id: id);
+    return await DBHelpers.deleteFromServer(
+      context,
+      route: '${clinicUrl}/delete_all_accessory_request',
+      data: data,
+      id: id,
+      showLoading: showLoading,
+      showToast: showToast,
+    );
   }
 
   // delete_patient

@@ -7,7 +7,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/accessories_shop_model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/income_model.dart';
@@ -57,12 +56,12 @@ class AdminDatabaseHelpers {
     //     .listen((event) {
     //   if (app_role == 'doctor') return;
 
-    //   List<A_ShopModel> requests = [];
+    //   List<AccessoryRequestModel> requests = [];
     //   if (event.snapshot.value != null) {
     //     Map map = event.snapshot.value as Map;
 
     //     map.forEach((key, value) {
-    //       requests.add(A_ShopModel.fromMap(value));
+    //       requests.add(AccessoryRequestModel.fromMap(value));
     //     });
     //   }
 
