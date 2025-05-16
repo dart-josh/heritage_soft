@@ -75,6 +75,9 @@ class _MyAppBarState extends State<MyAppBar> {
   // doctors row
   Widget doctors_row() {
     DoctorModel? doctor = AppData.get(context).active_doctor;
+    UserModel? user = doctor?.user;
+
+    String name = '${user!.f_name} ${user.l_name}';
 
     int waiting_count = doctor?.pen_patients.length ?? 0;
 
@@ -111,6 +114,28 @@ class _MyAppBarState extends State<MyAppBar> {
                   ),
                 ),
               ),
+
+        SizedBox(width: 15),
+
+              // name
+              Text(
+                name,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+
+              SizedBox(width: 15),
+
+              Text(
+                '[ ${user.user_id} ]',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            
 
         Expanded(child: Container()),
 
@@ -189,7 +214,7 @@ class _MyAppBarState extends State<MyAppBar> {
     UserModel? user = AppData.get(context).active_user;
 
     String name = '${user!.f_name} ${user.l_name}';
-    int birthday_count = get_birthday();
+    // int birthday_count = get_birthday();
 
     return Row(
       children: [
@@ -246,66 +271,66 @@ class _MyAppBarState extends State<MyAppBar> {
         Expanded(child: Container()),
 
         // birthday
-        if (user.app_role == 'CSU' ||
-            user.app_role == 'Admin' ||
-            user.app_role == 'Management' ||
-            user.app_role == 'ICT' ||
-            user.full_access)
-          Container(
-            padding: EdgeInsets.only(right: 10),
-            child: InkWell(
-              onTap: () {
-                if (accessories_request_open) return;
+        // if (user.app_role == 'CSU' ||
+        //     user.app_role == 'Admin' ||
+        //     user.app_role == 'Management' ||
+        //     user.app_role == 'ICT' ||
+        //     user.full_access)
+        //   Container(
+        //     padding: EdgeInsets.only(right: 10),
+        //     child: InkWell(
+        //       onTap: () {
+        //         if (accessories_request_open) return;
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => BirthdayList()),
-                );
-              },
-              child: Stack(
-                children: [
-                  // birthday icon
-                  Container(
-                    padding: EdgeInsets.only(top: 12, right: 8),
-                    child: Icon(
-                      Icons.card_giftcard,
-                      color: accessories_request_open
-                          ? Colors.white38
-                          : birthday_count > 0
-                              ? Colors.green
-                              : Colors.white60,
-                      size: 24,
-                    ),
-                  ),
+        //         Navigator.push(
+        //           context,
+        //           MaterialPageRoute(builder: (context) => BirthdayList()),
+        //         );
+        //       },
+        //       child: Stack(
+        //         children: [
+        //           // birthday icon
+        //           Container(
+        //             padding: EdgeInsets.only(top: 12, right: 8),
+        //             child: Icon(
+        //               Icons.card_giftcard,
+        //               color: accessories_request_open
+        //                   ? Colors.white38
+        //                   : birthday_count > 0
+        //                       ? Colors.green
+        //                       : Colors.white60,
+        //               size: 24,
+        //             ),
+        //           ),
 
-                  // notification
-                  if (birthday_count > 0)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        height: 18,
-                        width: 18,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            birthday_count.toString(),
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 11, height: 1),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+        //           // notification
+        //           if (birthday_count > 0)
+        //             Positioned(
+        //               top: 0,
+        //               right: 0,
+        //               child: Container(
+        //                 height: 18,
+        //                 width: 18,
+        //                 decoration: BoxDecoration(
+        //                   color: Colors.red,
+        //                   shape: BoxShape.circle,
+        //                 ),
+        //                 child: Center(
+        //                   child: Text(
+        //                     birthday_count.toString(),
+        //                     style: TextStyle(
+        //                         color: Colors.white, fontSize: 11, height: 1),
+        //                   ),
+        //                 ),
+        //               ),
+        //             ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
 
         // accessories shop
-        if (user.app_role == 'CSU' || user.full_access)
+        if (user.app_role == 'CSU' || user.app_role == 'Admin' || user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: InkWell(
@@ -330,7 +355,7 @@ class _MyAppBarState extends State<MyAppBar> {
           ),
 
         // accessory requests
-        if (user.app_role == 'CSU' || user.full_access)
+        if (user.app_role == 'CSU' || user.app_role == 'Admin' || user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: Row(

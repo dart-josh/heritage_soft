@@ -4,6 +4,7 @@ import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
+import 'package:heritage_soft/helpers/auth_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/user_helpers.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
@@ -668,6 +669,84 @@ class _UserSetupState extends State<UserSetup> {
               ),
             ],
           ),
+
+          if (edit && widget.user != null) SizedBox(height: 20),
+
+          if (edit && widget.user != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // reset password
+                InkWell(
+                  onTap: () async {
+                    bool conf = await Helpers.showConfirmation(
+                      context: context,
+                      title: 'Reset Password',
+                      message:
+                          'You are about to reset the password & pin of this user!',
+                    );
+
+                    if (conf)
+                      await AuthHelpers.reset_password(context,
+                          user_id: widget.user?.user_id ?? '');
+                  },
+                  child: Container(
+                    width: 200,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Reset Password',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 50),
+
+                // reset pin
+                InkWell(
+                  onTap: () async {
+                    bool conf = await Helpers.showConfirmation(
+                      context: context,
+                      title: 'Reset Pin',
+                      message:
+                          'You are about to reset the pin of this user!',
+                    );
+
+                    if (conf)
+                    await AuthHelpers.reset_pin(context,
+                        user_id: widget.user?.user_id ?? '');
+                  },
+                  child: Container(
+                    width: 200,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Reset Pin',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );

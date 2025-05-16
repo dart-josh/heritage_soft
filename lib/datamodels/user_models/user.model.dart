@@ -13,6 +13,7 @@ class UserModel {
   bool fresh_day;
   String app_role;
   bool can_sign_in;
+  bool pin;
 
   UserModel({
     this.key,
@@ -29,15 +30,16 @@ class UserModel {
     this.fresh_day = false,
     required this.app_role,
     required this.can_sign_in,
+    this.pin = false,
   });
 
   factory UserModel.gen(String key) {
     return UserModel(
       key: key,
-      user_id: 'Empty',
-      f_name: 'Empty',
-      l_name: 'Empty',
-      m_name: 'Empty',
+      user_id: '',
+      f_name: '',
+      l_name: '',
+      m_name: '',
       user_image: '',
       user_status: true,
       user_role: '',
@@ -64,6 +66,7 @@ class UserModel {
       fresh_day: map['fresh_day'] ?? true,
       app_role: map['app_role'] ?? 'None',
       can_sign_in: map['can_sign_in'] ?? false,
+      pin: map['pin'] != null ? true : false,
     );
   }
 

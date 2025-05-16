@@ -13,12 +13,13 @@ class ClinicInfo extends StatefulWidget {
   final AssessmentInfoModel? info;
   final bool new_det;
   final bool view_all;
-  const ClinicInfo(
-      {super.key,
-      required this.info,
-      required this.patient,
-      this.new_det = false,
-      this.view_all = true,});
+  const ClinicInfo({
+    super.key,
+    required this.info,
+    required this.patient,
+    this.new_det = false,
+    this.view_all = true,
+  });
 
   @override
   State<ClinicInfo> createState() => _ClinicInfoState();
@@ -28,7 +29,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
   @override
   void dispose() {
     case_select_controller.dispose();
-    equipment_select_controller.dispose();
+    other_case_controller.dispose();
+    // equipment_select_controller.dispose();
     diagnosis_controller.dispose();
     super.dispose();
   }
@@ -36,8 +38,10 @@ class _ClinicInfoState extends State<ClinicInfo> {
   @override
   void initState() {
     if (widget.new_det && widget.info != null) {
-      case_select_controller.text = widget.info!.case_select;
+      case_select_controller.text = widget.info?.case_select ?? '';
       selected_case_select_options = case_select_controller.text.split(',');
+
+      other_case_controller.text = widget.info?.case_select_others ?? '';
 
       diagnosis_controller.text = widget.info!.diagnosis;
 
@@ -45,9 +49,9 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
       treatment_type_select = widget.info!.treatment_type;
 
-      equipment_select_controller.text =
-          widget.info!.equipments.map((e) => e.equipmentName).join(',');
-      selected_equipment_options = equipment_select_controller.text.split(',');
+      // equipment_select_controller.text =
+      //     widget.info!.equipments.map((e) => e.equipmentName).join(',');
+      // selected_equipment_options = equipment_select_controller.text.split(',');
     }
 
     super.initState();
@@ -55,7 +59,6 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Dialog(
       surfaceTintColor: Colors.transparent,
       backgroundColor: Colors.transparent,
@@ -161,6 +164,11 @@ class _ClinicInfoState extends State<ClinicInfo> {
       // case title
       tile('Medical condition', widget.info!.case_select),
 
+      // other case
+      if (widget.info?.case_select_others != null &&
+          widget.info!.case_select_others!.isNotEmpty)
+        tile('Other Medical condition', widget.info?.case_select_others ?? ''),
+
       // diagnosis
       tile('PT Diagnosis', widget.info!.diagnosis),
 
@@ -171,8 +179,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
       tile('Treatment type', widget.info!.treatment_type),
 
       // equipment
-      tile('Equipment(s)',
-          widget.info!.equipments.map((e) => e.equipmentName).join(',')),
+      // tile('Equipment(s)',
+      //     widget.info!.equipments.map((e) => e.equipmentName).join(',')),
     ];
   }
 
@@ -210,7 +218,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
   //?
   TextEditingController case_select_controller = TextEditingController();
-  TextEditingController equipment_select_controller = TextEditingController();
+  TextEditingController other_case_controller = TextEditingController();
+  // TextEditingController equipment_select_controller = TextEditingController();
   TextEditingController diagnosis_controller = TextEditingController();
 
   List<String> selected_case_select_options = [];
@@ -227,20 +236,20 @@ class _ClinicInfoState extends State<ClinicInfo> {
     else
       case_select_controller.text = '';
 
-    if (selected_equipment_options.isNotEmpty)
-      equipment_select_controller.text = selected_equipment_options.join(',');
-    else
-      equipment_select_controller.text = '';
+    // if (selected_equipment_options.isNotEmpty)
+    //   equipment_select_controller.text = selected_equipment_options.join(',');
+    // else
+    //   equipment_select_controller.text = '';
 
     if (case_select_controller.text.startsWith(',')) {
       case_select_controller.text =
           case_select_controller.text.replaceFirst(',', '');
     }
 
-    if (equipment_select_controller.text.startsWith(',')) {
-      equipment_select_controller.text =
-          equipment_select_controller.text.replaceFirst(',', '');
-    }
+    // if (equipment_select_controller.text.startsWith(',')) {
+    //   equipment_select_controller.text =
+    //       equipment_select_controller.text.replaceFirst(',', '');
+    // }
 
     return [
       // case multi-select
@@ -256,6 +265,15 @@ class _ClinicInfoState extends State<ClinicInfo> {
               color: Colors.white,
             ),
           ),
+        ),
+      ),
+
+      Container(
+        padding: EdgeInsets.symmetric(vertical: 6),
+        child: Text_field(
+          label: 'Enter other condition(s)',
+          controller: other_case_controller,
+          font_size: 15,
         ),
       ),
 
@@ -300,21 +318,21 @@ class _ClinicInfoState extends State<ClinicInfo> {
         ),
       ),
 
-      // equipment
-      Container(
-        padding: EdgeInsets.symmetric(vertical: 6),
-        child: Text_field(
-          label: 'Equipment',
-          controller: equipment_select_controller,
-          edit: true,
-          icon: equipment_multi_select(
-            child: Icon(
-              Icons.select_all,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
+      // // equipment
+      // Container(
+      //   padding: EdgeInsets.symmetric(vertical: 6),
+      //   child: Text_field(
+      //     label: 'Equipment',
+      //     controller: equipment_select_controller,
+      //     edit: true,
+      //     icon: equipment_multi_select(
+      //       child: Icon(
+      //         Icons.select_all,
+      //         color: Colors.white,
+      //       ),
+      //     ),
+      //   ),
+      // ),
 
       SizedBox(height: 15),
 
@@ -375,16 +393,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
               diagnosis: diagnosis_controller.text.trim(),
               case_type: case_type_select,
               treatment_type: treatment_type_select,
-              equipments: selected_equipment_options
-                  .map((e) => EquipmentModel(
-                      key: e,
-                      equipmentName: e,
-                      equipmentId: e,
-                      category: e,
-                      costing: 0,
-                      status: 'Available'))
-                  .toList(),
-              case_select_others: '',
+              equipments: [],
+              case_select_others: other_case_controller.text.trim(),
               case_description: '',
               assessment_date: null,
             );

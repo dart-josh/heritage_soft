@@ -310,7 +310,7 @@ class _RequestAccessoriesPageState extends State<RequestAccessoriesPage> {
               ),
               padding: EdgeInsets.fromLTRB(33, 6, 10, 6),
               child: Text(
-                widget.patient.f_name.trim(),
+                '${widget.patient.f_name} ${widget.patient.l_name}',
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   color: Colors.white,

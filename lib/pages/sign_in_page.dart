@@ -9,6 +9,7 @@ import 'package:heritage_soft/helpers/user_helpers.dart';
 import 'package:heritage_soft/helpers/utils.dart';
 import 'package:heritage_soft/maintree.dart';
 import 'package:heritage_soft/pages/other/attendance_page.dart';
+import 'package:heritage_soft/pages/pin_page.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
 class SignInToApp extends StatefulWidget {
@@ -26,15 +27,20 @@ class _SignInToAppState extends State<SignInToApp> {
   bool isLoading = false;
   String loadingText = '';
 
-  void login() async {
+  String? user_id;
+  String? user_name;
+
+  void login({required String user_id, required String password}) async {
     setState(() {
       isLoading = true;
       loadingText = 'Checking user details';
     });
 
-    UserModel? user = await AuthHelpers.login(context,
-        user_id: user_controller.text.trim(),
-        password: pass_controller.text.trim());
+    UserModel? user = await AuthHelpers.login(
+      context,
+      user_id: user_id,
+      password: password,
+    );
 
     if (user != null) {
       if (!user.can_sign_in) {
@@ -51,8 +57,6 @@ class _SignInToAppState extends State<SignInToApp> {
         return;
       }
 
-      save_login(user_controller.text.trim(), pass_controller.text.trim());
-
       if (user.app_role == 'Doctor') {
         setState(() {
           isLoading = true;
@@ -65,6 +69,8 @@ class _SignInToAppState extends State<SignInToApp> {
         if (doc != null) {
           if (doc['status'] == 'Doctor') {
             DoctorModel doctor = doc['doctor'];
+
+            save_login(user_id, password, '${user.f_name} ${user.l_name}');
 
             // go to homepage
             goto_homepage(user: user, doctor: doctor);
@@ -87,6 +93,7 @@ class _SignInToAppState extends State<SignInToApp> {
           });
         }
       } else {
+        save_login(user_id, password, '${user.f_name} ${user.l_name}');
         // go to homepage
         goto_homepage(user: user);
       }
@@ -100,12 +107,12 @@ class _SignInToAppState extends State<SignInToApp> {
 
   Future<void> goto_homepage(
       {required UserModel user, DoctorModel? doctor}) async {
-    if (!user.can_sign_in) {
-      setState(() {
-        isLoading = false;
-        loadingText = '';
-      });
+    setState(() {
+      isLoading = false;
+      loadingText = '';
+    });
 
+    if (!user.can_sign_in) {
       Helpers.showToast(
         context: context,
         color: Colors.red,
@@ -115,6 +122,30 @@ class _SignInToAppState extends State<SignInToApp> {
       return;
     }
 
+    user_id = user.user_id;
+    user_name = '${user.f_name} ${user.l_name}';
+
+    // enter PIN
+    var pin = await showDialog(
+      context: context,
+      builder: (context) => PinPage(
+        user_id: user_id ?? '',
+        user_name: user_name ?? '',
+        page_index: user.pin ? 0 : 1,
+      ),
+      barrierDismissible: false,
+    );
+
+    if (pin == null) return;
+
+    bool user_pin = await AuthHelpers.check_pin(
+      context,
+      user_id: user_id ?? '',
+      pin: pin,
+    );
+
+    if (!user_pin) return;
+
     AppData.set(context).update_active_user(user);
 
     // asign user
@@ -122,8 +153,12 @@ class _SignInToAppState extends State<SignInToApp> {
       // update doctor availablity
       doctor.is_available = true;
 
-      await UserHelpers.add_update_doctor(context,
-          data: doctor.toJson(), showLoading: true, showToast: true);
+      await UserHelpers.add_update_doctor(
+        context,
+        data: doctor.toJson(),
+        showLoading: true,
+        showToast: true,
+      );
       AppData.set(context).update_active_doctor(doctor);
     }
 
@@ -132,28 +167,39 @@ class _SignInToAppState extends State<SignInToApp> {
   }
 
   // save  login
-  save_login(String user_id, String password) async {
+  save_login(String user_id, String password, String user_name) async {
     await Utils.save_user_id(user_id);
     await Utils.save_user_pass(password);
+    await Utils.save_user_name(user_name);
     return;
   }
 
   // get login
   void get_login_details() async {
-    String? user_id = await Utils.get_user_id();
+    user_id = await Utils.get_user_id();
     String? password = await Utils.get_user_pass();
+    user_name = await Utils.get_user_name();
 
     if (user_id != null && password != null) {
-      user_controller.text = user_id;
-      pass_controller.text = password;
+      user_controller.text = user_id ?? '';
+      // pass_controller.text = password;
 
-      login();
+      login(user_id: user_id ?? '', password: password);
     }
   }
 
+  @override
   initState() {
     super.initState();
     if (!widget.logout) get_login_details();
+  }
+
+  @override
+  void dispose() {
+    user_controller.dispose();
+    pass_controller.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -307,7 +353,9 @@ class _SignInToAppState extends State<SignInToApp> {
             user_controller.text = '${user_controller.text}-ST';
         }
 
-        login();
+        login(
+            user_id: user_controller.text.trim(),
+            password: pass_controller.text);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -329,6 +377,8 @@ class _SignInToAppState extends State<SignInToApp> {
       ),
     );
   }
+
+  //? FUNCTIONS
 
   // get fine_id
   String fine_id(String id) {

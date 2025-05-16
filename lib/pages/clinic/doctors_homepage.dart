@@ -30,8 +30,10 @@ class _DoctorsHomepageState extends State<DoctorsHomepage> {
 
   @override
   void initState() {
-    ServerHelpers.socket!.on('Doctor', (data) {
-      get_doctor(data);
+    Future.delayed(Duration(seconds: 1), () {
+      ServerHelpers.socket!.on('Doctor', (data) {
+        get_doctor(data);
+      });
     });
     super.initState();
   }
@@ -222,73 +224,75 @@ class _DoctorsHomepageState extends State<DoctorsHomepage> {
           borderRadius: BorderRadius.circular(15),
         ),
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Stack(
+        child: Column(
           children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/pt_clients.jpeg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            Expanded(
+              child: Stack(
                 children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 20),
-                  Text(
-                    'Physio Patients',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                  // background
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'images/pt_clients.jpeg',
+                      fit: BoxFit.cover,
+                      width: 200,
+                      height: 220,
                     ),
                   ),
-                ],
-              )),
-            ),
 
-            // counter
-            if (pen_ong_patient_count != 0)
-              Positioned(
-                top: 15,
-                right: 20,
-                child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.redAccent,
-                    ),
-                    height: 50,
-                    width: 50,
-                    child: Center(
-                        child: Text(
-                      pen_ong_patient_count.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                  // background cover box
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFF01040A).withOpacity(0.53),
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                    ))),
+                    ),
+                  ),
+
+                  // main content
+                  Positioned.fill(
+                    child: Center(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.people, size: 60, color: Colors.white),
+                        SizedBox(height: 20),
+                        Text(
+                          'Physio Patients',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            letterSpacing: 1,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ],
+                    )),
+                  ),
+                ],
               ),
+            ),
+            Row(
+              children: [
+                // pending
+                notification(
+                  active_doctor,
+                  count: active_doctor?.pen_patients.length ?? 0,
+                  color: Colors.redAccent,
+                  index: 1,
+                ),
+
+                // ongoing
+                notification(
+                  active_doctor,
+                  count: active_doctor?.ong_patients.length ?? 0,
+                  color: Colors.orange,
+                  index: 0,
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -358,5 +362,39 @@ class _DoctorsHomepageState extends State<DoctorsHomepage> {
     );
   }
 
+  // notification
+  Widget notification(DoctorModel? active_doctor,
+      {required int count, required Color color, required int index}) {
+    if (count == 0 || active_doctor == null) return Container();
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PatientList(
+                    pending_patient: active_doctor.pen_patients,
+                    ongoing_patient: active_doctor.ong_patients,
+                    my_patients: active_doctor.my_patients,
+                    inital_index: index,
+                  )),
+        );
+      },
+      child: Container(
+        height: 21,
+        width: 21,
+        margin: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            count.toString(),
+            style: TextStyle(color: Colors.white, fontSize: 13, height: 1),
+          ),
+        ),
+      ),
+    );
+  }
   //
 }

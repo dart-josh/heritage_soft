@@ -7,7 +7,9 @@ import 'package:heritage_soft/datamodels/store_models/sales_record.model.dart';
 import 'package:heritage_soft/helpers/clinic_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/store_database_helpers.dart';
+import 'package:heritage_soft/pages/store/print.page.dart';
 import 'package:heritage_soft/pages/store/widgets/complete_sale_dialog.dart';
+import 'package:intl/intl.dart';
 
 class ShopPage extends StatefulWidget {
   final AccessoryRequestModel? request;
@@ -793,94 +795,191 @@ class _ShopPageState extends State<ShopPage> {
     return Container(
       alignment: Alignment.bottomRight,
       margin: EdgeInsets.only(top: 10, right: 30),
-      child: InkWell(
-        onTap: () async {
-          // empty cart
-          if (items.isEmpty) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.redAccent,
-              toastText: 'Select an Item to proceed',
-              icon: Icons.error,
-            );
-            return;
-          }
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (items.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(right: 10),
+              child: InkWell(
+                onTap: () async {
+                  bool conf_print = await Helpers.showConfirmation(
+                    context: context,
+                    title: 'Print Ticket',
+                    message: 'Would you like to print a ticket for this items?',
+                    boolean: true,
+                  );
 
-          var auth_staff = AppData.get(context, listen: false).active_user;
+                  if (!conf_print) return;
 
-          DateTime date_st = DateTime.now();
+                  RequestPrintModel printModel = RequestPrintModel(
+                    date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                    time: DateFormat.jm().format(DateTime.now()),
+                    patient: widget.request?.patient != null
+                        ? '${widget.request?.patient?.f_name ?? ''} ${widget.request?.patient?.l_name ?? ''}'
+                        : '',
+                    items: items
+                        .map((p) => PrintItemModel(
+                            name: p.accessory.itemName,
+                            qty: p.qty,
+                            price: p.accessory.price,
+                            total_price: (p.accessory.price * p.qty)))
+                        .toList(),
+                  );
 
-          SalesRecordModel order = SalesRecordModel(
-            date: date_st,
-            accessories: items,
-            order_price: total_P,
-            patient: widget.request?.patient,
-            discount_price: 0,
-            shortNote: '',
-            paymentMethod: '',
-            splitPaymentMethod: [],
-            soldBy: auth_staff!,
-            saleType: '',
-          );
-
-          var res = await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) =>
-                CompleteSaleDialog(total: total_Q, amount: total_P),
-          );
-
-          if (res != null) {
-            Map result = res;
-            order.paymentMethod = result['payment_method'];
-            order.discount_price = result['final_amount'];
-            order.splitPaymentMethod = result['split_payment'];
-            order.shortNote = result['note'];
-            order.date = result['date'] ?? DateTime.now();
-
-            var sr = await StoreDatabaseHelpers.add_sales_record(
-              context,
-              data: order.toJson(soldByKey: auth_staff.key ?? ''),
-              showLoading: true,
-              showToast: true,
-            );
-
-            if (sr != null && sr['salesRecord'] != null) {
-              if (widget.request != null) {
-                await ClinicDatabaseHelpers.delete_accessory_request(
-                  context,
-                  data: {},
-                  id: widget.request?.key ?? '',
-                  showLoading: true,
+                  showDialog(
+                      context: context,
+                      builder: (context) => SalesPrintPage(print2: printModel));
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.blueAccent,
+                  ),
+                  height: 45,
+                  width: 45,
+                  child: Center(
+                    child: Icon(
+                      Icons.print,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          
+          InkWell(
+            onTap: () async {
+              // empty cart
+              if (items.isEmpty) {
+                Helpers.showToast(
+                  context: context,
+                  color: Colors.redAccent,
+                  toastText: 'Select an Item to proceed',
+                  icon: Icons.error,
                 );
+                return;
               }
 
-              search_list.clear();
-              search_controller.clear();
-              search_on = false;
-              items.clear();
-              setState(() {});
-            }
-          }
-        },
-        child: Container(
-          width: 200,
-          height: 45,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Center(
-            child: Text(
-              'SUBMIT',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+              var auth_staff = AppData.get(context, listen: false).active_user;
+
+              DateTime date_st = DateTime.now();
+
+              SalesRecordModel order = SalesRecordModel(
+                date: date_st,
+                accessories: items,
+                order_price: total_P,
+                patient: widget.request?.patient,
+                discount_price: 0,
+                shortNote: '',
+                paymentMethod: '',
+                splitPaymentMethod: [],
+                soldBy: auth_staff!,
+                saleType: '',
+              );
+
+              var res = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    CompleteSaleDialog(total: total_Q, amount: total_P),
+              );
+
+              if (res != null) {
+                Map result = res;
+                order.paymentMethod = result['payment_method'];
+                order.discount_price = result['final_amount'];
+                order.splitPaymentMethod = result['split_payment'];
+                order.shortNote = result['note'];
+                order.date = result['date'] ?? DateTime.now();
+
+                var sr = await StoreDatabaseHelpers.add_sales_record(
+                  context,
+                  data: order.toJson(soldByKey: auth_staff.key ?? ''),
+                  showLoading: true,
+                  showToast: true,
+                );
+
+                if (sr != null && sr['salesRecord'] != null) {
+                  if (widget.request != null) {
+                    await ClinicDatabaseHelpers.delete_accessory_request(
+                      context,
+                      data: {},
+                      id: widget.request?.key ?? '',
+                      showLoading: true,
+                    );
+                  }
+
+                  search_list.clear();
+                  search_controller.clear();
+                  search_on = false;
+                  items.clear();
+                  setState(() {});
+
+                  bool conf_print = await Helpers.showConfirmation(
+                    context: context,
+                    title: 'Print Receipt',
+                    message: 'Would you like to print a receipt for this sale?',
+                    boolean: true,
+                  );
+
+                  if (conf_print) {
+                    var record = SalesRecordModel.fromJson(sr['salesRecord']);
+                    SalesPrintModel printModel = SalesPrintModel(
+                      date: DateFormat('dd/MM/yyyy').format(record.date),
+                      time: DateFormat.jm().format(record.date),
+                      receipt_id: record.order_id,
+                      seller: record.soldBy.f_name,
+                      customer:
+                          '${record.patient?.f_name ?? ''} ${record.patient?.l_name ?? ''}',
+                      items: record.accessories
+                          .map((p) => PrintItemModel(
+                              name: p.accessory.itemName,
+                              qty: p.qty,
+                              price: p.accessory.price,
+                              total_price: (p.accessory.price * p.qty)))
+                          .toList(),
+                      sub_total: record.order_price,
+                      discount: record.order_price - record.discount_price,
+                      total: record.discount_price,
+                      pmts: record.splitPaymentMethod.isNotEmpty
+                          ? record.splitPaymentMethod
+                          : [
+                              PaymentMethodModel(
+                                paymentMethod: record.paymentMethod,
+                                amount: record.discount_price,
+                              )
+                            ],
+                    );
+
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            SalesPrintPage(print: printModel));
+                  }
+                }
+              }
+            },
+            child: Container(
+              width: 200,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Center(
+                child: Text(
+                  'SUBMIT',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

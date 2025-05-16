@@ -94,9 +94,10 @@ class UserHelpers {
     required Map data,
     bool showLoading = true,
     bool showToast = true,
+    bool requireUser = true,
   }) async {
     var response = await UserApi.add_update_doctor(context,
-        data: data, showLoading: showLoading, showToast: showToast);
+        data: data, showLoading: showLoading, showToast: showToast, requireUser: requireUser,);
 
     if (response != null && response['doctor'] != null) {
       DoctorModel doctor = DoctorModel.fromMap(

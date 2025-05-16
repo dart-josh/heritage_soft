@@ -123,11 +123,12 @@ class _HomePageState extends State<HomePage> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Text(
-                            current_page == 0
-                                ? 'HERITAGE FITNESS & WELLNESS CENTRE'
-                                : current_page == 1
-                                    ? 'HERITAGE PHYSIOTHERAPY CLINIC'
-                                    : 'DELIGHTSOME HERITAGE INTERNATIONAL',
+                            'HERITAGE PHYSIOTHERAPY CLINIC',
+                            // current_page == 0
+                            //     ? 'HERITAGE FITNESS & WELLNESS CENTRE'
+                            //     : current_page == 1
+                            //         ? 'HERITAGE PHYSIOTHERAPY CLINIC'
+                            //         : 'DELIGHTSOME HERITAGE INTERNATIONAL',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'MsLineDraw',
@@ -193,17 +194,17 @@ class _HomePageState extends State<HomePage> {
                 ? [
                     full_access_tab_1(),
                     full_access_tab_2(),
-                    full_access_tab_3(),
+                    // full_access_tab_3(),
                   ]
                 : (user.app_role == 'Admin' || user.app_role == 'Management')
                     ? [
                         admin_tab_1(),
-                        admin_tab_2(),
+                        // admin_tab_2(),
                       ]
                     : (user.app_role == 'CSU')
                         ? [
-                            main_page_0(),
-                            main_page_1(),
+                           csu_page_0(),
+                          //  csu_page_1(),
                           ]
                         : [],
             carouselController: buttonCarouselController,
@@ -238,7 +239,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // main page
-  Widget main_page_0() {
+  Widget csu_page_0() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: SingleChildScrollView(
@@ -249,19 +250,21 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           runAlignment: WrapAlignment.center,
           children: [
-            ft_client_list(),
             pt_client_list(),
             doctors(),
-            birthday_list(),
-            attendance_history(),
-            guest_record(),
+            accessories(),
+
+            sales_record(),
+            restock_accessories(),
+            restock_accessories_record(),
+            
           ],
         ),
       ),
     );
   }
 
-  Widget main_page_1() {
+  Widget csu_page_1() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: SingleChildScrollView(
@@ -271,12 +274,9 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            data_report(),
-            accessories(),
-            restock_accessories(),
-            restock_accessories_record(),
-            sales_record(),
-            manage_hmo(),
+            // data_report(),
+            
+            // manage_hmo(),
           ],
         ),
       ),
@@ -294,12 +294,17 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             all_data(),
-            data_report(),
-            birthday_list(),
-            ft_client_list(),
+            // data_report(),
+            // birthday_list(),
+            // ft_client_list(),
             pt_client_list(),
             staff_list(),
-            doctors(),
+
+            accessories(),
+            sales_record(),
+            restock_accessories(),
+            restock_accessories_record(),
+            
           ],
         ),
       ),
@@ -316,15 +321,12 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            attendance_history(),
-            staff_attendance_history(),
-            guest_record(),
-            accessories(),
-            restock_accessories(),
-            restock_accessories_record(),
-            sales_record(),
-            manage_hmo(),
-            manage_password(),
+            // attendance_history(),
+            // staff_attendance_history(),
+            // guest_record(),
+            
+            // manage_hmo(),
+            // manage_password(),
           ],
         ),
       ),
@@ -342,12 +344,12 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             all_data(),
-            ft_client_list(),
+            // ft_client_list(),
             pt_client_list(),
-            data_report(),
+            // data_report(),
             staff_list(),
             doctors(),
-            birthday_list(),
+            // birthday_list(),
           ],
         ),
       ),
@@ -364,15 +366,15 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            attendance_history(),
-            staff_attendance_history(),
-            guest_record(),
+            // attendance_history(),
+            // staff_attendance_history(),
+            // guest_record(),
             accessories(),
             restock_accessories(),
             restock_accessories_record(),
             sales_record(),
-            manage_hmo(),
-            manage_password(),
+            // manage_hmo(),
+            // manage_password(),
           ],
         ),
       ),
@@ -389,7 +391,7 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            mark_attendance(),
+            // mark_attendance(),
           ],
         ),
       ),

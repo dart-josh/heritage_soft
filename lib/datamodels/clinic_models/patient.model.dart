@@ -15,6 +15,8 @@ class PatientModel {
   String email;
   String address;
   String gender;
+  String marrital_status;
+  String religion;
   String dob;
   String age;
   String occupation;
@@ -51,6 +53,8 @@ class PatientModel {
     required this.email,
     required this.address,
     required this.gender,
+    required this.marrital_status,
+    required this.religion,
     required this.dob,
     required this.age,
     required this.occupation,
@@ -93,6 +97,8 @@ class PatientModel {
       email: map['email'] ?? '',
       address: map['address'] ?? '',
       gender: map['gender'] ?? '',
+      marrital_status: map['marrital_status'] ?? '',
+      religion: map['religion'] ?? '',
       dob: map['dob'] ?? '',
       age: map['age'] ?? '',
       occupation: map['occupation'] ?? '',
@@ -160,6 +166,8 @@ class PatientModel {
       email: '',
       address: '',
       gender: '',
+      marrital_status: '',
+      religion: '',
       dob: '',
       age: '',
       occupation: '',
@@ -188,6 +196,8 @@ class PatientModel {
         'email': email,
         'address': address,
         'gender': gender,
+        'marrital_status': marrital_status,
+        'religion': religion,
         'dob': dob,
         'age': age,
         'occupation': occupation,

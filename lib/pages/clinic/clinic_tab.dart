@@ -63,6 +63,8 @@ class _ClinicTabState extends State<ClinicTab> {
 
   bool run_timer = false;
 
+  bool isLoading = false;
+
   void get_patient(PatientModel pat) {
     var patt = AppData.get(context).patients.where((p) => p.key == pat.key);
 
@@ -119,18 +121,20 @@ class _ClinicTabState extends State<ClinicTab> {
   dynamic doc_patient_stream(dynamic data) async {
     PatientModel pat = PatientModel.fromMap(data);
 
-    if (patient.key == pat.key) if (mounted)
+    if (widget.patient.key == pat.key) if (mounted)
       setState(() {
         patient = pat;
       });
   }
 
   fetch_patient() async {
+    isLoading = true;
     var get_pat = await ClinicDatabaseHelpers.get_patient_by_id(context,
-        patient_key: patient.key ?? '');
-
-    print(get_pat?.patient_id);
-    if (get_pat != null) patient = get_pat;
+        patient_key: widget.patient.key ?? '');
+    isLoading = false;
+    if (get_pat != null) {
+      patient = get_pat;
+    }
   }
 
   @override
@@ -348,15 +352,15 @@ class _ClinicTabState extends State<ClinicTab> {
           topBar(),
 
           // profile area & session & billing setup
-          patient_data(),
+          if (!isLoading) patient_data(),
 
           // session info area
-          Expanded(child: Center(child: session_tab())),
+          Expanded(child: Center(child: (isLoading) ? CircularProgressIndicator() : session_tab())),
 
-          SizedBox(height: 30),
+          if (!isLoading) SizedBox(height: 30),
 
           // action tab
-          Padding(
+          if (!isLoading) Padding(
             padding: EdgeInsets.all(12),
             child: action_tab(),
           ),
@@ -530,7 +534,8 @@ class _ClinicTabState extends State<ClinicTab> {
                     ),
 
                   // request accessories (doctor only)
-                  if (((active_user!.app_role == 'Doctor') && can_treat) || active_user!.full_access)
+                  if (((active_user!.app_role == 'Doctor') && can_treat) ||
+                      active_user!.full_access)
                     Padding(
                       padding: EdgeInsets.only(left: 8),
                       child: InkWell(
@@ -727,7 +732,7 @@ class _ClinicTabState extends State<ClinicTab> {
           if (active_user!.app_role == 'Doctor' ||
               active_user!.app_role == 'CSU' ||
               active_user!.full_access)
-            if (!skip_assessment)
+            if (!skip_assessment && (patient.clinic_variables?.case_type != 'Assessment'))
               InkWell(
                 onTap: () async {
                   var res = await showDialog(
@@ -787,7 +792,9 @@ class _ClinicTabState extends State<ClinicTab> {
                 borderRadius: BorderRadius.circular(25),
               ),
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-              child: Text('Clinic options'),
+              child: Text(active_user!.app_role == 'Doctor'
+                  ? 'Session setup'
+                  : 'Clinic options'),
             ),
           ),
         ],
@@ -1121,15 +1128,30 @@ class _ClinicTabState extends State<ClinicTab> {
             else
               // Awaiting doctor/ Duration
               Center(
-                child: Text(
-                  (patient.current_case_id == null)
-                      ? 'Awaiting Doctor - ${patient.clinic_variables?.case_type ?? ''}'
-                      : patient.clinic_variables?.treatment_duration ?? '',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      (patient.current_case_id == null)
+                          ? 'Awaiting Doctor - ${patient.clinic_variables?.case_type ?? ''}'
+                          : patient.clinic_variables?.treatment_duration ?? '',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (patient.current_case_id == null) SizedBox(height: 2),
+                    if (patient.current_case_id == null)
+                      Text(
+                        'PT - ${patient.current_doctor?.user.f_name ?? ''}',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            fontStyle: FontStyle.italic),
+                      ),
+                  ],
                 ),
               )
 
@@ -1186,9 +1208,10 @@ class _ClinicTabState extends State<ClinicTab> {
                 if (patient.current_case_id == null) {
                   var conf = await Helpers.showConfirmation(
                       context: context,
-                      title: 'Go To TreatmentTab',
+                      title:
+                          'Go To ${patient.clinic_variables?.case_type ?? ''} Tab',
                       message:
-                          'You are about to open the treatment tab for this client, Would you like to proceed?',
+                          'You are about to open the ${patient.clinic_variables?.case_type.toLowerCase() ?? ''} tab for this client, Would you like to proceed?',
                       barrierDismissible: true);
 
                   if (conf) {
@@ -1219,17 +1242,31 @@ class _ClinicTabState extends State<ClinicTab> {
             // treatmnet countdown
             if (patient.current_case_id != null)
               Container(
-                child: Row(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Ongoing ${patient.clinic_variables?.case_type ?? ''}',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
+                        SizedBox(width: 8),
+                        time(),
+                      ],
+                    ),
+                    SizedBox(height: 2),
                     Text(
-                      'Ongoing ${patient.clinic_variables?.case_type ?? ''}',
+                      'PT - ${patient.current_doctor?.user.f_name ?? ''}',
                       style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          fontStyle: FontStyle.italic),
                     ),
-                    SizedBox(width: 8),
-                    time(),
                   ],
                 ),
               )

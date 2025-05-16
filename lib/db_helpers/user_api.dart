@@ -55,6 +55,7 @@ class UserApi {
     required Map data,
     bool showToast = false,
     bool showLoading = false,
+    bool requireUser = true,
   }) async {
     return await DBHelpers.postDataToServer(
       context,
@@ -62,6 +63,7 @@ class UserApi {
       data: data,
       showToast: showToast,
       showLoading: showLoading,
+      requireUser: requireUser,
     );
   }
 

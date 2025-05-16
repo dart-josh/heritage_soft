@@ -4,7 +4,8 @@ import 'package:universal_html/html.dart';
 
 GlobalKey<ScaffoldState> doctor_profile_key = GlobalKey();
 
-String server_url = 'http://192.168.1.111:5500'; // http://192.168.1.111 http://localhost
+String server_url = 'http://192.168.1.111:5500';
+// String server_url = 'http://localhost:5500';
 
 // ! DB ROUTES
 String clinicUrl = '${server_url}/api/clinic';
@@ -155,19 +156,19 @@ List<String> equipment_options = [
 ];
 
 List<String> assessment_decision_select_options = [
+  'Start Treatment',
   'Booked for Treatment',
   'Refer',
   'Others',
   'Not a Physio Patient'
 ];
 List<String> treatment_decision_select_options = [
-  'Booked for Treatment',
-  'Refer',
-  'Others',
   'Continue Treatment',
   'End Treatment',
-  'Schedule Treatment for Anoda date',
-  'Patient not Responsive'
+  'Schedule Treatment for Another date',
+  'Patient not Responsive',
+  'Refer',
+  'Others',
 ];
 
 List<String> decision_refered_options = [

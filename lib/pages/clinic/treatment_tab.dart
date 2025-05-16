@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
-import 'package:heritage_soft/datamodels/clinic_models/equipement.model.dart';
+// import 'package:heritage_soft/datamodels/clinic_models/equipement.model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/global_variables.dart';
@@ -61,10 +61,11 @@ class _TreatmentTabState extends State<TreatmentTab> {
   List<String> selected_case_select_options = [];
   String case_type_select = '';
   String treatment_type_select = '';
-  List<String> selected_equipment_options = [];
+  // List<String> selected_equipment_options = [];
 
   TextEditingController case_select_controller = TextEditingController();
-  TextEditingController equipment_select_controller = TextEditingController();
+  TextEditingController other_case_controller = TextEditingController();
+  // TextEditingController equipment_select_controller = TextEditingController();
   TextEditingController diagnosis_controller = TextEditingController();
 
   DoctorModel? active_doctor;
@@ -94,11 +95,12 @@ class _TreatmentTabState extends State<TreatmentTab> {
       diagnosis_controller.text = assessmentInfoModel.diagnosis;
       case_type_select = assessmentInfoModel.case_type;
       treatment_type_select = assessmentInfoModel.treatment_type;
-      equipment_select_controller.text = assessmentInfoModel.equipments
-          .map((e) => e.equipmentName)
-          .toList()
-          .join(',');
-      selected_equipment_options = equipment_select_controller.text.split(',');
+      other_case_controller.text = assessmentInfoModel.case_select_others ?? '';
+      // equipment_select_controller.text = assessmentInfoModel.equipments
+      //     .map((e) => e.equipmentName)
+      //     .toList()
+      //     .join(',');
+      // selected_equipment_options = equipment_select_controller.text.split(',');
     }
   }
 
@@ -157,17 +159,6 @@ class _TreatmentTabState extends State<TreatmentTab> {
       }
     }
 
-    // general validation
-    if (bp_reading.isEmpty) {
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'BP cannot be empty',
-        icon: Icons.error,
-      );
-      return false;
-    }
-
     if (note_controller.text.isEmpty) {
       Helpers.showToast(
         context: context,
@@ -222,18 +213,8 @@ class _TreatmentTabState extends State<TreatmentTab> {
         diagnosis: diagnosis_controller.text.trim(),
         case_type: case_type_select,
         treatment_type: treatment_type_select,
-        equipments: equipment_select_controller.text
-            .split(',')
-            .map((e) => EquipmentModel(
-                  equipmentName: e.trim(),
-                  key: '',
-                  equipmentId: '',
-                  category: '',
-                  costing: 0,
-                  status: '',
-                ))
-            .toList(),
-        case_select_others: '',
+        equipments: [],
+        case_select_others: other_case_controller.text.trim(),
         case_description: '',
         assessment_date: DateTime.now(),
       );
@@ -386,7 +367,8 @@ class _TreatmentTabState extends State<TreatmentTab> {
     note_controller.dispose();
 
     case_select_controller.dispose();
-    equipment_select_controller.dispose();
+    other_case_controller.dispose();
+    // equipment_select_controller.dispose();
     diagnosis_controller.dispose();
     other_decision_controller.dispose();
     super.dispose();
@@ -804,69 +786,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
       onSelected: (value) async {
         // health details
         // if (value == 1) {
-        //   Helpers.showLoadingScreen(context: context);
-
-        //   List<G_PhysioHealthModel> _all = [];
-
-        //   await ClinicDatabaseHelpers.get_physio_health_info(widget.client.key)
-        //       .then((snap) async {
-        //     snap.docs.forEach((element) {
-        //       _all.add(G_PhysioHealthModel(
-        //           key: element.id,
-        //           data: PhysioHealthModel.fromMap(element.id, element.data())));
-        //     });
-
-        //     Navigator.pop(context);
-
-        //     if (_all.isNotEmpty) {
-        //       if (widget.client.baseline_done) {
-        //         var conf = await showDialog(
-        //             context: context,
-        //             builder: (context) =>
-        //                 PhysioHealthSelectorDialog(list: _all));
-
-        //         if (conf != null) {
-        //           if (!conf[1]) {
-        //             Navigator.push(
-        //               context,
-        //               MaterialPageRoute(
-        //                 builder: (context) => PhysioClientHDPage(
-        //                   client: widget.client,
-        //                   health: conf[0],
-        //                 ),
-        //               ),
-        //             );
-        //           }
-        //         }
-        //       } else {
-        //         var data = _all
-        //             .where((element) => element.key == 'Baseline')
-        //             .first
-        //             .data;
-
-        //         Navigator.push(
-        //           context,
-        //           MaterialPageRoute(
-        //             builder: (context) => PhysioClientHDPage(
-        //               client: widget.client,
-        //               health: data,
-        //             ),
-        //           ),
-        //         );
-        //       }
-        //     } else {
-        //       if (app_role != 'desk') {
-        //         Helpers.showToast(
-        //           context: context,
-        //           color: Colors.red,
-        //           toastText: 'No Health details',
-        //           icon: Icons.error,
-        //         );
-        //         return;
-        //       }
-        //     }
-        //   });
-        // }
+        //   }
 
         // request accessories
         if (value == 2) {
@@ -1066,42 +986,6 @@ class _TreatmentTabState extends State<TreatmentTab> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // save file
-          InkWell(
-            onTap: () {
-              save_to_file(false);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              height: 30,
-              width: 120,
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.save,
-                      size: 25,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 2),
-                    Text(
-                      'Save to File',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           SizedBox(width: 10),
 
           // end treatment
@@ -1151,20 +1035,20 @@ class _TreatmentTabState extends State<TreatmentTab> {
     else
       case_select_controller.text = '';
 
-    if (selected_equipment_options.isNotEmpty)
-      equipment_select_controller.text = selected_equipment_options.join(',');
-    else
-      equipment_select_controller.text = '';
+    // if (selected_equipment_options.isNotEmpty)
+    //   equipment_select_controller.text = selected_equipment_options.join(',');
+    // else
+    //   equipment_select_controller.text = '';
 
     if (case_select_controller.text.startsWith(',')) {
       case_select_controller.text =
           case_select_controller.text.replaceFirst(',', '');
     }
 
-    if (equipment_select_controller.text.startsWith(',')) {
-      equipment_select_controller.text =
-          equipment_select_controller.text.replaceFirst(',', '');
-    }
+    // if (equipment_select_controller.text.startsWith(',')) {
+    //   equipment_select_controller.text =
+    //       equipment_select_controller.text.replaceFirst(',', '');
+    // }
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -1190,6 +1074,16 @@ class _TreatmentTabState extends State<TreatmentTab> {
                           color: Colors.white,
                         ),
                       ),
+                    ),
+                  ),
+
+                  // other case
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 6),
+                    child: Text_field(
+                      label: 'Enter other condition(s)',
+                      controller: other_case_controller,
+                      font_size: 15,
                     ),
                   ),
 
@@ -1234,21 +1128,21 @@ class _TreatmentTabState extends State<TreatmentTab> {
                     ),
                   ),
 
-                  // equipment
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 6),
-                    child: Text_field(
-                      label: 'Equipment',
-                      controller: equipment_select_controller,
-                      edit: true,
-                      icon: equipment_multi_select(
-                        child: Icon(
-                          Icons.select_all,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // // equipment
+                  // Container(
+                  //   padding: EdgeInsets.symmetric(vertical: 6),
+                  //   child: Text_field(
+                  //     label: 'Equipment',
+                  //     controller: equipment_select_controller,
+                  //     edit: true,
+                  //     icon: equipment_multi_select(
+                  //       child: Icon(
+                  //         Icons.select_all,
+                  //         color: Colors.white,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -1478,7 +1372,9 @@ class _TreatmentTabState extends State<TreatmentTab> {
                     ),
                     SizedBox(width: 6),
                     Text(
-                      widget.patient.treatment_info!.last_bp_p,
+                      widget.patient.treatment_info!.last_bp_p != '0'
+                          ? widget.patient.treatment_info!.last_bp_p
+                          : 'Not recorded',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,
@@ -1519,7 +1415,9 @@ class _TreatmentTabState extends State<TreatmentTab> {
                   ),
                   SizedBox(width: 6),
                   Text(
-                    widget.patient.treatment_info?.last_bp ?? '',
+                    widget.patient.treatment_info?.last_bp != '0'
+                        ? widget.patient.treatment_info?.last_bp ?? ''
+                        : 'Not recorded',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -1778,46 +1676,6 @@ class _TreatmentTabState extends State<TreatmentTab> {
             }).toList());
   }
 
-  // equipment select
-  Widget equipment_multi_select({required child}) {
-    return PopupMenuButton<String>(
-        padding: EdgeInsets.all(0),
-        offset: Offset(0, 30),
-        child: child,
-        elevation: 8,
-        onSelected: (value) async {
-          bool is_in = selected_equipment_options.contains(value);
-
-          if (is_in) {
-            selected_equipment_options.remove(value);
-          } else {
-            selected_equipment_options.add(value);
-          }
-
-          setState(() {});
-        },
-        itemBuilder: (context) => equipment_options.map((e) {
-              bool is_in = selected_equipment_options.contains(e);
-
-              return PopupMenuItem(
-                enabled: !(e.startsWith('*')),
-                padding: EdgeInsets.all(0),
-                value: e,
-                child: Container(
-                  width: double.infinity,
-                  height: kMinInteractiveDimension,
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: is_in ? Colors.red.shade100 : Colors.blue.shade50,
-                  ),
-                  child: Text(
-                    e.replaceAll('*', ''),
-                    style: TextStyle(),
-                  ),
-                ),
-              );
-            }).toList());
-  }
 
   //
 }

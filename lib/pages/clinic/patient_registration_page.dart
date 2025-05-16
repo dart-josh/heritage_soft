@@ -413,6 +413,17 @@ class _PatientRegistrationPageState extends State<PatientRegistrationPage> {
   String gender_select = '';
   List<String> gender_options = ['Male', 'Female'];
 
+  String marrital_status_select = '';
+  List<String> marrital_status_options = [
+    'Single',
+    'Married',
+    'Divorced',
+    'Widowed'
+  ];
+
+  String religion_select = '';
+  List<String> religion_options = ['Christain', 'Muslim', 'Other'];
+
   String occupation_select = '';
 
   String hmo_select = 'No HMO';
@@ -747,6 +758,52 @@ class _PatientRegistrationPageState extends State<PatientRegistrationPage> {
                     node: age_node,
                     hintText: '',
                     require: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // marrital status  religion
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                // marrital_status
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    // width: 100,
+                    child: Select_form(
+                      label: 'Marrital status',
+                      options: marrital_status_options,
+                      text_value: marrital_status_select,
+                      setval: (val) {
+                        marrital_status_select = val;
+
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 20),
+
+                // religion
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    // width: 100,
+                    child: Select_form(
+                      label: 'Religion',
+                      options: religion_options,
+                      text_value: religion_select,
+                      setval: (val) {
+                        religion_select = val;
+
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -1142,17 +1199,6 @@ class _PatientRegistrationPageState extends State<PatientRegistrationPage> {
           return;
         }
 
-        // check age if empty
-        if (age_controller.text.isEmpty) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.redAccent,
-            toastText: 'Enter your age',
-            icon: Icons.error,
-          );
-          return;
-        }
-
         // check hmo id if hmo selected
         if (hmo_select != 'No HMO' && hmo_id_controller.text.isEmpty) {
           Helpers.showToast(
@@ -1247,6 +1293,8 @@ class _PatientRegistrationPageState extends State<PatientRegistrationPage> {
         age_controller.text = '';
         occupation_select = '';
         gender_select = '';
+        marrital_status_select = '';
+        religion_select = '';
         hmo_select = 'No HMO';
         hmo_id_controller.text = '';
         nature_of_work_controller.text = '';
@@ -1305,6 +1353,8 @@ class _PatientRegistrationPageState extends State<PatientRegistrationPage> {
       email: email_controller.text.trim(),
       address: address_controller.text.trim(),
       gender: gender_select,
+      marrital_status: marrital_status_select,
+      religion: religion_select,
       dob: dob_controller.text.trim(),
       age: age_controller.text.trim(),
       occupation: occupation_select,

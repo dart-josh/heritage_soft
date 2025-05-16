@@ -281,11 +281,23 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
           profile_area(),
 
           // personal/contact details
-          Expanded(
-              child: SingleChildScrollView(
-                  child: (active_user!.app_role == 'Doctor')
-                      ? personal_details()
-                      : contact_details())),
+          (active_user!.app_role == 'Doctor')
+              ? Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text_field(
+                    label: 'Address',
+                    controller: address_controller,
+                    node: address_node,
+                    maxLine: 3,
+                    edit: !edit,
+                    require: edit,
+                  ),
+                )
+              : Expanded(
+                  child: SingleChildScrollView(child: contact_details())),
+
+          if (active_user!.app_role == 'Doctor') clinic_tab(),
         ],
       ),
     );
@@ -303,9 +315,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
               child: Column(
                 children: [
                   // personal details
-                  (active_user!.app_role == 'Doctor')
-                      ? Container()
-                      : personal_details(),
+                  personal_details(),
 
                   // other details
                   (active_user!.app_role == 'Doctor')
@@ -320,7 +330,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
                       : sponsor_details(),
 
                   // Doctor tab
-                  Doctor_tab(),
+                  if (active_user!.app_role != 'Doctor') clinic_tab(),
                 ],
               ),
             ),
@@ -622,6 +632,17 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
   String gender_select = '';
   List<String> gender_options = ['Male', 'Female'];
 
+  String marrital_status_select = '';
+  List<String> marrital_status_options = [
+    'Single',
+    'Married',
+    'Divorced',
+    'Widowed'
+  ];
+
+  String religion_select = '';
+  List<String> religion_options = ['Christain', 'Muslim', 'Other'];
+
   String occupation_select = '';
 
   List<SponsorModel> sponsors = [];
@@ -843,6 +864,56 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
             ),
           ),
 
+          // marrital status  religion
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                // marrital_status
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    // width: 100,
+                    child: Select_form(
+                      label: 'Marrital status',
+                      options: marrital_status_options,
+                      text_value: marrital_status_select,
+                      require: edit,
+                      edit: edit,
+                      setval: (val) {
+                        marrital_status_select = val;
+
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 20),
+
+                // religion
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    // width: 100,
+                    child: Select_form(
+                      label: 'Religion',
+                      options: religion_options,
+                      text_value: religion_select,
+                      require: edit,
+                      edit: edit,
+                      setval: (val) {
+                        religion_select = val;
+
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // occupation
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
@@ -871,7 +942,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
             ),
 
           // hmo
-          if (patient.hmo != 'No HMO')
+          if (patient.hmo != 'No HMO' && (active_user!.app_role != 'Doctor'))
             Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text_field(
@@ -884,7 +955,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
             ),
 
           // hmo id
-          if (patient.hmo != 'No HMO')
+          if (patient.hmo != 'No HMO' && (active_user!.app_role != 'Doctor'))
             Padding(
               padding: EdgeInsets.symmetric(vertical: 1),
               child: Text_field(
@@ -895,7 +966,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
               ),
             ),
 
-          if (patient.hmo != 'No HMO') SizedBox(height: 8),
+          if (patient.hmo != 'No HMO' && (active_user!.app_role != 'Doctor')) SizedBox(height: 8),
         ],
       ),
     );
@@ -1278,7 +1349,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
   }
 
   // Doctors tab
-  Widget Doctor_tab() {
+  Widget clinic_tab() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Column(
@@ -1298,7 +1369,7 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
                   ),
                 ),
                 child: Text(
-                  'Doctor\'s Tab',
+                  'Clinic Tab',
                   style: headingStyle,
                 ),
               ),
@@ -1318,8 +1389,6 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
                 InkWell(
                   onTap: () async {
                     if (patient == null) return;
-
-                    Helpers.showLoadingScreen(context: context);
 
                     List<G_PhysioHealthModel> _all = [];
 
@@ -1685,17 +1754,6 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
           return;
         }
 
-        // check age if not empty
-        if (age_controller.text.isEmpty) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.redAccent,
-            toastText: 'Enter your age',
-            icon: Icons.error,
-          );
-          return;
-        }
-
         // continue
         bool? res = await showDialog(
           context: context,
@@ -1908,6 +1966,8 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
     occupation_select = patient.occupation;
     nature_of_work_controller.text = patient.nature_of_work;
     gender_select = patient.gender;
+    marrital_status_select = patient.marrital_status;
+    religion_select = patient.religion;
 
     hykau = patient.hykau;
     hykau_controller.text = patient.hykau_others;
@@ -1933,6 +1993,8 @@ class _PatientProfilePageState extends State<PatientProfilePage> {
       email: email_controller.text.trim(),
       address: address_controller.text.trim(),
       gender: gender_select,
+      marrital_status: marrital_status_select,
+      religion: religion_select,
       dob: dob_controller.text.trim(),
       age: age_controller.text.trim(),
       occupation: occupation_select,

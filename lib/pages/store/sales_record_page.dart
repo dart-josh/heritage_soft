@@ -6,6 +6,7 @@ import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/server_helpers.dart';
 import 'package:heritage_soft/helpers/store_database_helpers.dart';
+import 'package:heritage_soft/pages/store/print.page.dart';
 import 'package:heritage_soft/pages/store/widgets/accessory_item_dialog.dart';
 import 'package:intl/intl.dart';
 
@@ -590,6 +591,30 @@ class _SalesRecordState extends State<SalesRecord> {
               id,
               Expanded(child: Container()),
               time,
+              IconButton(
+                  onPressed: () async {
+                    SalesPrintModel printModel = SalesPrintModel(
+                      date: DateFormat('dd/MM/yyyy').format(record.date),
+                      time: DateFormat.jm().format(record.date),
+                      receipt_id: record.order_id,
+                      seller: record.soldBy.f_name,
+                      customer: '${record.patient?.f_name ?? ''} ${record.patient?.l_name ?? ''}',
+                      items: record.accessories.map((p) => PrintItemModel(name: p.accessory.itemName, qty: p.qty, price: p.accessory.price, total_price: (p.accessory.price * p.qty))).toList(),
+                      sub_total: record.order_price,
+                      discount: record.order_price - record.discount_price,
+                      total: record.discount_price,
+                      pmts: record.splitPaymentMethod.isNotEmpty ? record.splitPaymentMethod : [PaymentMethodModel(paymentMethod: record.paymentMethod, amount: record.discount_price,)],
+                    );
+
+                    showDialog(
+                        context: context,
+                        builder: (context) =>
+                            SalesPrintPage(print: printModel));
+                  },
+                  icon: Icon(
+                    Icons.receipt,
+                    color: Colors.white70,
+                  )),
               if (active_user?.full_access ?? false)
                 IconButton(
                     onPressed: () async {

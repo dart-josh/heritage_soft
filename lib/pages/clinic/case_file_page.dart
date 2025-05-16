@@ -426,7 +426,7 @@ class _CaseFileDState extends State<CaseFileD> {
 
                         // value
                         Text(
-                          file.bp_reading,
+                          file.bp_reading.isNotEmpty ? file.bp_reading : 'Not recorded',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,

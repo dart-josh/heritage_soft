@@ -10,12 +10,14 @@ class PatientList extends StatefulWidget {
   final List<MyPatientModel> my_patients;
   final List<PatientModel> ongoing_patient;
   final List<PatientModel> pending_patient;
+  final int? inital_index;
 
   const PatientList({
     super.key,
     required this.my_patients,
     required this.ongoing_patient,
     required this.pending_patient,
+    this.inital_index,
   });
 
   @override
@@ -79,6 +81,8 @@ class _PatientListState extends State<PatientList>
         : ongoing_patients.isNotEmpty
             ? 0
             : 2;
+
+    if (widget.inital_index != null) _index = widget.inital_index ?? _index;
 
     return DefaultTabController(
       length: 3,
