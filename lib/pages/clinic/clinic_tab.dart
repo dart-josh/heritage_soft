@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
@@ -25,6 +26,7 @@ import 'package:heritage_soft/widgets/options_dialog.dart';
 import 'package:heritage_soft/pages/clinic/widgets/physio_hmo_tag.dart';
 import 'package:heritage_soft/pages/clinic/widgets/session_plan_dialog.dart';
 import 'package:heritage_soft/pages/clinic/widgets/clinic_info.dart';
+import 'package:heritage_soft/widgets/text_field.dart';
 
 import 'package:intl/intl.dart';
 
@@ -355,15 +357,20 @@ class _ClinicTabState extends State<ClinicTab> {
           if (!isLoading) patient_data(),
 
           // session info area
-          Expanded(child: Center(child: (isLoading) ? CircularProgressIndicator() : session_tab())),
+          Expanded(
+              child: Center(
+                  child: (isLoading)
+                      ? CircularProgressIndicator()
+                      : session_tab())),
 
           if (!isLoading) SizedBox(height: 30),
 
           // action tab
-          if (!isLoading) Padding(
-            padding: EdgeInsets.all(12),
-            child: action_tab(),
-          ),
+          if (!isLoading)
+            Padding(
+              padding: EdgeInsets.all(12),
+              child: action_tab(),
+            ),
         ],
       ),
     );
@@ -732,7 +739,8 @@ class _ClinicTabState extends State<ClinicTab> {
           if (active_user!.app_role == 'Doctor' ||
               active_user!.app_role == 'CSU' ||
               active_user!.full_access)
-            if (!skip_assessment && (patient.clinic_variables?.case_type != 'Assessment'))
+            if (!skip_assessment &&
+                (patient.clinic_variables?.case_type != 'Assessment'))
               InkWell(
                 onTap: () async {
                   var res = await showDialog(
@@ -1835,6 +1843,15 @@ class _BillingDialogState extends State<BillingDialog> {
     30000
   ];
 
+  final TextEditingController price_con = TextEditingController();
+
+  @override
+  void dispose() {
+    price_con.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     var val = NumberFormat('#,###');
@@ -1844,7 +1861,7 @@ class _BillingDialogState extends State<BillingDialog> {
       backgroundColor: Colors.transparent,
       child: Container(
         width: 300,
-        height: 400,
+        height: 450,
         decoration: BoxDecoration(
           color: Colors.blueGrey.shade400.withOpacity(.8),
           borderRadius: BorderRadius.circular(6),
@@ -2029,19 +2046,36 @@ class _BillingDialogState extends State<BillingDialog> {
                 onChanged: (val) {
                   if (val != null) {
                     price_select = val;
-
+                    price_con.text = val.toString();
                     if (mounted) setState(() {});
                   }
                 },
               ),
             ),
 
-            SizedBox(height: 40),
+            const SizedBox(height: 10),
+
+            Container(
+              width: 145,
+              child: Text_field(
+                controller: price_con,
+                format: [FilteringTextInputFormatter.digitsOnly],
+                prefix: const Text(
+                  '₦',
+                  style: TextStyle(
+                    color: Color(0xFFc3c3c3),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+
+            const Expanded(child: SizedBox()),
 
             // submit
             InkWell(
               onTap: () {
-                if (price_select == null) {
+                if (price_con.text.isEmpty) {
                   Helpers.showToast(
                     context: context,
                     color: Colors.red,
@@ -2051,7 +2085,7 @@ class _BillingDialogState extends State<BillingDialog> {
                   return;
                 }
 
-                Navigator.pop(context, price_select);
+                Navigator.pop(context, int.parse(price_con.text));
               },
               child: Container(
                 width: 140,
@@ -2074,6 +2108,8 @@ class _BillingDialogState extends State<BillingDialog> {
                 ),
               ),
             ),
+
+            SizedBox(height: 10),
           ],
         ),
       ),
@@ -2107,6 +2143,15 @@ class _AssessmentPaymentState extends State<AssessmentPayment> {
     15000,
     20000
   ];
+
+  final TextEditingController price_con = TextEditingController(text: '5000');
+
+  @override
+  void dispose() {
+    price_con.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2254,18 +2299,44 @@ class _AssessmentPaymentState extends State<AssessmentPayment> {
                 onChanged: (val) {
                   if (val != null) {
                     assessment_amount = val;
-
+                    price_con.text = val.toString();
                     if (mounted) setState(() {});
                   }
                 },
               ),
             ),
 
-            SizedBox(height: 40),
+            const SizedBox(height: 10),
+
+            Container(
+              width: 145,
+              child: Text_field(
+                controller: price_con,
+                format: [FilteringTextInputFormatter.digitsOnly],
+                prefix: const Text(
+                  '₦',
+                  style: TextStyle(
+                    color: Color(0xFFc3c3c3),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+
+            const Expanded(child: SizedBox()),
 
             // submit
             InkWell(
               onTap: () async {
+                if (price_con.text.isEmpty) {
+                  return Helpers.showToast(
+                    context: context,
+                    color: Colors.redAccent,
+                    toastText: 'Select amount',
+                    icon: Icons.error,
+                  );
+                }
+
                 var conf = await showDialog(
                   context: context,
                   builder: (context) => ConfirmDialog(
@@ -2276,7 +2347,7 @@ class _AssessmentPaymentState extends State<AssessmentPayment> {
                 );
 
                 if (conf != null && conf)
-                  Navigator.pop(context, assessment_amount);
+                  Navigator.pop(context, int.parse(price_con.text));
               },
               child: Container(
                 width: 140,
@@ -2299,6 +2370,8 @@ class _AssessmentPaymentState extends State<AssessmentPayment> {
                 ),
               ),
             ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),

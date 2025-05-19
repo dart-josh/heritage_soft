@@ -11,7 +11,6 @@ import 'package:heritage_soft/datamodels/store_models/sales_record.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/datamodels/users_model.dart';
-import 'package:heritage_soft/pages/store/sales_record_page.dart';
 import 'package:provider/provider.dart';
 
 class AppData extends ChangeNotifier {
