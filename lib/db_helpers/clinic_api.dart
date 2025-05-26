@@ -24,6 +24,12 @@ class ClinicApi {
         route: '${userUrl}/get_doctors');
   }
 
+  // get_all_case_files
+  static Future get_all_case_files(BuildContext context) async {
+    return await DBHelpers.getDataFromServer(context,
+        route: '${clinicUrl}/get_all_case_files');
+  }
+
   // get case file by patient
   static Future get_case_file_by_patient(BuildContext context,
       {required Map data}) async {
@@ -69,6 +75,16 @@ class ClinicApi {
   static Future get_all_accessory_requests(BuildContext context) async {
     return await DBHelpers.getDataFromServer(context,
         route: '${clinicUrl}/get_all_accessory_requests');
+  }
+
+  // get_payment_record
+  static Future get_payment_record(BuildContext context) async {
+    return await DBHelpers.getDataFromServer(
+      context,
+      route: '${clinicUrl}/get_payment_record',
+      // showLoading: true,
+      // showToast: true,
+    );
   }
 
   // !

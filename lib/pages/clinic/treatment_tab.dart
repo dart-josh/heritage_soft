@@ -60,7 +60,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
   List<String> selected_case_select_options = [];
   String case_type_select = '';
-  String treatment_type_select = '';
+  String treatment_type_select = 'Out Patient';
   // List<String> selected_equipment_options = [];
 
   TextEditingController case_select_controller = TextEditingController();
@@ -96,11 +96,6 @@ class _TreatmentTabState extends State<TreatmentTab> {
       case_type_select = assessmentInfoModel.case_type;
       treatment_type_select = assessmentInfoModel.treatment_type;
       other_case_controller.text = assessmentInfoModel.case_select_others ?? '';
-      // equipment_select_controller.text = assessmentInfoModel.equipments
-      //     .map((e) => e.equipmentName)
-      //     .toList()
-      //     .join(',');
-      // selected_equipment_options = equipment_select_controller.text.split(',');
     }
   }
 
@@ -108,7 +103,8 @@ class _TreatmentTabState extends State<TreatmentTab> {
   bool validate_fields() {
     // assessment validation
     if (assessment) {
-      if (case_select_controller.text.isEmpty) {
+      if (case_select_controller.text.isEmpty &&
+          other_case_controller.text.isEmpty) {
         Helpers.showToast(
           context: context,
           color: Colors.redAccent,
@@ -1035,20 +1031,10 @@ class _TreatmentTabState extends State<TreatmentTab> {
     else
       case_select_controller.text = '';
 
-    // if (selected_equipment_options.isNotEmpty)
-    //   equipment_select_controller.text = selected_equipment_options.join(',');
-    // else
-    //   equipment_select_controller.text = '';
-
     if (case_select_controller.text.startsWith(',')) {
       case_select_controller.text =
           case_select_controller.text.replaceFirst(',', '');
     }
-
-    // if (equipment_select_controller.text.startsWith(',')) {
-    //   equipment_select_controller.text =
-    //       equipment_select_controller.text.replaceFirst(',', '');
-    // }
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -1638,18 +1624,26 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
   // case select
   Widget case_multi_select({required child}) {
+    case_select_options.sort((a, b) => a.compareTo(b));
+
     return PopupMenuButton<String>(
         padding: EdgeInsets.all(0),
         offset: Offset(0, 30),
         child: child,
         elevation: 8,
         onSelected: (value) async {
+          final old_val = selected_case_select_options.join(', ');
           bool is_in = selected_case_select_options.contains(value);
 
           if (is_in) {
             selected_case_select_options.remove(value);
           } else {
             selected_case_select_options.add(value);
+          }
+
+          if (diagnosis_controller.text.isEmpty ||
+              diagnosis_controller.text == old_val) {
+            diagnosis_controller.text = selected_case_select_options.join(', ');
           }
 
           setState(() {});
@@ -1675,7 +1669,6 @@ class _TreatmentTabState extends State<TreatmentTab> {
               );
             }).toList());
   }
-
 
   //
 }

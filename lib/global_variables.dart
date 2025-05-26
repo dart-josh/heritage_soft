@@ -88,8 +88,13 @@ List<String> treatment_time = [
 List<String> case_select_options = [
   'Rheumatoid Arthritis (RA)',
   'Osteoarthritis (Knee/Hip/Shoulder)',
+  'Bilateral Knee OA',
   'Cervical Pain',
   'Septic Arthritis',
+  'Hemiparesis',
+  'Paraparesis',
+  'Monoparesis',
+  'Quadriparesis',
   'Partial Stroke / TIA',
   'Complete Stroke / Hemiplegia',
   'Parkinson\'s Disease',
@@ -107,6 +112,7 @@ List<String> case_select_options = [
   'Peripheral Nerve lesion',
   'Facet Joint Syndrome',
   'Spinal Stenosis',
+  'Lumbar Stenosis',
   'Shoulder Joint Pain',
   'Frozen Shoulder',
   'Shoulder Impingement Syndrome',
@@ -118,12 +124,15 @@ List<String> case_select_options = [
 
 List<String> case_type_options = [
   'Orthopaedic',
-  'Pediatric',
   'Neurological',
-  'Women\'s Health',
+  'Geriatric',
+  'Pediatric',
+  'O/G',
+  'Ortho-Neuro',
   'Cardiopulmonary',
   'Ergonomics',
   'Sports',
+  'Women\'s Health',
 ];
 
 List<String> treatment_type_options = [
@@ -165,7 +174,7 @@ List<String> assessment_decision_select_options = [
 List<String> treatment_decision_select_options = [
   'Continue Treatment',
   'End Treatment',
-  'Schedule Treatment for Another date',
+  'Could not treat patient',
   'Patient not Responsive',
   'Refer',
   'Others',

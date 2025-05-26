@@ -158,6 +158,49 @@ class Helpers {
     );
   }
 
+  // get duration
+  static String get_duration(DateTime? time_in, DateTime? time_out) {
+    if (time_in == null || time_out == null) return '';
+
+    Duration diff = time_out.difference(time_in);
+
+    int hr = 0;
+    int min = 0;
+    int day = 0;
+
+    if (diff.inHours >= 24) {
+      day = diff.inDays;
+      hr = diff.inHours - (diff.inDays * 24);
+      min = diff.inMinutes - (diff.inHours * 60);
+    } else if (diff.inHours >= 1) {
+      hr = diff.inHours;
+      min = diff.inMinutes - (diff.inHours * 60);
+    } else {
+      min = diff.inMinutes;
+    }
+
+    String d = (day == 0)
+        ? ''
+        : (day == 1)
+            ? '$day Day '
+            : '$day Days ';
+
+    String h = (hr == 0)
+        ? ''
+        : (hr == 1)
+            ? '$hr Hour '
+            : '$hr Hours ';
+
+    String m = (min == 0)
+        ? ''
+        : (min == 1)
+            ? '$min Min'
+            : '$min Mins';
+
+    return '$d$h$m';
+  }
+
+
   // bmi calculation
   static Map<String, String> calc_bmi(double height, double weight) {
     // [weight (kg) / height (cm) / height (cm)] x 10,000

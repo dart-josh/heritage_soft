@@ -476,7 +476,7 @@ class _PatientListState extends State<PatientList>
                   Row(
                     children: [
                       // id
-                      Text(
+                      SelectableText(
                         patient.patient_id,
                         style: TextStyle(
                           color: Colors.black,
@@ -492,7 +492,7 @@ class _PatientListState extends State<PatientList>
                   SizedBox(height: 6),
 
                   // name
-                  Text(
+                  SelectableText(
                     cl_name,
                     style: TextStyle(
                       color: Colors.black,
@@ -590,7 +590,7 @@ class _PatientListState extends State<PatientList>
                   Row(
                     children: [
                       // id
-                      Text(
+                      SelectableText(
                         patient.patient?.patient_id ?? '',
                         style: TextStyle(
                           color: Colors.black,
@@ -606,7 +606,7 @@ class _PatientListState extends State<PatientList>
                   SizedBox(height: 6),
 
                   // name
-                  Text(
+                  SelectableText(
                     cl_name,
                     style: TextStyle(
                       color: Colors.black,
@@ -668,6 +668,8 @@ class _PatientListState extends State<PatientList>
               element.f_name.toLowerCase().contains(value.toLowerCase()) ||
               element.m_name.toLowerCase().contains(value.toLowerCase()) ||
               element.l_name.toLowerCase().contains(value.toLowerCase()) ||
+              ('${element.f_name.toLowerCase()} ${element.l_name.toLowerCase()}' == value.toLowerCase()) ||
+              ('${element.f_name.toLowerCase()} ${element.m_name.toLowerCase()} ${element.l_name.toLowerCase()}' == value.toLowerCase()) ||
               element.patient_id
                   .toString()
                   .toLowerCase()

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
+import 'package:heritage_soft/pages/clinic/clinic_record_page.dart';
 import 'package:heritage_soft/pages/store/accessories_list_page.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/other/attendance_page.dart';
@@ -203,8 +204,8 @@ class _HomePageState extends State<HomePage> {
                       ]
                     : (user.app_role == 'CSU')
                         ? [
-                           csu_page_0(),
-                          //  csu_page_1(),
+                            csu_page_0(),
+                            //  csu_page_1(),
                           ]
                         : [],
             carouselController: buttonCarouselController,
@@ -253,11 +254,10 @@ class _HomePageState extends State<HomePage> {
             pt_client_list(),
             doctors(),
             accessories(),
-
+            clinic_record(),
             sales_record(),
-            restock_accessories(),
             restock_accessories_record(),
-            
+            restock_accessories(),
           ],
         ),
       ),
@@ -275,7 +275,7 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             // data_report(),
-            
+
             // manage_hmo(),
           ],
         ),
@@ -298,13 +298,14 @@ class _HomePageState extends State<HomePage> {
             // birthday_list(),
             // ft_client_list(),
             pt_client_list(),
-            staff_list(),
+            doctors(),
+
+            clinic_record(),
+            sales_record(),
+            restock_accessories_record(),
 
             accessories(),
-            sales_record(),
             restock_accessories(),
-            restock_accessories_record(),
-            
           ],
         ),
       ),
@@ -324,7 +325,7 @@ class _HomePageState extends State<HomePage> {
             // attendance_history(),
             // staff_attendance_history(),
             // guest_record(),
-            
+
             // manage_hmo(),
             // manage_password(),
           ],
@@ -347,6 +348,8 @@ class _HomePageState extends State<HomePage> {
             // ft_client_list(),
             pt_client_list(),
             // data_report(),
+            clinic_record(),
+
             staff_list(),
             doctors(),
             // birthday_list(),
@@ -398,7 +401,140 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // TILES
+  //? TILES
+
+  // Client list
+  Widget pt_client_list() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AllPatientList()),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/pt_clients.jpeg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 20),
+                  Text(
+                    'Physio Client List',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //
+  // doctors
+  Widget doctors() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DoctorsList()),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/doctor.jpg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 10),
+                  Text(
+                    'Physiotherapist\'s',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   // Gym Client list
   Widget ft_client_list() {
@@ -450,72 +586,6 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 20),
                   Text(
                     'Gym Client List',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                ],
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Client list
-  Widget pt_client_list() {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AllPatientList()),
-        );
-      },
-      child: Container(
-        width: 220,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Stack(
-          children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/pt_clients.jpeg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 20),
-                  Text(
-                    'Physio Client List',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -750,73 +820,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // doctors
-  Widget doctors() {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => DoctorsList()),
-        );
-      },
-      child: Container(
-        width: 220,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Stack(
-          children: [
-            // background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                'images/doctor.jpg',
-                fit: BoxFit.cover,
-                width: 200,
-                height: 220,
-              ),
-            ),
-
-            // background cover box
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF01040A).withOpacity(0.53),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-
-            // main content
-            Positioned.fill(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 60, color: Colors.white),
-                  SizedBox(height: 10),
-                  Text(
-                    'Physiotherapist\'s',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                ],
-              )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  //
   Widget accessories() {
     return InkWell(
       onTap: () {
@@ -1195,6 +1198,74 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 10),
                   Text(
                     'Office\nData',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // gym data
+  Widget clinic_record() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ClinicRecordPage(),
+          ),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/clinic.jpg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 10),
+                  Text(
+                    'Clinic\nRecord',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,

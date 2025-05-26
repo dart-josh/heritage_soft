@@ -235,6 +235,10 @@ class _AllPatientListState extends State<AllPatientList> {
                 element.l_name
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
+                ('${element.f_name.toLowerCase()} ${element.l_name.toLowerCase()}' ==
+                    value.toLowerCase()) ||
+                ('${element.f_name.toLowerCase()} ${element.m_name.toLowerCase()} ${element.l_name.toLowerCase()}' ==
+                    value.toLowerCase()) ||
                 element.patient_id
                     .toString()
                     .toLowerCase()
@@ -905,7 +909,7 @@ class _AllPatientListState extends State<AllPatientList> {
                   Row(
                     children: [
                       // id
-                      Text(
+                      SelectableText(
                         patient.patient_id,
                         style: TextStyle(
                           color: Colors.black,
@@ -921,7 +925,7 @@ class _AllPatientListState extends State<AllPatientList> {
                   SizedBox(height: 6),
 
                   // name
-                  Text(
+                  SelectableText(
                     cl_name,
                     style: TextStyle(
                       color: Colors.black,

@@ -35,11 +35,10 @@ class DoctorModel {
 
   factory DoctorModel.fromMap(Map map) {
     var ty = map['user'].runtimeType;
-
     return DoctorModel(
       key: map['_id'] ?? '',
-      user: (ty == String)
-          ? UserModel.gen(map['user'])
+      user: (ty == String || map['user'] == null)
+          ? UserModel.gen(map['user'] ?? '')
           : UserModel.fromMap(map['user']),
       is_available: map['is_available'] ?? false,
       title: map['title'] ?? 'Physiotherapist',

@@ -138,8 +138,12 @@ class PatientModel {
             <AssessmentInfoModel>[],
       ),
       clinic_history: List<ClinicHistoryModel>.from(
-        map['clinic_history']
-                ?.map((e) => ClinicHistoryModel.fromMap(e as Map)) ??
+        map['clinic_history']?.map((e) {
+              if (e.runtimeType == String) {
+                return ClinicHistoryModel.gen();
+              } else
+                return ClinicHistoryModel.fromMap(e as Map);
+            }) ??
             <ClinicHistoryModel>[],
       ),
       clinic_invoice: List<InvoiceModel>.from(
@@ -465,6 +469,21 @@ class ClinicHistoryModel {
     required this.session_frequency,
   });
 
+  factory ClinicHistoryModel.gen() {
+    return ClinicHistoryModel(
+      history_id: '',
+      hist_type: '',
+      date: DateTime.now(),
+      amount: 0,
+      amount_b4_discount: 0,
+      session_paid: 0,
+      cost_p_session: 0,
+      old_float: 0,
+      new_float: 0,
+      session_frequency: '',
+    );
+  }
+
   factory ClinicHistoryModel.fromMap(Map map) {
     return ClinicHistoryModel(
       history_id: map['history_id'] ?? '',
@@ -530,10 +549,10 @@ class InvoiceModel {
     return InvoiceModel(
       invoice_id: map['invoice_id'] ?? '',
       invoice_type: map['invoice_type'] ?? '',
-      amount: map['amount']?? 0,
-      discount: map['discount']?? 0,
+      amount: map['amount'] ?? 0,
+      discount: map['discount'] ?? 0,
       date: DateTime.parse(map['date']),
-      total_session: map['total_session']?? 0,
+      total_session: map['total_session'] ?? 0,
       frequency: map['frequency'] ?? '',
       completed_session: map['completed_session'] ?? 0,
       paid_session: map['paid_session'] ?? 0,

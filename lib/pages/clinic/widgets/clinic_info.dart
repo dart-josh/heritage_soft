@@ -225,7 +225,7 @@ class _ClinicInfoState extends State<ClinicInfo> {
   List<String> selected_case_select_options = [];
   String case_type_select = '';
 
-  String treatment_type_select = '';
+  String treatment_type_select = 'Out Patient';
 
   List<String> selected_equipment_options = [];
 
@@ -236,20 +236,10 @@ class _ClinicInfoState extends State<ClinicInfo> {
     else
       case_select_controller.text = '';
 
-    // if (selected_equipment_options.isNotEmpty)
-    //   equipment_select_controller.text = selected_equipment_options.join(',');
-    // else
-    //   equipment_select_controller.text = '';
-
     if (case_select_controller.text.startsWith(',')) {
       case_select_controller.text =
           case_select_controller.text.replaceFirst(',', '');
     }
-
-    // if (equipment_select_controller.text.startsWith(',')) {
-    //   equipment_select_controller.text =
-    //       equipment_select_controller.text.replaceFirst(',', '');
-    // }
 
     return [
       // case multi-select
@@ -338,7 +328,8 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
       InkWell(
         onTap: () async {
-          if (case_select_controller.text.isEmpty) {
+          if (case_select_controller.text.isEmpty &&
+              other_case_controller.text.isEmpty) {
             Helpers.showToast(
               context: context,
               color: Colors.redAccent,
@@ -423,18 +414,26 @@ class _ClinicInfoState extends State<ClinicInfo> {
 
   // case select
   Widget case_multi_select({required child}) {
+    case_select_options.sort((a, b) => a.compareTo(b));
+
     return PopupMenuButton<String>(
         padding: EdgeInsets.all(0),
         offset: Offset(0, 30),
         child: child,
         elevation: 8,
         onSelected: (value) async {
+          final old_val = selected_case_select_options.join(', ');
           bool is_in = selected_case_select_options.contains(value);
 
           if (is_in) {
             selected_case_select_options.remove(value);
           } else {
             selected_case_select_options.add(value);
+          }
+
+          if (diagnosis_controller.text.isEmpty ||
+              diagnosis_controller.text == old_val) {
+            diagnosis_controller.text = selected_case_select_options.join(', ');
           }
 
           setState(() {});

@@ -3,10 +3,8 @@ import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
-import 'package:heritage_soft/datamodels/physio_client_model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
-import 'package:heritage_soft/datamodels/users_model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/pages/gym/clients_list.dart';
 import 'package:heritage_soft/pages/clinic/doctors_list.dart';
@@ -47,21 +45,12 @@ class _AllDataState extends State<AllData> {
 
   // get gym data
   get_gym_data() {
-    all_gym_cl = Provider.of<AppData>(context).clients;
-
-    active_gym_cl = all_gym_cl.where((element) => element.sub_status!).toList();
-
-    expired_gym_cl =
-        all_gym_cl.where((element) => !element.sub_status!).toList();
-
-    hmo_cl = all_gym_cl.where((element) => element.hmo != 'No HMO').toList();
-
-    gym_hmos = Provider.of<AppData>(context).gym_hmo.toList();
+    
   }
 
   // get physio data
   get_physio_data() {
-    all_physio_cl = Provider.of<AppData>(context).patients;
+    all_physio_cl = AppData.get(context).patients;
 
     phy_prv_cl =
         all_physio_cl.where((element) => element.hmo == 'No HMO').toList();
@@ -73,12 +62,12 @@ class _AllDataState extends State<AllData> {
 
     total_phy_session = 0;
     Provider.of<AppData>(context).doctors.forEach((el) {
-      total_phy_session += el.my_patients
+      total_phy_session += (el.my_patients.isNotEmpty) ? el.my_patients
           .reduce((element, next) => MyPatientModel(
                 patient: el.my_patients[0].patient,
                 session_count: element.session_count + next.session_count,
               ))
-          .session_count;
+          .session_count : 0;
     });
   }
 

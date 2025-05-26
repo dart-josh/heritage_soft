@@ -390,7 +390,7 @@ class _AssessmentHistoryPageState extends State<AssessmentHistoryPage> {
 
                 Expanded(
                   child: Text(
-                    history.case_select,
+                    history.case_select.isNotEmpty ? history.case_select : history.case_select_others ?? '',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,

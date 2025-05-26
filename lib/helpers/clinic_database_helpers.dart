@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/clinic_models/payment.model.dart';
 import 'package:heritage_soft/datamodels/store_models/accessory_request.model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/db_helpers/clinic_api.dart';
@@ -10,8 +11,6 @@ import 'package:heritage_soft/pages/clinic/clinic_tab.dart';
 import 'package:provider/provider.dart';
 
 class ClinicDatabaseHelpers {
-  
-
   // get all patients
   static Future get_all_patients(BuildContext context) async {
     var response = await ClinicApi.get_all_patients(context);
@@ -61,6 +60,28 @@ class ClinicDatabaseHelpers {
 
       Provider.of<AppData>(context, listen: false).update_doctors(doctors);
     }
+  }
+
+  //get_all_case_files
+  static Future<List<CaseFileModel>?> get_all_case_files(
+      BuildContext context) async {
+    List<CaseFileModel> files = [];
+    var response = await ClinicApi.get_all_case_files(
+      context,
+    );
+
+    if (response != null) {
+      List data = response['caseFiles'];
+
+      data.forEach((e) {
+        CaseFileModel cl_1 = CaseFileModel.fromMap(e);
+        files.add(cl_1);
+      });
+
+      return files;
+    }
+
+    return null;
   }
 
   // get case file by patient
@@ -167,11 +188,29 @@ class ClinicDatabaseHelpers {
     }
   }
 
+  // get_payment_record
+  static Future<List<PaymentHistoryModel>> get_payment_record(
+      BuildContext context) async {
+    var response = await ClinicApi.get_payment_record(context);
+
+    List<PaymentHistoryModel> payments = [];
+
+    if (response != null) {
+      List data = response['payments'];
+
+      data.forEach((e) {
+        PaymentHistoryModel req = PaymentHistoryModel.fromMap(e);
+        payments.add(req);
+      });
+    }
+
+    return payments;
+  }
+
   //
 
   // ! SETTERS
 
-  
   // add_update_accessory_request
   static Future add_update_accessory_request(
     BuildContext context, {
@@ -640,7 +679,6 @@ class ClinicDatabaseHelpers {
     }
   }
 
-  
   // delete_accessory_request
   static Future delete_accessory_request(
     BuildContext context, {
