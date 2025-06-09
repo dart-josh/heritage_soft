@@ -4,7 +4,7 @@ import 'package:universal_html/html.dart';
 
 GlobalKey<ScaffoldState> doctor_profile_key = GlobalKey();
 
-String server_url = 'http://192.168.1.111:5500';
+String server_url = 'http://192.168.0.111:5500';
 // String server_url = 'http://localhost:5500';
 
 // ! DB ROUTES
