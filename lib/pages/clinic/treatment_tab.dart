@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/clinic_models/casefile.model.dart';
 // import 'package:heritage_soft/datamodels/clinic_models/equipement.model.dart';
@@ -343,11 +344,90 @@ class _TreatmentTabState extends State<TreatmentTab> {
       setState(() {});
     });
 
+    note_controller.addListener(_onTextChanged);
+
     refresh();
 
     super.initState();
   }
 
+  // ! NEW
+  final FocusNode notepad_focusNode = FocusNode();
+
+  FocusNode _note_node = FocusNode();
+
+  List<String> _suggestions = [];
+
+  void _onTextChanged() {
+    final text = note_controller.text;
+    final cursorPos = note_controller.selection.base.offset;
+
+    if (cursorPos == -1 || text.isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+
+    final lastWord = _getCurrentWord(text, cursorPos);
+    if (lastWord.isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+
+    final matches = notepad_dictionary
+        .where((word) =>
+            (word['key']?.toLowerCase().startsWith(lastWord.toLowerCase()) ?? false) ||
+            (word['value']?.toLowerCase().contains(lastWord.toLowerCase()) ?? false))
+        .toList();
+
+    setState(() {
+      _suggestions = matches.map((e) => e['value'] ?? '').toList();
+    });
+  }
+
+  String _getCurrentWord(String text, int cursorPos) {
+    final beforeCursor = text.substring(0, cursorPos);
+    final words = beforeCursor.split(RegExp(r'\s+'));
+    return words.isNotEmpty ? words.last : '';
+  }
+
+  void _replaceCurrentWord(String suggestion) {
+    final text = note_controller.text;
+    final cursorPos = note_controller.selection.base.offset;
+    final beforeCursor = text.substring(0, cursorPos);
+    final afterCursor = text.substring(cursorPos);
+
+    final wordStart = beforeCursor.lastIndexOf(RegExp(r'\s')) + 1;
+    // final currentWord = beforeCursor.substring(wordStart);
+    final newText =
+        beforeCursor.substring(0, wordStart) + suggestion + " " + afterCursor;
+
+    final newCursorPos = wordStart + suggestion.length + 1;
+
+    setState(() {
+      note_controller.text = newText;
+      note_controller.selection = TextSelection.collapsed(offset: newCursorPos);
+      _suggestions = [];
+    });
+    FocusScope.of(context).requestFocus(_note_node);
+  }
+
+  void _handleKey(KeyEvent event) {
+    if (event.runtimeType != KeyDownEvent) return; // only handle key down
+
+    final key = event.logicalKey;
+
+    for (int i = 1; i <= 9; i++) {
+      final expectedKey =
+          LogicalKeyboardKey(LogicalKeyboardKey.digit1.keyId + (i - 1));
+      if (key == expectedKey && _suggestions.length >= i) {
+        _replaceCurrentWord(_suggestions[i - 1]);
+        break;
+      }
+    }
+  }
+
+  //! -----
+  
   // refresh page because of countdown
   refresh() {
     Future.delayed(Duration(seconds: 1), () {
@@ -358,6 +438,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
   @override
   void dispose() {
+    note_controller.removeListener(_onTextChanged);
     bp_controller.dispose();
     remarks_controller.dispose();
     note_controller.dispose();
@@ -367,6 +448,8 @@ class _TreatmentTabState extends State<TreatmentTab> {
     // equipment_select_controller.dispose();
     diagnosis_controller.dispose();
     other_decision_controller.dispose();
+
+    notepad_focusNode.dispose();
     super.dispose();
   }
 
@@ -455,6 +538,77 @@ class _TreatmentTabState extends State<TreatmentTab> {
 
                         // time
                         Positioned(top: 50, left: 0, right: 0, child: time()),
+
+                        // suggestions
+                        if (_suggestions.isNotEmpty)
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              height: 50,
+                              width: double.infinity,
+                              margin: EdgeInsets.only(top: 2),
+                              padding: EdgeInsets.all(1),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _suggestions.length,
+                                itemBuilder: (context, index) {
+                                  final suggestion = _suggestions[index];
+                                  int keypress_index = index + 1;
+
+                                  return InkWell(
+                                    onTap: () =>
+                                        _replaceCurrentWord(suggestion),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(8),
+                                          margin:
+                                              EdgeInsets.fromLTRB(7, 7, 7, 7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[600],
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            suggestion,
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                        if (keypress_index <= 9)
+                                          Positioned(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.grey,
+                                              ),
+                                              height: 18,
+                                              width: 18,
+                                              child: Center(
+                                                child: Text(
+                                                  keypress_index.toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -471,44 +625,48 @@ class _TreatmentTabState extends State<TreatmentTab> {
   Widget main_page() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: Column(
-        children: [
-          // top bar
-          topBar(),
+      child: KeyboardListener(
+        focusNode: notepad_focusNode,
+        onKeyEvent: _handleKey,
+        child: Column(
+          children: [
+            // top bar
+            topBar(),
 
-          // profile area
-          Padding(
-            padding: EdgeInsets.only(left: 20, top: 5, bottom: 0, right: 20),
-            child: Row(
-              children: [
-                profile_area(),
-                Expanded(child: Container()),
-                treatment_action(),
-              ],
+            // profile area
+            Padding(
+              padding: EdgeInsets.only(left: 20, top: 5, bottom: 0, right: 20),
+              child: Row(
+                children: [
+                  profile_area(),
+                  Expanded(child: Container()),
+                  treatment_action(),
+                ],
+              ),
             ),
-          ),
 
-          // main tab
-          Expanded(
-            child: !assessment ? treatment_area() : assessment_area(),
-          ),
+            // main tab
+            Expanded(
+              child: !assessment ? treatment_area() : assessment_area(),
+            ),
 
-          // doctors name
-          Container(
-            padding: EdgeInsets.only(right: 12, bottom: 6, top: 8),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                'PT ${active_doctor!.user.f_name}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
+            // doctors name
+            Container(
+              padding: EdgeInsets.only(right: 12, bottom: 6, top: 8),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  'PT ${active_doctor!.user.f_name}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1504,6 +1662,7 @@ class _TreatmentTabState extends State<TreatmentTab> {
           Text_field(
             label: '',
             controller: note_controller,
+            node: _note_node,
             is_filled: true,
             fill_color: Colors.black38,
             maxLine: 16,

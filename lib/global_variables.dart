@@ -220,4 +220,23 @@ String indemnity_write_up =
 // app current version
 String current_version = '1.3.0';
 
+final List<Map<String, String>> notepad_dictionary = [
+    {'key': "str", 'value': "Strengthening Exercise"},
+    {'key': "cse", 'value': "Core stabilization Exercise"},
+    {'key': "br", 'value': "Bridging Exercise"},
+    {'key': "sqt", 'value': "Squatting"},
+    {'key': "bcy", 'value': "Bicycling"},
+    {'key': "stc", 'value': "Stair climbing"},
+    {'key': "stm", 'value': "STM (Soft Tissue Massage)"},
+    {'key': "cry", 'value': "Cryotherapy (10')"},
+    {'key': "tens", 'value': "TENS (10')"},
+    {'key': "irr", 'value': "IRR (10')"},
+    {'key': "hmp", 'value': "Home Programmes"},
+    {'key': "rse", 'value': "Resisted Exercise"},
+    {'key': "pm", 'value': "Passive mobilization"},
+    {'key': "ace", 'value': "Active Exercise"},
+    {'key': "ase", 'value': "Assited Exercise"},
+  ];
+
+
 // flutter build web --web-renderer html
