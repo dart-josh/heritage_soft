@@ -22,16 +22,16 @@ class AccessoryModel {
     required this.restockLimit,
   });
 
-  factory AccessoryModel.fromMap(Map map) => AccessoryModel(
-        key: map['_id'] ?? '',
-        itemId: map['itemId'] ?? '',
-        itemName: map['itemName'] ?? '',
-        category: map['category'] ?? '',
-        itemCode: map['itemCode'] ?? '',
-        price: map['price'] ?? '',
-        quantity: map['quantity'] ?? '',
-        isAvailable: map['isAvailable'] ?? false,
-        restockLimit: map['restockLimit'] ?? 0,
+  factory AccessoryModel.fromMap(Map? map) => AccessoryModel(
+        key: map?['_id'] ?? '',
+        itemId: map?['itemId'] ?? '',
+        itemName: map?['itemName'] ?? '',
+        category: map?['category'] ?? '',
+        itemCode: map?['itemCode'] ?? '',
+        price: map?['price'] ?? 0,
+        quantity: map?['quantity'] ?? 0,
+        isAvailable: map?['isAvailable'] ?? false,
+        restockLimit: map?['restockLimit'] ?? 0,
       );
 
   Map toJson() => {
