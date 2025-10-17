@@ -1840,7 +1840,13 @@ class _BillingDialogState extends State<BillingDialog> {
     15000,
     20000,
     25000,
-    30000
+    30000,
+    35000,
+    40000,
+    45000,
+    50000,
+    55000,
+    60000
   ];
 
   final TextEditingController price_con = TextEditingController();
@@ -2141,7 +2147,15 @@ class _AssessmentPaymentState extends State<AssessmentPayment> {
     10000,
     12000,
     15000,
-    20000
+    20000,
+    25000,
+    30000,
+    35000,
+    40000,
+    45000,
+    50000,
+    55000,
+    60000,
   ];
 
   final TextEditingController price_con = TextEditingController(text: '5000');
