@@ -16,15 +16,6 @@ class ServerHelpers {
     });
 
     socket!.connect();
-
-    // ProductMaterials
-    // socket!.on('ProductMaterials', (data) {
-      
-    // });
-
-    // socket!.off('event', (data) {
-
-    // });
   }
 
   // get all data

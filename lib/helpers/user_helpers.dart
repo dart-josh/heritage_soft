@@ -145,7 +145,5 @@ class UserHelpers {
     }
   }
 
-  // add_update_doctor
-  // add_update_user
   // add_update_customer
 }
