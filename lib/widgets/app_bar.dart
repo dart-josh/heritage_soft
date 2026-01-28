@@ -117,25 +117,24 @@ class _MyAppBarState extends State<MyAppBar> {
 
         SizedBox(width: 15),
 
-              // name
-              Text(
-                name,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
+        // name
+        Text(
+          name,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
 
-              SizedBox(width: 15),
+        SizedBox(width: 15),
 
-              Text(
-                '[ ${user.user_id} ]',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            
+        Text(
+          '[ ${user.user_id} ]',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
 
         Expanded(child: Container()),
 
@@ -214,7 +213,7 @@ class _MyAppBarState extends State<MyAppBar> {
     UserModel? user = AppData.get(context).active_user;
 
     String name = '${user!.f_name} ${user.l_name}';
-    // int birthday_count = get_birthday();
+    int birthday_count = get_birthday();
 
     return Row(
       children: [
@@ -271,66 +270,68 @@ class _MyAppBarState extends State<MyAppBar> {
         Expanded(child: Container()),
 
         // birthday
-        // if (user.app_role == 'CSU' ||
-        //     user.app_role == 'Admin' ||
-        //     user.app_role == 'Management' ||
-        //     user.app_role == 'ICT' ||
-        //     user.full_access)
-        //   Container(
-        //     padding: EdgeInsets.only(right: 10),
-        //     child: InkWell(
-        //       onTap: () {
-        //         if (accessories_request_open) return;
+        if (user.app_role == 'CSU' ||
+            user.app_role == 'Admin' ||
+            user.app_role == 'Management' ||
+            user.app_role == 'ICT' ||
+            user.full_access)
+          Container(
+            padding: EdgeInsets.only(right: 10),
+            child: InkWell(
+              onTap: () {
+                if (accessories_request_open) return;
 
-        //         Navigator.push(
-        //           context,
-        //           MaterialPageRoute(builder: (context) => BirthdayList()),
-        //         );
-        //       },
-        //       child: Stack(
-        //         children: [
-        //           // birthday icon
-        //           Container(
-        //             padding: EdgeInsets.only(top: 12, right: 8),
-        //             child: Icon(
-        //               Icons.card_giftcard,
-        //               color: accessories_request_open
-        //                   ? Colors.white38
-        //                   : birthday_count > 0
-        //                       ? Colors.green
-        //                       : Colors.white60,
-        //               size: 24,
-        //             ),
-        //           ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BirthdayList()),
+                );
+              },
+              child: Stack(
+                children: [
+                  // birthday icon
+                  Container(
+                    padding: EdgeInsets.only(top: 12, right: 8),
+                    child: Icon(
+                      Icons.card_giftcard,
+                      color: accessories_request_open
+                          ? Colors.white38
+                          : birthday_count > 0
+                              ? Colors.green
+                              : Colors.white60,
+                      size: 24,
+                    ),
+                  ),
 
-        //           // notification
-        //           if (birthday_count > 0)
-        //             Positioned(
-        //               top: 0,
-        //               right: 0,
-        //               child: Container(
-        //                 height: 18,
-        //                 width: 18,
-        //                 decoration: BoxDecoration(
-        //                   color: Colors.red,
-        //                   shape: BoxShape.circle,
-        //                 ),
-        //                 child: Center(
-        //                   child: Text(
-        //                     birthday_count.toString(),
-        //                     style: TextStyle(
-        //                         color: Colors.white, fontSize: 11, height: 1),
-        //                   ),
-        //                 ),
-        //               ),
-        //             ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
+                  // notification
+                  if (birthday_count > 0)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        height: 18,
+                        width: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            birthday_count.toString(),
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 11, height: 1),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
 
         // accessories shop
-        if (user.app_role == 'CSU' || user.app_role == 'Admin' || user.full_access)
+        if (user.app_role == 'CSU' ||
+            user.app_role == 'Admin' ||
+            user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: InkWell(
@@ -355,7 +356,9 @@ class _MyAppBarState extends State<MyAppBar> {
           ),
 
         // accessory requests
-        if (user.app_role == 'CSU' || user.app_role == 'Admin' || user.full_access)
+        if (user.app_role == 'CSU' ||
+            user.app_role == 'Admin' ||
+            user.full_access)
           Container(
             padding: EdgeInsets.only(right: 10),
             child: Row(
@@ -444,8 +447,8 @@ class _MyAppBarState extends State<MyAppBar> {
 
   // get birthday
   int get_birthday() {
-    int gym_client = Provider.of<AppData>(context, listen: false)
-        .clients
+    int gym_client = Provider.of<AppData>(context)
+        .gym_clients
         .where((element) =>
             element.dob!.isNotEmpty &&
             (element.dob == '/1900'
@@ -455,18 +458,18 @@ class _MyAppBarState extends State<MyAppBar> {
         .toList()
         .length;
 
-    // int physio_clients = Provider.of<AppData>(context, listen: false)
-    //     .physio_clients
-    //     .where((element) =>
-    //         element.dob!.isNotEmpty &&
-    //         (element.dob == '/1900'
-    //             ? false
-    //             : (get_birth_Date(getDate(element.dob!)) ==
-    //                 get_birth_Date(DateTime.now()))))
-    //     .toList()
-    //     .length;
+    int physio_clients = Provider.of<AppData>(context)
+        .patients
+        .where((element) =>
+            element.dob.isNotEmpty &&
+            (element.dob == '/1900'
+                ? false
+                : (get_birth_Date(getDate(element.dob)) ==
+                    get_birth_Date(DateTime.now()))))
+        .toList()
+        .length;
 
-    return 0;
+    return gym_client + physio_clients;
   }
 
   // get date

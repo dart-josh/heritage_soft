@@ -6,7 +6,7 @@ import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/user_helpers.dart';
 import 'package:heritage_soft/pages/clinic/doctor_patient_list.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 class DoctorsProfile extends StatefulWidget {

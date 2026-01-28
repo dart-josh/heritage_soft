@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
+import 'package:heritage_soft/helpers/server_helpers.dart';
 import 'dart:ui' as ui;
 
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
+import 'package:heritage_soft/pages/gym/registration_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -23,9 +25,9 @@ class _ClientsListState extends State<ClientsList> {
   TextStyle option_style = TextStyle(color: Colors.white, fontSize: 13);
   TextStyle title_style = TextStyle(color: Colors.black, fontSize: 16);
 
-  List<ClientListModel> main_clients = [];
-  List<ClientListModel> clients = [];
-  List<ClientListModel> search_list = [];
+  List<ClientModel> main_clients = [];
+  List<ClientModel> clients = [];
+  List<ClientModel> search_list = [];
   bool emptySearch = false;
 
   int client_count = 0;
@@ -78,14 +80,38 @@ class _ClientsListState extends State<ClientsList> {
   bool addons_pt_pp_val = false;
   bool addons_physio_val = false;
 
+  dynamic get_clients(dynamic data) async {
+    ClientModel client = ClientModel.fromMap(data);
+
+    AppData.set(context).update_client(client);
+  }
+
+  dynamic remove_client(dynamic id) async {
+    AppData.set(context).delete_client(id);
+  }
+
+  initiators() async {
+    await GymDatabaseHelpers.get_all_clients(context);
+  }
+
   @override
   void initState() {
-    refresh_hmo_week();
+    initiators();
+    ServerHelpers.socket!.on('GymClient', (data) {
+      get_clients(data);
+    });
+    ServerHelpers.socket!.on('GymClientD', (data) {
+      remove_client(data);
+    });
+
     super.initState();
   }
 
-  refresh_hmo_week() {
-    GymDatabaseHelpers.reset_week_for_hmo_plan_clients(context);
+  @override
+  void dispose() {
+    ServerHelpers.socket!.off('GymClient');
+    ServerHelpers.socket!.off('GymClientD');
+    super.dispose();
   }
 
   @override
@@ -164,20 +190,20 @@ class _ClientsListState extends State<ClientsList> {
   }
 
   // filter function
-  List<ClientListModel> filter_module() {
+  List<ClientModel> filter_module() {
     if (!filter_on) return main_clients;
 
     return main_clients
         .where((element) =>
             ((status_filter_on)
-                ? element.sub_status == status_filter_val
+                ? element.subStatus == status_filter_val
                 : true) &&
             ((sub_type_filter_on)
-                ? element.sub_type!.toLowerCase() ==
+                ? element.subType!.toLowerCase() ==
                     sub_type_filter_val.toLowerCase()
                 : true) &&
             ((sub_plan_filter_on)
-                ? element.sub_plan!.toLowerCase() ==
+                ? element.subPlan!.toLowerCase() ==
                     sub_plan_filter_val.toLowerCase()
                 : true) &&
             filter_addons(element))
@@ -187,19 +213,19 @@ class _ClientsListState extends State<ClientsList> {
   }
 
   // filter addons function
-  bool filter_addons(ClientListModel element) {
+  bool filter_addons(ClientModel element) {
     if (addons_filter_on) {
       return (((addons_bx_val) ? element.boxing! : true) &&
-          ((addons_pt_val) ? element.pt_status! : true) &&
+          ((addons_pt_val) ? element.ptStatus! : true) &&
           ((addons_pt_sp_val)
-              ? (element.pt_status! &&
-                  element.pt_plan!.toLowerCase().contains('standard'))
+              ? (element.ptStatus! &&
+                  element.ptPlan!.toLowerCase().contains('standard'))
               : true) &&
           ((addons_pt_pp_val)
-              ? (element.pt_status! &&
-                  element.pt_plan!.toLowerCase().contains('premium'))
+              ? (element.ptStatus! &&
+                  element.ptPlan!.toLowerCase().contains('premium'))
               : true) &&
-          ((addons_physio_val) ? element.physio_cl! : true));
+          ((addons_physio_val) ? element.physioCl : true));
     } else {
       return true;
     }
@@ -209,7 +235,7 @@ class _ClientsListState extends State<ClientsList> {
 
   // main page
   Widget main_page() {
-    main_clients = Provider.of<AppData>(context).clients;
+    main_clients = Provider.of<AppData>(context).gym_clients;
     clients = filter_module();
 
     client_count = main_clients.length;
@@ -269,16 +295,16 @@ class _ClientsListState extends State<ClientsList> {
     if (value.isNotEmpty) {
       var data = clients.where(
         (element) =>
-            element.f_name!
+            element.fName!
                 .toLowerCase()
                 .contains(value.toLowerCase().trim()) ||
-            element.m_name!
+            element.mName!
                 .toLowerCase()
                 .contains(value.toLowerCase().trim()) ||
-            element.l_name!
+            element.lName!
                 .toLowerCase()
                 .contains(value.toLowerCase().trim()) ||
-            element.id!.toLowerCase().contains(value.toLowerCase().trim()),
+            element.clientId!.toLowerCase().contains(value.toLowerCase().trim()),
       );
 
       if (data.isNotEmpty) {
@@ -328,7 +354,24 @@ class _ClientsListState extends State<ClientsList> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // serach field
+                // new client
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ClientRegistrationPage()));
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                    size: 26,
+                  ),
+                ),
+
+                SizedBox(width: 10),
+
+                // search field
                 AnimatedContainer(
                   width: search_box_width,
                   duration: Duration(milliseconds: 500),
@@ -1265,11 +1308,11 @@ class _ClientsListState extends State<ClientsList> {
 
   // client list
   Widget list() {
-    clients.sort((a, b) => int.parse(b.id!.split('-')[1])
-        .compareTo(int.parse(a.id!.split('-')[1])));
+    clients.sort((a, b) => int.parse(b.clientId!.split('-')[1])
+        .compareTo(int.parse(a.clientId!.split('-')[1])));
 
     return
-        // empty serach
+        // empty search
         emptySearch
             ? Center(
                 child: Text(
@@ -1314,8 +1357,8 @@ class _ClientsListState extends State<ClientsList> {
   }
 
   // client list tile
-  Widget list_tile(ClientListModel client) {
-    String cl_name = '${client.f_name} ${client.l_name}';
+  Widget list_tile(ClientModel client) {
+    String cl_name = '${client.fName} ${client.lName}';
 
     return InkWell(
       onTap: () async {
@@ -1345,7 +1388,7 @@ class _ClientsListState extends State<ClientsList> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
-                child: client.user_image!.isEmpty
+                child: client.userImage!.isEmpty
                     ? Image.asset(
                         'images/icon/user-alt.png',
                         width: 50,
@@ -1354,7 +1397,7 @@ class _ClientsListState extends State<ClientsList> {
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
-                          client.user_image!,
+                          client.userImage!,
                           height: 80,
                           width: 80,
                           fit: BoxFit.cover,
@@ -1376,7 +1419,7 @@ class _ClientsListState extends State<ClientsList> {
                     children: [
                       // id
                       Text(
-                        client.id!,
+                        client.clientId ?? "",
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 12,
@@ -1387,7 +1430,7 @@ class _ClientsListState extends State<ClientsList> {
                       Expanded(child: Container()),
 
                       // subscription
-                      client.sub_plan!.isNotEmpty
+                      client.subPlan!.isNotEmpty
                           ? Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
@@ -1406,7 +1449,7 @@ class _ClientsListState extends State<ClientsList> {
                                   ),
                                   SizedBox(width: 2),
                                   Text(
-                                    client.sub_plan!,
+                                    client.subPlan!,
                                     style: TextStyle(
                                       fontSize: 8,
                                       letterSpacing: 1,
@@ -1442,7 +1485,7 @@ class _ClientsListState extends State<ClientsList> {
                     width: 80,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
-                      color: Color(client.sub_status! ? 0xFF88ECA9 : 0xFFFF5252)
+                      color: Color(client.subStatus! ? 0xFF88ECA9 : 0xFFFF5252)
                           .withOpacity(0.67),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -1451,11 +1494,11 @@ class _ClientsListState extends State<ClientsList> {
                       children: [
                         Icon(Icons.circle,
                             color: Color(
-                                client.sub_status! ? 0xFF19F763 : 0xFFFF5252),
+                                client.subStatus! ? 0xFF19F763 : 0xFFFF5252),
                             size: 8),
                         SizedBox(width: 6),
                         Text(
-                          client.sub_status! ? 'Active' : 'Inactive',
+                          client.subStatus! ? 'Active' : 'Inactive',
                           style: TextStyle(fontSize: 12, color: Colors.white),
                         ),
                       ],

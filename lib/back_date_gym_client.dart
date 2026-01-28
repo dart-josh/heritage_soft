@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:intl/intl.dart';
@@ -390,7 +392,7 @@ class _RegistrationPageState extends State<BackDateRegistration> {
 
   bool show_age = false;
 
-  List<String> hmo = gym_hmo.map((e) => e.hmo_name).toList();
+  List<String> hmo = [];
 
   // !
 
@@ -711,6 +713,7 @@ class _RegistrationPageState extends State<BackDateRegistration> {
 
   // sub details
   Widget subscription_area() {
+    var gym_hmo = AppData.get(context, listen: false).gym_hmo;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
@@ -2097,23 +2100,23 @@ class _RegistrationPageState extends State<BackDateRegistration> {
     Helpers.showLoadingScreen(context: context);
 
     // check client id to ensure no duplicates
-    List check_id = await GymDatabaseHelpers.check_gym_client_id(cl_id);
+    // List check_id = await GymDatabaseHelpers.check_gym_client_id(cl_id);
 
-    // check for errors
-    if (!check_id[0]) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: check_id[1],
-        icon: Icons.error,
-      );
-      return;
-    }
+    // // check for errors
+    // if (!check_id[0]) {
+    //   Navigator.pop(context);
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: check_id[1],
+    //     icon: Icons.error,
+    //   );
+    //   return;
+    // }
 
     // assign new key
     if (new_key.isEmpty) {
-      new_key = await GymDatabaseHelpers.assign_gym_registration_key();
+      // new_key = await GymDatabaseHelpers.assign_gym_registration_key();
     }
 
     String dob = dob_controller.text.trim();
@@ -2153,74 +2156,74 @@ class _RegistrationPageState extends State<BackDateRegistration> {
     String pt_dt = get_pt_date(pt_date);
     String bx_dt = get_pt_date(bx_date);
 
-    var newcl = ClientModel(
-      key: new_key,
-      id: cl_id,
-      reg_date: reg_date_controller.text.trim(),
-      user_status: true,
-      sub_type: sub_type_select,
-      sub_plan: package_select,
-      pt_plan: pt_plan,
-      sub_status: sub_status,
-      pt_status: pt,
-      sub_date: sub_dt,
-      pt_date: pt_dt,
-      boxing: boxing,
-      bx_date: bx_dt,
-      f_name: first_name_controller.text.trim(),
-      m_name: middle_name_controller.text.trim(),
-      l_name: last_name_controller.text.trim(),
-      user_image: '',
-      phone_1: phone_1_controller.text.trim(),
-      phone_2: phone_2_controller.text.trim(),
-      email: email_controller.text.trim(),
-      address: address_controller.text.trim(),
-      ig_user: ig_controller.text.trim(),
-      fb_user: fb_controller.text.trim(),
-      gender: gender_select,
-      dob: dob,
-      show_age: show_age,
-      occupation: occupation_select,
-      program_type_select: program_type_select,
-      corporate_type_select: corporate_type_select,
-      company_name: company_name_controller.text.trim(),
-      hmo: hmo_select,
-      hmo_id: hmo_id_controller.text.trim(),
-      hykau: hykau == 'Select' ? '' : hykau,
-      hykau_others: hykau_controller.text.trim(),
-      sub_paused: false,
-      paused_date: '',
-      sub_income: 0,
-      baseline_done: false,
-      physio_cl: false,
-      physio_key: '',
-      indemnity_verified: false,
-      max_days: week_days,
-      renew_dates: '',
-      registration_dates: '',
-      registered: false,
-    );
+    // var newcl = ClientModel(
+    //   key: new_key,
+    //   id: cl_id,
+    //   reg_date: reg_date_controller.text.trim(),
+    //   user_status: true,
+    //   sub_type: sub_type_select,
+    //   sub_plan: package_select,
+    //   pt_plan: pt_plan,
+    //   sub_status: sub_status,
+    //   pt_status: pt,
+    //   sub_date: sub_dt,
+    //   pt_date: pt_dt,
+    //   boxing: boxing,
+    //   bx_date: bx_dt,
+    //   f_name: first_name_controller.text.trim(),
+    //   m_name: middle_name_controller.text.trim(),
+    //   l_name: last_name_controller.text.trim(),
+    //   user_image: '',
+    //   phone_1: phone_1_controller.text.trim(),
+    //   phone_2: phone_2_controller.text.trim(),
+    //   email: email_controller.text.trim(),
+    //   address: address_controller.text.trim(),
+    //   ig_user: ig_controller.text.trim(),
+    //   fb_user: fb_controller.text.trim(),
+    //   gender: gender_select,
+    //   dob: dob,
+    //   show_age: show_age,
+    //   occupation: occupation_select,
+    //   program_type_select: program_type_select,
+    //   corporate_type_select: corporate_type_select,
+    //   company_name: company_name_controller.text.trim(),
+    //   hmo: hmo_select,
+    //   hmo_id: hmo_id_controller.text.trim(),
+    //   hykau: hykau == 'Select' ? '' : hykau,
+    //   hykau_others: hykau_controller.text.trim(),
+    //   sub_paused: false,
+    //   paused_date: '',
+    //   sub_income: 0,
+    //   baseline_done: false,
+    //   physio_cl: false,
+    //   physio_key: '',
+    //   indemnity_verified: false,
+    //   max_days: week_days,
+    //   renew_dates: '',
+    //   registration_dates: '',
+    //   registered: false,
+    // );
 
-    var cl_map = newcl.toJson();
+    // var cl_map = newcl.toJson();
 
-    // register cleint
-    bool registration =
-        await GymDatabaseHelpers.register_gym_client(new_key, cl_map);
+    // // register cleint
+    // bool registration =
+    //     await GymDatabaseHelpers.register_gym_client(new_key, cl_map);
 
     // check for errors
-    if (!registration) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return;
-    }
+    // if (!registration) {
+    //   Navigator.pop(context);
+    //   Helpers.showToast(
+    //     context: context,
+    //     color: Colors.redAccent,
+    //     toastText: 'Error, Try again',
+    //     icon: Icons.error,
+    //   );
+    //   return;
+    // }
 
-    // update last gym id
-    if (increase_id) GymDatabaseHelpers.update_last_gym_id(cl_id);
+    // // update last gym id
+    // if (increase_id) GymDatabaseHelpers.update_last_gym_id(cl_id);
 
     // complete
     Navigator.pop(context);

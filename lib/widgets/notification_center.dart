@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
 
 class NotificationCenter extends StatefulWidget {
   final ClientSignInModel? client;

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
@@ -9,7 +10,7 @@ import 'package:heritage_soft/pages/gym/Widgets/qr_code_dialog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
 class MobileClientList extends StatefulWidget {
-  final List<ClientListModel> clients;
+  final List<ClientModel> clients;
   const MobileClientList({super.key, required this.clients});
 
   @override
@@ -17,8 +18,8 @@ class MobileClientList extends StatefulWidget {
 }
 
 class _MobileClientListState extends State<MobileClientList> {
-  List<ClientListModel> clients = [];
-  List<ClientListModel> search_list = [];
+  List<ClientModel> clients = [];
+  List<ClientModel> search_list = [];
 
   TextEditingController search_controller = TextEditingController();
 
@@ -32,16 +33,18 @@ class _MobileClientListState extends State<MobileClientList> {
       search_list = clients
           .where(
             (element) =>
-                element.f_name!
+                element.fName!
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.m_name!
+                element.mName!
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.l_name!
+                element.lName!
                     .toLowerCase()
                     .contains(value.toLowerCase().trim()) ||
-                element.id!.toLowerCase().contains(value.toLowerCase().trim()),
+                element.clientId!
+                    .toLowerCase()
+                    .contains(value.toLowerCase().trim()),
           )
           .toList();
     } else {
@@ -70,8 +73,8 @@ class _MobileClientListState extends State<MobileClientList> {
 
   @override
   Widget build(BuildContext context) {
-    clients.sort((a, b) => int.parse(b.id!.split('-')[1])
-        .compareTo(int.parse(a.id!.split('-')[1])));
+    clients.sort((a, b) => int.parse(b.clientId!.split('-')[1])
+        .compareTo(int.parse(a.clientId!.split('-')[1])));
 
     return Scaffold(
       appBar: AppBar(
@@ -127,15 +130,15 @@ class _MobileClientListState extends State<MobileClientList> {
   }
 
   // client list tile
-  Widget list_tile(ClientListModel client) {
-    String cl_name = '${client.f_name} ${client.l_name}';
+  Widget list_tile(ClientModel client) {
+    String cl_name = '${client.fName} ${client.lName}';
 
     return InkWell(
       onTap: () async {
         await showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => QRCodeDialog(user_id: client.id!),
+          builder: (context) => QRCodeDialog(user_id: client.clientId!),
         );
       },
       child: Container(
@@ -156,7 +159,7 @@ class _MobileClientListState extends State<MobileClientList> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
-                child: client.user_image!.isEmpty
+                child: client.userImage!.isEmpty
                     ? Image.asset(
                         'images/icon/user-alt.png',
                         width: 50,
@@ -165,7 +168,7 @@ class _MobileClientListState extends State<MobileClientList> {
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
-                          client.user_image!,
+                          client.userImage!,
                           height: 80,
                           width: 80,
                           fit: BoxFit.cover,
@@ -187,7 +190,7 @@ class _MobileClientListState extends State<MobileClientList> {
                     children: [
                       // id
                       Text(
-                        client.id!,
+                        client.clientId!,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 12,
@@ -198,7 +201,7 @@ class _MobileClientListState extends State<MobileClientList> {
                       Expanded(child: Container()),
 
                       // subscription plan
-                      client.sub_plan!.isNotEmpty
+                      client.subPlan!.isNotEmpty
                           ? Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
@@ -217,7 +220,7 @@ class _MobileClientListState extends State<MobileClientList> {
                                   ),
                                   SizedBox(width: 2),
                                   Text(
-                                    client.sub_plan!,
+                                    client.subPlan!,
                                     style: TextStyle(
                                       fontSize: 8,
                                       letterSpacing: 1,
@@ -235,7 +238,7 @@ class _MobileClientListState extends State<MobileClientList> {
                       // menu
                       options_menu(
                           child: Icon(Icons.menu),
-                          user_image: client.user_image!,
+                          user_image: client.userImage!,
                           user_id: client.key!)
                     ],
                   ),
@@ -261,7 +264,7 @@ class _MobileClientListState extends State<MobileClientList> {
                     width: 85,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
-                      color: Color(client.sub_status! ? 0xFF88ECA9 : 0xFFFF5252)
+                      color: Color(client.subStatus! ? 0xFF88ECA9 : 0xFFFF5252)
                           .withOpacity(0.67),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -270,11 +273,11 @@ class _MobileClientListState extends State<MobileClientList> {
                       children: [
                         Icon(Icons.circle,
                             color: Color(
-                                client.sub_status! ? 0xFF19F763 : 0xFFFF5252),
+                                client.subStatus! ? 0xFF19F763 : 0xFFFF5252),
                             size: 8),
                         SizedBox(width: 6),
                         Text(
-                          client.sub_status! ? 'Active' : 'Inactive',
+                          client.subStatus! ? 'Active' : 'Inactive',
                           style: TextStyle(fontSize: 12, color: Colors.white),
                         ),
                       ],
@@ -325,25 +328,31 @@ class _MobileClientListState extends State<MobileClientList> {
 
             // upload image
             if (image_file != null) {
-              img = await AdminDatabaseHelpers.uploadFile(
-                      image_file, user_id, true) ??
-                  '';
+              // img = await AdminDatabaseHelpers.uploadFile(
+              //         image_file, user_id, true) ??
+              //     '';
             }
 
             Map client_update_details = {
               'user_image': img,
             };
 
-            bool ed = await GymDatabaseHelpers.update_client_details(
-                user_id, client_update_details);
+            Map ed = await GymDatabaseHelpers.update_client_details(
+              context,
+              data: {
+                'data_type': 'image',
+                'client_key': user_id,
+                'client_details': client_update_details
+              },
+            );
 
             Navigator.pop(context);
 
-            if (!ed) {
+            if (!ed['status']) {
               Helpers.showToast(
                 context: context,
                 color: Colors.redAccent,
-                toastText: 'An Error occured, Try again!',
+                toastText: 'An Error occurred, Try again!',
                 icon: Icons.error,
               );
               return;

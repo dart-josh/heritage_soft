@@ -12,7 +12,7 @@ import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/clinic/clinic_tab.dart';
 import 'package:heritage_soft/pages/other/physio_health_details_page.dart';
 import 'package:heritage_soft/pages/other/physio_health_registration_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/edit_name_dialog.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
 import 'package:heritage_soft/widgets/options_dialog.dart';

@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/helpers/admin_database_helpers.dart';
+import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:provider/provider.dart';
 
@@ -197,7 +198,6 @@ class _ManageHMOState extends State<ManageHMO> with TickerProviderStateMixin {
           builder: (context) => EditHMODialog(
             hmo: HMO_Model(
               hmo_name: '',
-              key: '',
               days_week: 2,
               hmo_amount: 12000,
             ),
@@ -205,27 +205,29 @@ class _ManageHMOState extends State<ManageHMO> with TickerProviderStateMixin {
         );
 
         if (ed != null) {
-          Helpers.showLoadingScreen(context: context);
-
           HMO_Model dd = ed;
 
-          bool ahm = await AdminDatabaseHelpers.add_hmo(
-              (value == 1) ? 'Gym HMO' : 'Physio HMO', dd.toJson(), '',
-              sett: true);
-
-          Navigator.pop(context);
-
-          if (!ahm) {
-            Helpers.showToast(
-              context: context,
-              color: Colors.red,
-              toastText: 'An Error Occurred, Try again',
-              icon: Icons.error,
+          if (value == 1) {
+            bool dl = await GymDatabaseHelpers.add_update_hmo(
+              context,
+              data: dd.toJson(),
             );
-            return;
+
+            if (!dl) {
+              Helpers.showToast(
+                context: context,
+                color: Colors.red,
+                toastText: 'Failed to add HMO',
+                icon: Icons.error,
+              );
+              return;
+            }
           }
 
-          Navigator.pop(context);
+          // bool ahm = await AdminDatabaseHelpers.add_hmo(
+          //     (value == 1) ? 'Gym HMO' : 'Physio HMO', dd.toJson(), '',
+          //     sett: true);
+
         }
       },
       itemBuilder: (context) => [
@@ -241,15 +243,15 @@ class _ManageHMOState extends State<ManageHMO> with TickerProviderStateMixin {
         ),
 
         // physio
-        PopupMenuItem(
-          value: 2,
-          child: Container(
-            child: Text(
-              'Physio HMO',
-              style: TextStyle(),
-            ),
-          ),
-        ),
+        // PopupMenuItem(
+        //   value: 2,
+        //   child: Container(
+        //     child: Text(
+        //       'Physio HMO',
+        //       style: TextStyle(),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
@@ -291,23 +293,28 @@ class _ManageHMOState extends State<ManageHMO> with TickerProviderStateMixin {
               );
 
               if (ed != null) {
-                Helpers.showLoadingScreen(context: context);
-
                 HMO_Model dd = ed;
 
-                bool uhm = await AdminDatabaseHelpers.add_hmo(
-                    gym_type ? 'Gym HMO' : 'Physio HMO', dd.toJson(), hmo.key);
-
-                Navigator.pop(context);
-
-                if (!uhm) {
-                  Helpers.showToast(
-                    context: context,
-                    color: Colors.red,
-                    toastText: 'An Error Occurred, Try again',
-                    icon: Icons.error,
+                if (gym_type) {
+                  bool dl = await GymDatabaseHelpers.add_update_hmo(
+                    context,
+                    data: dd.toJson(),
                   );
-                  return;
+
+                  if (!dl) {
+                    Helpers.showToast(
+                      context: context,
+                      color: Colors.red,
+                      toastText: 'Failed to update HMO',
+                      icon: Icons.error,
+                    );
+                    return;
+                  }
+                } else {
+                  // bool uhm = await AdminDatabaseHelpers.add_hmo(
+                  //     gym_type ? 'Gym HMO' : 'Physio HMO',
+                  //     dd.toJson(),
+                  //     hmo.key);
                 }
               }
             },
@@ -332,21 +339,19 @@ class _ManageHMOState extends State<ManageHMO> with TickerProviderStateMixin {
               );
 
               if (conf != null && conf) {
-                Helpers.showLoadingScreen(context: context);
+                if (gym_type) {
+                  Map dl = await GymDatabaseHelpers.delete_hmo(context,
+                      hmo_id: hmo.key ?? "");
 
-                bool dhm = await AdminDatabaseHelpers.delete_hmo(
-                    gym_type ? 'Gym HMO' : 'Physio HMO', hmo.key);
-
-                Navigator.pop(context);
-
-                if (!dhm) {
-                  Helpers.showToast(
-                    context: context,
-                    color: Colors.red,
-                    toastText: 'An Error Occurred, Try again',
-                    icon: Icons.error,
-                  );
-                  return;
+                  if (!dl['status']) {
+                    Helpers.showToast(
+                      context: context,
+                      color: Colors.red,
+                      toastText: 'Failed to delete HMO',
+                      icon: Icons.error,
+                    );
+                    return;
+                  }
                 }
               }
             },

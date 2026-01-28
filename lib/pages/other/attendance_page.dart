@@ -23,7 +23,7 @@ class AttendancePage extends StatefulWidget {
 class _AttendancePageState extends State<AttendancePage> {
   @override
   void initState() {
-    if (!widget.home) GymDatabaseHelpers.get_gym_clients(context);
+    if (!widget.home) GymDatabaseHelpers.get_all_clients(context);
     if (!widget.home) StaffDatabaseHelpers.get_all_staff(context);
     if (!widget.home) AdminDatabaseHelpers.get_news();
     refresh();

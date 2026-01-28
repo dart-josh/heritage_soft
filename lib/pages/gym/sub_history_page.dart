@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/pages/gym/print.page.dart';
@@ -41,35 +41,22 @@ class _SubHistoryPageState extends State<SubHistoryPage> {
 
   // get all history
   load_data() async {
-    isLoading = true;
+    List<Sub_History_Model> sub_h = client?.history ?? [];
 
-    await GymDatabaseHelpers.get_sub_history(client!.key).then((snapshot) {
-      List<Sub_History_Model> sub_h = [];
+    if (sub_h.isNotEmpty) {
+      sub_history = groupRec(sub_h);
+      var chk =
+          sub_history.where((element) => element.year == active_year).toList();
 
-      // snapshot.docs.forEach((element) {
-      //   Sub_History_Model rec =
-      //       Sub_History_Model.fromMap(element.id, element.data());
-      //   sub_h.add(rec);
-      // });
+      if (chk.isNotEmpty) {
+        active_record = chk.first.record;
+      } else {
+        active_record.clear();
+      }
+    } else {}
 
-      isLoading = false;
-
-      if (sub_h.isNotEmpty) {
-        sub_history = groupRec(sub_h);
-        var chk = sub_history
-            .where((element) => element.year == active_year)
-            .toList();
-
-        if (chk.isNotEmpty) {
-          active_record = chk.first.record;
-        } else {
-          active_record.clear();
-        }
-      } else {}
-
-      setState(() {});
-      return;
-    });
+    setState(() {});
+    return;
   }
 
   // group history
@@ -701,12 +688,14 @@ class _SubHistoryPageState extends State<SubHistoryPage> {
                           amount: history.amount,
                           expiry_date: history.exp_date.replaceAll('/', '-'),
                           receipt_type: history.hist_type,
-                          sub_amount_b4_discount: history.sub_amount_b4_discount ?? 0,
+                          sub_amount_b4_discount:
+                              history.sub_amount_b4_discount ?? 0,
                         );
 
                         await showDialog(
                             context: context,
-                            builder: (context) => GymPrintPage(print: printModel));
+                            builder: (context) =>
+                                GymPrintPage(print: printModel));
                       },
                       child:
                           Icon(Icons.receipt, color: Colors.white70, size: 20),
@@ -762,14 +751,15 @@ class _SubHistoryPageState extends State<SubHistoryPage> {
                     !deact &&
                     history.amount != 0 &&
                     (history.sub_amount_b4_discount != null &&
-                        history.sub_amount_b4_discount != history.amount && history.sub_amount_b4_discount != 0))
+                        history.sub_amount_b4_discount != history.amount &&
+                        history.sub_amount_b4_discount != 0))
                   Align(
                     alignment: Alignment.centerRight,
                     child: Container(
-                      padding:
-                          EdgeInsets.only(top: 4),
+                      padding: EdgeInsets.only(top: 4),
                       child: Text(
-                        Helpers.format_amount(history.sub_amount_b4_discount!, naira: true),
+                        Helpers.format_amount(history.sub_amount_b4_discount!,
+                            naira: true),
                         style: TextStyle(
                           color: Colors.white60,
                           fontSize: 16,
@@ -922,6 +912,7 @@ class Sub_CL_Model {
   String fullname;
   String sub_plan;
   int sub_income;
+  List<Sub_History_Model> history;
 
   Sub_CL_Model({
     required this.key,
@@ -930,5 +921,6 @@ class Sub_CL_Model {
     required this.fullname,
     required this.sub_plan,
     required this.sub_income,
+    required this.history,
   });
 }

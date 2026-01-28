@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
 import 'package:heritage_soft/global_variables.dart';
-import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class indemnityPage extends StatefulWidget {
@@ -22,27 +21,16 @@ class indemnityPage extends StatefulWidget {
 
 class _indemnityPageState extends State<indemnityPage> {
   bool is_verified = false;
-  late StreamSubscription verification_stream;
 
-  StreamSubscription listen_to_verification() {
-    return GymDatabaseHelpers.client_details_stream(widget.client_key)
-        .listen((event) {
-      // if (event.exists) {
-      //   is_verified = event.data()!['indemnity_verified'] ?? false;
-      //   setState(() {});
-      // }
-    });
-  }
+  listen_to_verification() {}
 
   @override
   void initState() {
-    verification_stream = listen_to_verification();
     super.initState();
   }
 
   @override
   void dispose() {
-    verification_stream.cancel();
     super.dispose();
   }
 

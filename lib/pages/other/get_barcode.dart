@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/Widgets/qr_code_dialog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 
 class GetBarcode extends StatefulWidget {
-  final List<ClientListModel> clients;
+  final List<ClientModel> clients;
   const GetBarcode({super.key, required this.clients});
 
   @override
@@ -15,7 +15,7 @@ class GetBarcode extends StatefulWidget {
 class _GetBarcodeState extends State<GetBarcode> {
   TextEditingController id_controller = TextEditingController();
 
-  List<ClientListModel> clients = [];
+  List<ClientModel> clients = [];
 
   @override
   void initState() {
@@ -92,14 +92,14 @@ class _GetBarcodeState extends State<GetBarcode> {
             InkWell(
               onTap: () async {
                 var chk = clients.where((e) =>
-                    e.id!.toLowerCase() ==
+                    e.clientId!.toLowerCase() ==
                     id_controller.text.trim().toLowerCase());
 
                 if (chk.isNotEmpty) {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => QRCodeDialog(user_id: chk.first.id!),
+                    builder: (context) => QRCodeDialog(user_id: chk.first.clientId!),
                   );
                 } else {
                   Helpers.showToast(

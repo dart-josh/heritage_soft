@@ -3,20 +3,23 @@ import 'dart:async';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/attendance_model.dart';
-import 'package:heritage_soft/datamodels/client_health_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client_health.model.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
+import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
+import 'package:heritage_soft/pages/clinic/patient_pofile_page.dart';
+import 'package:heritage_soft/pages/clinic/patient_registration_page.dart';
 import 'package:heritage_soft/pages/gym/client_health_details_page.dart';
 import 'package:heritage_soft/pages/gym/client_health_registration_page.dart';
 import 'package:heritage_soft/pages/gym/clients_attendance_history.dart';
 import 'package:heritage_soft/pages/gym/indemnity_page.dart';
 import 'package:heritage_soft/pages/gym/renewal_page.dart';
 import 'package:heritage_soft/pages/gym/sub_history_page.dart';
-import 'package:heritage_soft/pages/clinic/patient_pofile_page.dart';
-import 'package:heritage_soft/pages/clinic/patient_registration_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/edit_name_dialog.dart';
 import 'package:heritage_soft/pages/gym/Widgets/gym_health_selector_dialog.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
@@ -30,7 +33,7 @@ import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:intl/intl.dart';
 
 import 'package:heritage_soft/widgets/text_field.dart';
-import 'package:heritage_soft/helpers/admin_database_helpers.dart';
+import 'package:provider/provider.dart';
 
 class ClientProfilePage extends StatefulWidget {
   const ClientProfilePage({super.key, required this.cl_id});
@@ -52,6 +55,8 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
     fontWeight: FontWeight.bold,
     fontSize: 18,
   );
+
+  UserModel? active_user;
 
   bool edit = false;
 
@@ -123,53 +128,26 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
   bool show_age = false;
 
-  List<String> hmo = gym_hmo.map((e) => e.hmo_name).toList();
-
-  late StreamSubscription health_summary_stream;
-  late StreamSubscription client_details_stream;
+  List<String> hmo = [];
 
   // get client details
   get_client_details() {
-    client_details_stream =
-        GymDatabaseHelpers.client_details_stream(widget.cl_id).listen((event) {
-      if (edit) return;
+    if (edit) return;
+    var clx = Provider.of<AppData>(context)
+        .gym_clients
+        .where((cl) => cl.key == widget.cl_id);
 
-      // if (event.data() != null) {
-      //   Map map = event.data()!;
-      //   client = ClientModel.fromMap(event.id, map);
-      //   update_profile_controllers();
-      // }
-    });
-  }
+    if (clx.isNotEmpty) client = clx.first;
+    update_profile_controllers();
+    // HealthSummaryModel client_health = HealthSummaryModel(
+    //     height: client!.healthData!.last.data.height,
+    //     weight: client!.healthData!.last.data.weight);
 
-  // get health_summary_stream
-  get_health_summary() {
-    health_summary_stream =
-        GymDatabaseHelpers.client_health_summary_stream(widget.cl_id)
-            .listen((event) {
-      if (edit) return;
-
-      // if (event.data() != null) {
-      //   HealthSummaryModel client_health =
-      //       HealthSummaryModel.fromMap(event.data()!);
-
-      //   update_health_controllers(client_health);
-      // }
-    });
-  }
-
-  @override
-  void initState() {
-    get_client_details();
-    get_health_summary();
-    super.initState();
+    // update_health_controllers(client_health);
   }
 
   @override
   void dispose() {
-    health_summary_stream.cancel();
-    client_details_stream.cancel();
-
     phone_1_controller.dispose();
     phone_2_controller.dispose();
     email_controller.dispose();
@@ -211,8 +189,13 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    active_user = AppData.get(context).active_user;
+    get_client_details();
+    var hmm = AppData.get(context).gym_hmo;
+    hmo = hmm.map((e) => e.hmo_name).toList();
     double width = MediaQuery.of(context).size.width * 0.85;
     double height = MediaQuery.of(context).size.height * 0.93;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -288,7 +271,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                       ],
                     ),
 
-                    // edit notifictaion
+                    // edit notificataion
                     (edit)
                         ? Positioned(
                             top: 10,
@@ -328,11 +311,29 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
     );
   }
 
-  // WIDGETs
+  //? WIDGETs
+
   // main page
   Widget main_page() {
     if (client == null) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 20),
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.cancel,
+              color: Colors.white,
+              size: 28,
+            ),
+          )
+        ],
+      ));
     }
 
     return Padding(
@@ -431,8 +432,8 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
   // id & subscription group
   Widget id_sub_group() {
     String reg_dt = '';
-    if (client!.reg_date!.isNotEmpty) {
-      var date_data = client!.reg_date!.split('/');
+    if (client!.regDate!.isNotEmpty) {
+      var date_data = client!.regDate!.split('/');
       var date_res = DateTime(
         int.parse(date_data[2]),
         int.parse(date_data[1]),
@@ -459,7 +460,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           children: [
             // client id
             Text(
-              client!.id ?? '',
+              client!.clientId ?? '',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -502,7 +503,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         Row(
           children: [
             // sub plan & type
-            client!.sub_plan!.isNotEmpty
+            client!.subPlan!.isNotEmpty
                 ? Row(
                     children: [
                       // sub plan
@@ -525,7 +526,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                             ),
                             SizedBox(width: 2),
                             Text(
-                              client!.sub_plan!,
+                              client!.subPlan!,
                               style: TextStyle(
                                 fontSize: 10,
                                 letterSpacing: 1,
@@ -548,7 +549,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                             EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         margin: EdgeInsets.only(left: 10, top: 2),
                         child: Text(
-                          client!.sub_type!,
+                          client!.subType!,
                           style: TextStyle(
                             fontSize: 9,
                             letterSpacing: 1,
@@ -562,7 +563,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 : Container(),
 
             // physio tag
-            if (client!.physio_cl)
+            if (client!.physioCl)
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
@@ -620,7 +621,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                   ),
 
             // personal training
-            !client!.pt_status!
+            !client!.ptStatus!
                 ? Container()
                 : Padding(
                     padding: EdgeInsets.only(left: 8, top: 2),
@@ -641,7 +642,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                           ),
                           SizedBox(width: 3),
                           Text(
-                            'PT - ${client!.pt_plan}',
+                            'PT - ${client!.ptPlan}',
                             style: TextStyle(
                               fontSize: 9,
                               letterSpacing: 1,
@@ -861,12 +862,13 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                           ? expired_box()
                           : active_box(),
 
-                  client != null && client!.sub_paused!
+                  client != null && client!.subPaused!
                       ? sub_paused_box()
                       : Container(),
 
                   // renew button
-                  if (app_role == 'desk' || app_role == 'ict')
+                  if (active_user!.app_role == 'CSU' ||
+                      active_user!.app_role == 'ICT')
                     client == null
                         ? Container()
                         : (!subscription_status && !edit)
@@ -966,7 +968,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Text_field(
-                      label: 'Address',
+                      label: 'Addres_2',
                       controller: address_controller,
                       node: address_node,
                       maxLine: 3,
@@ -1386,166 +1388,141 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 onTap: () async {
                   if (client == null) return;
 
-                  Helpers.showLoadingScreen(context: context);
-
                   HealthClientModel client_h = HealthClientModel(
                     key: client!.key!,
-                    id: client!.id!,
+                    id: client!.clientId!,
                     name: '$first_name $middle_name $last_name',
                     user_image: user_image,
                     hmo: client!.hmo!,
-                    baseline_done: client!.baseline_done,
-                    program_type: client!.program_type_select,
+                    baseline_done: client!.baselineDone,
+                    program_type: client!.programTypeSelect ?? "",
                   );
 
-                  List<G_HealthModel> _all = [];
+                  List<G_HealthModel> _all = client?.healthData ?? [];
 
-                  await GymDatabaseHelpers.client_health_details(client!.key!)
-                      .then((snap) async {
-                    // snap.docs.forEach((element) {
-                    //   _all.add(G_HealthModel(
-                    //       key: element.id,
-                    //       type: element.data()['data_type'] ?? 'basic',
-                    //       data:
-                    //           HealthModel.fromMap(element.id, element.data())));
-                    // });
+                  // if db contains data
+                  if (_all.isNotEmpty) {
+                    if (client!.baselineDone) {
+                      var conf = await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              HealthSelectorDialog(list: _all));
 
-                    Navigator.pop(context);
-
-                    // if db contains data
-                    if (_all.isNotEmpty) {
-                      // set baseline done if baseline date is different from today
-                      if (_all.length == 1 && !client!.baseline_done) {
-                        if (Helpers.fmt_date(_all[0].data.date) !=
-                            DateFormat('d MMM, y').format(DateTime.now())) {
-                          GymDatabaseHelpers.update_client_details(
-                              client!.key!, {'baseline_done': true});
-                          client!.baseline_done = true;
-                        }
-                      }
-
-                      if (client!.baseline_done) {
-                        var conf = await showDialog(
-                            context: context,
-                            builder: (context) =>
-                                HealthSelectorDialog(list: _all));
-
-                        if (conf != null) {
-                          if (conf[1]) {
-                            new_health_details(
-                                client: client_h, health: conf[0]);
-                          } else {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ClientHDPage(
-                                  client: client_h,
-                                  health: conf[0],
-                                ),
+                      if (conf != null) {
+                        if (conf[1]) {
+                          new_health_details(client: client_h, health: conf[0]);
+                        } else {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ClientHDPage(
+                                client: client_h,
+                                health: conf[0],
                               ),
-                            );
-
-                            setState(() {});
-                          }
-                        }
-                      } else {
-                        var data = _all
-                            .where((element) => element.key == 'Baseline')
-                            .first
-                            .data;
-
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ClientHDPage(
-                              client: client_h,
-                              health: data,
                             ),
-                          ),
-                        );
+                          );
 
-                        setState(() {});
+                          setState(() {});
+                        }
                       }
-                    }
+                    } else {
+                      var data = _all
+                          .where((element) => element.key == 'Baseline')
+                          .first
+                          .data;
 
-                    // if no data in db
-                    else {
-                      if (app_role != 'desk' && app_role != 'ict') return;
-
-                      var bs = await showDialog(
-                        context: context,
-                        builder: (context) => ConfirmDialog(
-                          title: 'Baseline Assessment',
-                          subtitle:
-                              'You are about to take form for baseline assessment. Would you like to proceed?',
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClientHDPage(
+                            client: client_h,
+                            health: data,
+                          ),
                         ),
                       );
 
-                      if (bs == null || !bs) return;
-
-                      String dt_type = await showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => OptionsDialog(
-                          title: 'Health Form Type',
-                          options: ['Basic form', 'Comprehensive from'],
-                          dismiss: false,
-                        ),
-                      );
-
-                      var data_type =
-                          (dt_type == 'Basic form') ? 'basic' : 'comprehensive';
-
-                      HealthModel pty = HealthModel(
-                        height: '',
-                        weight: '',
-                        ideal_weight: '',
-                        fat_rate: '',
-                        weight_gap: '',
-                        weight_target: '',
-                        waist: '',
-                        arm: '',
-                        chest: '',
-                        thighs: '',
-                        hips: '',
-                        pulse_rate: '',
-                        blood_pressure: '',
-                        sugar_level: '',
-                        chl_ov: '',
-                        chl_nv: '',
-                        chl_rm: '',
-                        hdl_ov: '',
-                        hdl_nv: '',
-                        hdl_rm: '',
-                        ldl_ov: '',
-                        ldl_nv: '',
-                        ldl_rm: '',
-                        trg_ov: '',
-                        trg_nv: '',
-                        trg_rm: '',
-                        blood_sugar: false,
-                        eh_finding: '',
-                        eh_recommend: '',
-                        sh_finding: '',
-                        sh_recommend: '',
-                        ah_finding: '',
-                        ah_recommend: '',
-                        other_finding: '',
-                        other_recommend: '',
-                        ft_obj_1: '',
-                        ft_obj_2: '',
-                        ft_obj_3: '',
-                        ft_obj_4: '',
-                        ft_obj_5: '',
-                        key: 'Baseline',
-                        date: DateFormat('dd_MM_yyyy').format(DateTime.now()),
-                        done: false,
-                        data_type: data_type,
-                      );
-
-                      new_health_details(client: client_h, health: pty);
+                      setState(() {});
                     }
-                  });
+                  }
+
+                  // if no data in db
+                  else {
+                    if (active_user!.app_role != 'CSU' &&
+                        active_user!.app_role != 'ICT') return;
+
+                    var bs = await showDialog(
+                      context: context,
+                      builder: (context) => ConfirmDialog(
+                        title: 'Baseline Assessment',
+                        subtitle:
+                            'You are about to take form for baseline assessment. Would you like to proceed?',
+                      ),
+                    );
+
+                    if (bs == null || !bs) return;
+
+                    String dt_type = await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => OptionsDialog(
+                        title: 'Health Form Type',
+                        options: ['Basic form', 'Comprehensive from'],
+                        dismiss: false,
+                      ),
+                    );
+
+                    var data_type =
+                        (dt_type == 'Basic form') ? 'basic' : 'comprehensive';
+
+                    HealthModel pty = HealthModel(
+                      height: '',
+                      weight: '',
+                      ideal_weight: '',
+                      fat_rate: '',
+                      weight_gap: '',
+                      weight_target: '',
+                      waist: '',
+                      arm: '',
+                      chest: '',
+                      thighs: '',
+                      hips: '',
+                      pulse_rate: '',
+                      blood_pressure: '',
+                      sugar_level: '',
+                      chl_ov: '',
+                      chl_nv: '',
+                      chl_rm: '',
+                      hdl_ov: '',
+                      hdl_nv: '',
+                      hdl_rm: '',
+                      ldl_ov: '',
+                      ldl_nv: '',
+                      ldl_rm: '',
+                      trg_ov: '',
+                      trg_nv: '',
+                      trg_rm: '',
+                      blood_sugar: false,
+                      eh_finding: '',
+                      eh_recommend: '',
+                      sh_finding: '',
+                      sh_recommend: '',
+                      ah_finding: '',
+                      ah_recommend: '',
+                      other_finding: '',
+                      other_recommend: '',
+                      ft_obj_1: '',
+                      ft_obj_2: '',
+                      ft_obj_3: '',
+                      ft_obj_4: '',
+                      ft_obj_5: '',
+                      key: 'Baseline',
+                      date: DateFormat('dd_MM_yyyy').format(DateTime.now()),
+                      done: false,
+                      data_type: data_type,
+                    );
+
+                    new_health_details(client: client_h, health: pty);
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -1674,9 +1651,9 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
                 CAH_Model client_att = CAH_Model(
                   key: client!.key!,
-                  id: client!.id!,
-                  name: client!.f_name!,
-                  sub_plan: client!.sub_plan!,
+                  id: client!.clientId!,
+                  name: client!.fName!,
+                  sub_plan: client!.subPlan!,
                 );
 
                 Navigator.push(
@@ -1704,12 +1681,14 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             child: InkWell(
               onTap: () async {
                 Sub_CL_Model client_att = Sub_CL_Model(
-                    key: client!.key!,
-                    id: client!.id!,
-                    name: client!.f_name!,
-                    sub_plan: client!.sub_plan!,
-                    sub_income: client!.sub_income,
-                    fullname: '${client!.f_name} ${client!.l_name}');
+                  key: client!.key!,
+                  id: client!.clientId!,
+                  name: client!.fName!,
+                  sub_plan: client!.subPlan!,
+                  sub_income: client!.subIncome,
+                  fullname: '${client!.fName} ${client!.lName}',
+                  history: client!.sub_history ?? [],
+                );
 
                 Navigator.push(
                   context,
@@ -1727,7 +1706,8 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           ),
 
         // edit icon
-        if (client != null && (app_role == 'ict'))
+        if (client != null &&
+            (active_user!.app_role == 'ICT' || active_user!.app_role == 'CSU'))
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 5),
             child: InkWell(
@@ -1874,27 +1854,27 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
   Widget renew_button() {
     return InkWell(
       onTap: () {
-        String name = '${client!.f_name} ${client!.l_name}';
+        String name = '${client!.fName} ${client!.lName}';
 
         RenewalModel newDet = RenewalModel(
           key: client!.key!,
-          id: client!.id!,
-          reg_date: client!.reg_date!,
-          user_image: client!.user_image!,
+          id: client!.clientId!,
+          reg_date: client!.regDate!,
+          user_image: client!.userImage!,
           name: name,
-          sub_plan: client!.sub_plan!.isEmpty && client!.hmo != 'No HMO'
+          sub_plan: client!.subPlan!.isEmpty && client!.hmo != 'No HMO'
               ? 'HMO Plan'
-              : client!.sub_plan!,
-          pt_plan: client!.pt_plan!,
-          pt_status: client!.pt_status!,
+              : client!.subPlan!,
+          pt_plan: client!.ptPlan!,
+          pt_status: client!.ptStatus!,
           boxing: client!.boxing!,
-          sub_type: client!.sub_type!,
+          sub_type: client!.subType!,
           hmo_name: client!.hmo,
-          sub_income: client!.sub_income,
-          program_type: client!.program_type_select,
-          renew_dates: client!.renew_dates,
-          registration_dates: client!.registration_dates,
-          sub_date: client!.sub_date ?? '',
+          sub_income: client!.subIncome,
+          program_type: client!.programTypeSelect ?? "",
+          renew_dates: client!.renewDates ?? "",
+          registration_dates: client!.registrationDates ?? "",
+          sub_date: client!.subDate ?? '',
           registered: client!.registered,
         );
 
@@ -1903,7 +1883,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           MaterialPageRoute(
             builder: (context) => RenewalPage(
               details: newDet,
-              register: client!.sub_plan!.isEmpty,
+              register: client!.subPlan!.isEmpty,
             ),
           ),
         );
@@ -1917,7 +1897,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Center(
           child: Text(
-            client!.sub_plan!.isEmpty ? 'Subscribe' : 'Renew',
+            client!.subPlan!.isEmpty ? 'Subscribe' : 'Renew',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -1993,25 +1973,11 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           }
         }
 
-        bool emailValid = RegExp(
-                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-            .hasMatch(email_controller.text.trim());
-
-        if (!emailValid) {
-          Helpers.showToast(
-            context: context,
-            color: Colors.redAccent,
-            toastText: 'Invalid Email',
-            icon: Icons.error,
-          );
-          return;
-        }
-
         if (address_controller.text.isEmpty) {
           Helpers.showToast(
             context: context,
             color: Colors.redAccent,
-            toastText: 'Address Empty',
+            toastText: 'Addres_2 Empty',
             icon: Icons.error,
           );
           return;
@@ -2071,6 +2037,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
         bool? res = await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => ConfirmDialog(
             title: 'Submit details',
             subtitle: 'Are you sure you want to proceed?',
@@ -2136,22 +2103,24 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             middle_name = res['middle_name'];
             last_name = res['last_name'];
 
-            Map client_name_update = {
-              'f_name': first_name,
-              'm_name': middle_name,
-              'l_name': last_name,
+            Map client_update_details = {
+              'client_details.f_name': first_name,
+              'client_details.m_name': middle_name,
+              'client_details.l_name': last_name,
             };
 
-            Helpers.showLoadingScreen(context: context);
-            bool ress = await GymDatabaseHelpers.update_client_details(
-                client!.key!, client_name_update);
-            Navigator.pop(context);
+            Map res_2 =
+                await GymDatabaseHelpers.update_client_details(context, data: {
+              'data_type': 'name',
+              'client_key': widget.cl_id,
+              'client_details': client_update_details
+            });
 
-            if (!ress) {
+            if (!res_2['status']) {
               Helpers.showToast(
                 context: context,
                 color: Colors.redAccent,
-                toastText: 'An Error occured, Try again!',
+                toastText: 'An Error occurred, Try again!',
                 icon: Icons.error,
               );
               return;
@@ -2171,16 +2140,16 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         // subscriptions
         if (value == 2) {
           ClientSubModel cl = ClientSubModel(
-            sub_plan: client!.sub_plan!,
-            pt_plan: client!.pt_plan!,
-            sub_status: client!.sub_status!,
-            pt_status: client!.pt_status!,
-            sub_date: client!.sub_date!,
-            pt_date: client!.pt_date!,
-            boxing: client!.boxing!,
-            bx_date: client!.bx_date!,
-            sub_paused: client!.sub_paused!,
-            paused_date: client!.paused_date!,
+            sub_plan: client?.subPlan ?? '',
+            pt_plan: client?.ptPlan ?? '',
+            sub_status: client?.subStatus ?? false,
+            pt_status: client?.ptStatus ?? false,
+            sub_date: client?.subDate ?? '',
+            pt_date: client?.ptDate ?? '',
+            boxing: client?.boxing ?? false,
+            bx_date: client?.bxDate ?? '',
+            sub_paused: client?.subPaused ?? false,
+            paused_date: client?.pausedDate ?? '',
           );
 
           var res = await showDialog(
@@ -2193,30 +2162,34 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             // deactivate gym sub
             if (res == 'sub') {
               Map new_upd = {
-                'sub_status': false,
+                'sub_details.sub_status': false,
               };
 
-              Helpers.showLoadingScreen(context: context);
-              bool ress = await GymDatabaseHelpers.update_client_details(
-                  client!.key!, new_upd);
-              Navigator.pop(context);
+              Map res_2 = await GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'deactivate_sub',
+                  'client_key': widget.cl_id,
+                  'client_details': new_upd
+                },
+              );
 
-              if (!ress) {
+              if (!res_2['status']) {
                 Helpers.showToast(
                   context: context,
                   color: Colors.redAccent,
-                  toastText: 'An Error occured, Try again!',
+                  toastText: 'An Error occurred, Try again!',
                   icon: Icons.error,
                 );
                 return;
               }
 
-              Sub_History_Model subhist = Sub_History_Model(
+              Sub_History_Model sub_hist = Sub_History_Model(
                 key: '',
-                sub_plan: client!.sub_plan!,
-                sub_type: client!.sub_type!,
+                sub_plan: client!.subPlan!,
+                sub_type: client!.subType!,
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                exp_date: client!.sub_date!,
+                exp_date: client!.subDate!,
                 amount: 0,
                 extras_amount: 0,
                 boxing: false,
@@ -2228,7 +2201,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
               // add to sub history
               GymDatabaseHelpers.add_to_sub_history(
-                  client!.key!, subhist.toJson());
+                context,
+                data: {
+                  'client_key': widget.cl_id,
+                  'sub_details': sub_hist.toJson(),
+                },
+              );
 
               Helpers.showToast(
                 context: context,
@@ -2253,36 +2231,43 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                       : (res == 'Premium')
                           ? premium_pt
                           : 0;
-                  int inc = client!.sub_income + sub_amount;
+                  int inc = client!.subIncome + sub_amount;
+
+                  String pt_plan = res.toString();
+                  String pt_date = get_pt_date();
 
                   Map new_upd = {
-                    'pt_plan': res.toString(),
-                    'pt_date': get_pt_date(),
-                    'pt_status': true,
+                    'sub_details.pt_plan': pt_plan,
+                    'sub_details.pt_date': pt_date,
+                    'sub_details.pt_status': true,
                     'sub_income': inc,
                   };
 
-                  Helpers.showLoadingScreen(context: context);
-                  bool ress = await GymDatabaseHelpers.update_client_details(
-                      client!.key!, new_upd);
-                  Navigator.pop(context);
+                  Map res_2 = await GymDatabaseHelpers.update_client_details(
+                    context,
+                    data: {
+                      'data_type': 'activate_pt',
+                      'client_key': widget.cl_id,
+                      'client_details': new_upd
+                    },
+                  );
 
-                  if (!ress) {
+                  if (!res_2['status']) {
                     Helpers.showToast(
                       context: context,
                       color: Colors.redAccent,
-                      toastText: 'An Error occured, Try again!',
+                      toastText: 'An Error occurred, Try again!',
                       icon: Icons.error,
                     );
                     return;
                   }
 
-                  Sub_History_Model subhist = Sub_History_Model(
+                  Sub_History_Model sub_hist = Sub_History_Model(
                     key: '',
-                    sub_plan: '${new_upd['pt_plan']} Plan',
+                    sub_plan: '${pt_plan} Plan',
                     sub_type: '',
                     sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                    exp_date: new_upd['pt_date'],
+                    exp_date: pt_date,
                     amount: sub_amount,
                     extras_amount: 0,
                     boxing: false,
@@ -2294,7 +2279,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
                   // add to sub history
                   GymDatabaseHelpers.add_to_sub_history(
-                      client!.key!, subhist.toJson());
+                    context,
+                    data: {
+                      'client_key': widget.cl_id,
+                      'sub_details': sub_hist.toJson(),
+                    },
+                  );
 
                   // play success animation
                   success_controller.play();
@@ -2318,30 +2308,34 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             // deactivate personal training
             else if (res == 'pt-d') {
               Map new_upd = {
-                'pt_status': false,
+                'sub_details.pt_status': false,
               };
 
-              Helpers.showLoadingScreen(context: context);
-              bool ress = await GymDatabaseHelpers.update_client_details(
-                  client!.key!, new_upd);
-              Navigator.pop(context);
+              Map res_2 = await GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'deactivate_pt',
+                  'client_key': widget.cl_id,
+                  'client_details': new_upd
+                },
+              );
 
-              if (!ress) {
+              if (!res_2['status']) {
                 Helpers.showToast(
                   context: context,
                   color: Colors.redAccent,
-                  toastText: 'An Error occured, Try again!',
+                  toastText: 'An Error occurred, Try again!',
                   icon: Icons.error,
                 );
                 return;
               }
 
-              Sub_History_Model subhist = Sub_History_Model(
+              Sub_History_Model sub_hist = Sub_History_Model(
                 key: '',
-                sub_plan: 'PT ${client!.pt_plan!} Plan',
+                sub_plan: 'PT ${client!.ptPlan!} Plan',
                 sub_type: '',
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                exp_date: client!.pt_date!,
+                exp_date: client!.ptDate!,
                 amount: 0,
                 extras_amount: 0,
                 boxing: false,
@@ -2353,7 +2347,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
               // add to sub history
               GymDatabaseHelpers.add_to_sub_history(
-                  client!.key!, subhist.toJson());
+                context,
+                data: {
+                  'client_key': widget.cl_id,
+                  'sub_details': sub_hist.toJson(),
+                },
+              );
 
               Helpers.showToast(
                 context: context,
@@ -2371,6 +2370,8 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
               Map new_upd = {};
               int sub_amount = boxing_fee;
 
+              String bx_date = get_pt_date();
+
               // activate boxing
               if (box) {
                 var res2 = await showDialog(
@@ -2380,11 +2381,11 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                 );
 
                 if (res2 != null && res2) {
-                  int inc = client!.sub_income + sub_amount;
+                  int inc = client!.subIncome + sub_amount;
 
                   new_upd = {
-                    'boxing': true,
-                    'bx_date': get_pt_date(),
+                    'sub_details.boxing': true,
+                    'sub_details.bx_date': bx_date,
                     'sub_income': inc,
                   };
                 } else {
@@ -2394,20 +2395,24 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
               // deactivate boxing
               else {
                 new_upd = {
-                  'boxing': false,
+                  'sub_details.boxing': false,
                 };
               }
 
-              Helpers.showLoadingScreen(context: context);
-              bool ress = await GymDatabaseHelpers.update_client_details(
-                  client!.key!, new_upd);
-              Navigator.pop(context);
+              Map res_2 = await GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'update_bx',
+                  'client_key': widget.cl_id,
+                  'client_details': new_upd
+                },
+              );
 
-              if (!ress) {
+              if (!res_2['status']) {
                 Helpers.showToast(
                   context: context,
                   color: Colors.redAccent,
-                  toastText: 'An Error occured, Try again!',
+                  toastText: 'An Error occurred, Try again!',
                   icon: Icons.error,
                 );
                 return;
@@ -2415,12 +2420,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
               // add to sub history
               if (box) {
-                Sub_History_Model subhist = Sub_History_Model(
+                Sub_History_Model sub_hist = Sub_History_Model(
                   key: '',
                   sub_plan: 'Monthly Boxing Plan',
                   sub_type: '',
                   sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                  exp_date: new_upd['bx_date'],
+                  exp_date: bx_date,
                   amount: sub_amount,
                   extras_amount: 0,
                   boxing: false,
@@ -2432,14 +2437,19 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
                 // add to sub history
                 GymDatabaseHelpers.add_to_sub_history(
-                    client!.key!, subhist.toJson());
+                  context,
+                  data: {
+                    'client_key': widget.cl_id,
+                    'sub_details': sub_hist.toJson(),
+                  },
+                );
               } else {
-                Sub_History_Model subhist = Sub_History_Model(
+                Sub_History_Model sub_hist = Sub_History_Model(
                   key: '',
                   sub_plan: 'Monthly Boxing Plan',
                   sub_type: '',
                   sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                  exp_date: client!.bx_date!,
+                  exp_date: client!.bxDate!,
                   amount: 0,
                   extras_amount: 0,
                   boxing: false,
@@ -2451,7 +2461,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
                 // add to sub history
                 GymDatabaseHelpers.add_to_sub_history(
-                    client!.key!, subhist.toJson());
+                  context,
+                  data: {
+                    'client_key': widget.cl_id,
+                    'sub_details': sub_hist.toJson(),
+                  },
+                );
               }
 
               // success animation
@@ -2475,64 +2490,68 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
             // resume sub
             if (res == 'resume_sub') {
-              String ned = client!.sub_date!;
-              Map nt = {'sub_paused': false};
+              String ned = client!.subDate!;
+              Map nt = {'sub_details.sub_paused': false};
 
               // sub plan
-              if (client!.sub_status! && client!.sub_date!.isNotEmpty) {
-                int sub_rem_days = get_date(client!.sub_date!)
-                    .difference(get_date(client!.paused_date!))
+              if (client!.subStatus! && client!.subDate!.isNotEmpty) {
+                int sub_rem_days = get_date(client!.subDate!)
+                    .difference(get_date(client!.pausedDate!))
                     .inDays;
 
                 ned = DateFormat('dd/MM/yyyy')
                     .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-                nt.addAll({'sub_date': ned});
+                nt.addAll({'sub_details.sub_date': ned});
               }
 
               // boxing plan
-              if (client!.boxing! && client!.bx_date!.isNotEmpty) {
-                int sub_rem_days = get_date(client!.bx_date!)
-                    .difference(get_date(client!.paused_date!))
+              if (client!.boxing! && client!.bxDate!.isNotEmpty) {
+                int sub_rem_days = get_date(client!.bxDate!)
+                    .difference(get_date(client!.pausedDate!))
                     .inDays;
 
                 String ned = DateFormat('dd/MM/yyyy')
                     .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-                nt.addAll({'bx_date': ned});
+                nt.addAll({'sub_details.bx_date': ned});
               }
 
               // pt plan
-              if (client!.pt_status! && client!.pt_date!.isNotEmpty) {
-                int sub_rem_days = get_date(client!.pt_date!)
-                    .difference(get_date(client!.paused_date!))
+              if (client!.ptStatus! && client!.ptDate!.isNotEmpty) {
+                int sub_rem_days = get_date(client!.ptDate!)
+                    .difference(get_date(client!.pausedDate!))
                     .inDays;
 
                 String ned = DateFormat('dd/MM/yyyy')
                     .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-                nt.addAll({'pt_date': ned});
+                nt.addAll({'sub_details.pt_date': ned});
               }
 
-              Helpers.showLoadingScreen(context: context);
-              bool ress = await GymDatabaseHelpers.update_client_details(
-                  client!.key!, nt);
-              Navigator.pop(context);
+              Map res_2 = await GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'resume_sub',
+                  'client_key': widget.cl_id,
+                  'client_details': nt
+                },
+              );
 
-              if (!ress) {
+              if (!res_2['status']) {
                 Helpers.showToast(
                   context: context,
                   color: Colors.redAccent,
-                  toastText: 'An Error occured, Try again!',
+                  toastText: 'An Error occurred, Try again!',
                   icon: Icons.error,
                 );
                 return;
               }
 
-              Sub_History_Model subhist = Sub_History_Model(
+              Sub_History_Model sub_hist = Sub_History_Model(
                 key: '',
-                sub_plan: client!.sub_plan!,
-                sub_type: client!.sub_type!,
+                sub_plan: client!.subPlan!,
+                sub_type: client!.subType!,
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
                 exp_date: ned,
                 amount: 0,
@@ -2546,7 +2565,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
               // add to sub history
               GymDatabaseHelpers.add_to_sub_history(
-                  client!.key!, subhist.toJson());
+                context,
+                data: {
+                  'client_key': widget.cl_id,
+                  'sub_details': sub_hist.toJson(),
+                },
+              );
 
               Helpers.showToast(
                 context: context,
@@ -2559,31 +2583,36 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             // pause sub
             if (res == 'pause_sub') {
               Map nt = {
-                'sub_paused': true,
-                'paused_date': DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                'sub_details.sub_paused': true,
+                'sub_details.paused_date':
+                    DateFormat('dd/MM/yyyy').format(DateTime.now()),
               };
 
-              Helpers.showLoadingScreen(context: context);
-              bool ress = await GymDatabaseHelpers.update_client_details(
-                  client!.key!, nt);
-              Navigator.pop(context);
+              Map res_2 = await GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'pause_sub',
+                  'client_key': widget.cl_id,
+                  'client_details': nt
+                },
+              );
 
-              if (!ress) {
+              if (!res_2['status']) {
                 Helpers.showToast(
                   context: context,
                   color: Colors.redAccent,
-                  toastText: 'An Error occured, Try again!',
+                  toastText: 'An Error occurred, Try again!',
                   icon: Icons.error,
                 );
                 return;
               }
 
-              Sub_History_Model subhist = Sub_History_Model(
+              Sub_History_Model sub_hist = Sub_History_Model(
                 key: '',
-                sub_plan: client!.sub_plan!,
-                sub_type: client!.sub_type!,
+                sub_plan: client!.subPlan!,
+                sub_type: client!.subType!,
                 sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                exp_date: client!.sub_date!,
+                exp_date: client!.subDate!,
                 amount: 0,
                 extras_amount: 0,
                 boxing: false,
@@ -2595,7 +2624,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
               // add to sub history
               GymDatabaseHelpers.add_to_sub_history(
-                  client!.key!, subhist.toJson());
+                context,
+                data: {
+                  'client_key': widget.cl_id,
+                  'sub_details': sub_hist.toJson(),
+                },
+              );
 
               Helpers.showToast(
                 context: context,
@@ -2609,9 +2643,10 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
         // indemnity verification
         if (value == 3) {
-          if (app_role != 'desk' && app_role != 'ict') return;
+          if (active_user!.app_role != 'CSU' && active_user!.app_role != 'ICT')
+            return;
 
-          if (!client!.indemnity_verified) {
+          if (!client!.indemnityVerified) {
             String name = '$first_name $last_name';
 
             await Navigator.push(
@@ -2638,14 +2673,14 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           await showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => QRCodeDialog(user_id: client!.id!),
+            builder: (context) => QRCodeDialog(user_id: client!.clientId!),
           );
         }
 
         // physio
         if (value == 5) {
           // view physio profile
-          if (client!.physio_cl && client!.physio_key.isNotEmpty) {
+          if (client!.physioCl && client!.physioKey!.isNotEmpty) {
             // Navigator.push(
             //   context,
             //   MaterialPageRoute(
@@ -2657,7 +2692,8 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
           // register for physio
           else {
-            if (app_role != 'desk' && app_role != 'ict') return;
+            if (active_user!.app_role != 'CSU' &&
+                active_user!.app_role != 'ICT') return;
 
             var conf = await showDialog(
               context: context,
@@ -2692,37 +2728,41 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             //   context,
             //   MaterialPageRoute(
             //       builder: (context) => PatientRegistrationPage(
-            //             cl_id: Helpers.generate_id(
-            //                 'phy', (hmo_select != 'No HMO')),
             //             new_ft: new_pt_cl,
             //           )),
             // );
           }
+
+          Helpers.showToast(
+              context: context,
+              color: Colors.black,
+              toastText: 'Not available',
+              icon: Icons.info_outline);
         }
 
         // advance renewal
         if (value == 6) {
-          String name = '${client!.f_name} ${client!.l_name}';
+          String name = '${client!.fName} ${client!.lName}';
 
           RenewalModel newDet = RenewalModel(
             key: client!.key!,
-            id: client!.id!,
-            reg_date: client!.reg_date!,
-            user_image: client!.user_image!,
+            id: client!.clientId!,
+            reg_date: client!.regDate!,
+            user_image: client!.userImage!,
             name: name,
-            sub_plan: client!.sub_plan!.isEmpty && client!.hmo != 'No HMO'
+            sub_plan: client!.subPlan!.isEmpty && client!.hmo != 'No HMO'
                 ? 'HMO Plan'
-                : client!.sub_plan!,
-            pt_plan: client!.pt_plan!,
-            pt_status: client!.pt_status!,
+                : client!.subPlan!,
+            pt_plan: client!.ptPlan!,
+            pt_status: client!.ptStatus!,
             boxing: client!.boxing!,
-            sub_type: client!.sub_type!,
+            sub_type: client!.subType!,
             hmo_name: client!.hmo,
-            sub_income: client!.sub_income,
-            program_type: client!.program_type_select,
-            renew_dates: client!.renew_dates,
-            registration_dates: client!.registration_dates,
-            sub_date: client!.sub_date ?? '',
+            sub_income: client!.subIncome,
+            program_type: client!.programTypeSelect ?? "",
+            renew_dates: client!.renewDates ?? "",
+            registration_dates: client!.registrationDates ?? "",
+            sub_date: client!.subDate ?? '',
             registered: client!.registered,
           );
 
@@ -2731,7 +2771,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             MaterialPageRoute(
               builder: (context) => RenewalPage(
                 details: newDet,
-                register: client!.sub_plan!.isEmpty,
+                register: client!.subPlan!.isEmpty,
                 adv_renewal: true,
               ),
             ),
@@ -2740,10 +2780,10 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
 
         // delete user
         else if (value == 0) {
-          var conf = await Helpers.enter_password(context,
-              title: 'Delete User password');
+          // var conf = await Helpers.enter_password(context,
+          //     title: 'Delete User password');
 
-          if (!conf) return;
+          // if (!conf) return;
 
           var res = await showDialog(
             context: context,
@@ -2758,11 +2798,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
           if (res != null && res == true) {
             Helpers.showLoadingScreen(context: context);
 
-            bool dt = await GymDatabaseHelpers.delete_client(widget.cl_id);
+            Map dt = await GymDatabaseHelpers.delete_client(context,
+                client_id: widget.cl_id);
 
             Navigator.pop(context);
 
-            if (!dt) {
+            if (!dt['status']) {
               Helpers.showToast(
                 context: context,
                 color: Colors.redAccent,
@@ -2785,7 +2826,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
       },
       itemBuilder: (context) => [
         // edit name
-        if (app_role == 'ict')
+        if (active_user!.app_role == 'ICT' || active_user!.app_role == 'CSU')
           PopupMenuItem(
             value: 1,
             child: Container(
@@ -2820,7 +2861,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         ),
 
         // advance renewal
-        if (client!.sub_status ?? false)
+        if (client!.subStatus ?? false)
           PopupMenuItem(
             value: 6,
             child: Container(
@@ -2844,20 +2885,21 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
             child: Row(
               children: [
                 Icon(
-                  client!.indemnity_verified ? Icons.verified : Icons.circle,
+                  client!.indemnityVerified ? Icons.verified : Icons.circle,
                   size: 16,
-                  color: client!.indemnity_verified ? Colors.blue : Colors.grey,
+                  color: client!.indemnityVerified ? Colors.blue : Colors.grey,
                 ),
                 SizedBox(width: 5),
                 Text(
-                  client!.indemnity_verified
+                  client!.indemnityVerified
                       ? 'Verified'
-                      : (app_role != 'desk' && app_role != 'ict')
+                      : (active_user!.app_role != 'CSU' &&
+                              active_user!.app_role != 'ICT')
                           ? 'Not Verified'
                           : 'Verify User Agreement',
                   style: TextStyle(
                     color:
-                        client!.indemnity_verified ? Colors.blue : Colors.grey,
+                        client!.indemnityVerified ? Colors.blue : Colors.grey,
                   ),
                 ),
               ],
@@ -2887,7 +2929,9 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         PopupMenuDivider(),
 
         // physio
-        if ((app_role == 'desk' || app_role == 'ict') || client!.physio_cl)
+        if ((active_user!.app_role == 'CSU' ||
+                active_user!.app_role == 'ICT') ||
+            client!.physioCl)
           PopupMenuItem(
             value: 5,
             child: Container(
@@ -2896,9 +2940,7 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
                   Icon(Icons.health_and_safety, size: 16),
                   SizedBox(width: 5),
                   Text(
-                    client!.physio_cl
-                        ? 'Physio Profile'
-                        : 'Register for Physio',
+                    client!.physioCl ? 'Physio Profile' : 'Register for Physio',
                     style: TextStyle(
                       color: Colors.deepPurple,
                     ),
@@ -2911,23 +2953,24 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
         PopupMenuDivider(),
 
         // delete user
-        // if (active_staff!.full_access)
-        PopupMenuItem(
-          value: 0,
-          child: Container(
-            child: Text(
-              'Delete User',
-              style: TextStyle(
-                color: Colors.redAccent,
+        if (active_user!.app_role == 'Admin' || active_user!.app_role == 'ICT')
+          PopupMenuItem(
+            value: 0,
+            child: Container(
+              child: Text(
+                'Delete User',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
 
-  // FUNCTION
+  //? FUNCTION
+
   // calculate age
   String calc_age(DateTime dob) {
     // return
@@ -2965,34 +3008,35 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
     return newDate;
   }
 
-  // update text controlers
+  // update text controllers
   void update_profile_controllers() {
-    first_name = client!.f_name!;
-    middle_name = client!.m_name!;
-    last_name = client!.l_name!;
-    user_image = client!.user_image!;
+    if (client == null) return;
+    first_name = client?.fName ?? "";
+    middle_name = client?.mName ?? "";
+    last_name = client?.lName ?? "";
+    user_image = client?.userImage ?? "";
 
-    phone_1_controller.text = client!.phone_1!;
-    phone_2_controller.text = client!.phone_2!;
-    email_controller.text = client!.email!;
-    address_controller.text = client!.address!;
-    ig_controller.text = client!.ig_user!;
-    fb_controller.text = client!.fb_user!;
+    phone_1_controller.text = client?.phone1 ?? "";
+    phone_2_controller.text = client?.phone2 ?? "";
+    email_controller.text = client?.email ?? "";
+    address_controller.text = client?.address ?? "";
+    ig_controller.text = client?.igUser ?? "";
+    fb_controller.text = client?.fbUser ?? "";
 
     dob_controller.text = client!.dob!;
-    show_age = client!.show_age;
+    show_age = client!.showAge;
     occupation_select = client!.occupation!;
     gender_select = client!.gender!;
-    subscription_status = client!.sub_status!;
-    program_type_select = client!.program_type_select;
-    corporate_type_select = client!.corporate_type_select;
+    subscription_status = client!.subStatus!;
+    program_type_select = client!.programTypeSelect ?? "";
+    corporate_type_select = client!.corporateTypeSelect ?? "";
 
     hmo_select = client!.hmo!;
-    hmo_id_controller.text = client!.hmo_id!;
+    hmo_id_controller.text = client!.hmoId!;
 
     hykau = client!.hykau!;
-    hykau_controller.text = client!.hykau_others!;
-    company_name_controller.text = client!.company_name;
+    hykau_controller.text = client!.hykauOthers ?? "";
+    company_name_controller.text = client!.companyName ?? "";
 
     // age calculator
     if (dob_controller.text.isNotEmpty) {
@@ -3040,14 +3084,12 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
     if (mounted) setState(() {});
   }
 
-  // update client info
+  //? update client info
   update_client_details() async {
-    Helpers.showLoadingScreen(context: context);
-
     if (image_file != null) {
-      user_image = await AdminDatabaseHelpers.uploadFile(
-              image_file!, widget.cl_id, true) ??
-          '';
+      // user_image = await AdminDatabaseHelpers.uploadFile(
+      //         image_file!, widget.cl_id, true) ??
+      //     '';
     }
 
     String dob = dob_controller.text.trim();
@@ -3060,36 +3102,37 @@ class _ClientProfilePageState extends State<ClientProfilePage> {
     }
 
     Map client_update_details = {
-      'phone_1': phone_1_controller.text.trim(),
-      'phone_2': phone_2_controller.text.trim(),
-      'email': email_controller.text.trim(),
-      'address': address_controller.text.trim(),
-      'ig_user': ig_controller.text.trim(),
-      'fb_user': fb_controller.text.trim(),
-      'gender': gender_select,
-      'dob': dob,
-      'show_age': show_age,
-      'occupation': occupation_select,
-      'program_type_select': program_type_select,
-      'corporate_type_select': corporate_type_select,
-      'company_name': company_name_controller.text.trim(),
-      'hmo': hmo_select,
-      'hmo_id': hmo_id_controller.text.trim(),
       'user_image': user_image,
-      'hykau': hykau,
-      'hykau_others': hykau_controller.text.trim(),
+      'contact_details.phone_1': phone_1_controller.text.trim(),
+      'contact_details.phone_2': phone_2_controller.text.trim(),
+      'contact_details.email': email_controller.text.trim(),
+      'contact_details.address': address_controller.text.trim(),
+      'contact_details.ig_user': ig_controller.text.trim(),
+      'contact_details.fb_user': fb_controller.text.trim(),
+      'personal_details.gender': gender_select,
+      'personal_details.dob': dob,
+      'personal_details.show_age': show_age,
+      'personal_details.occupation': occupation_select,
+      'program_details.program_type_select': program_type_select,
+      'program_details.corporate_type_select': corporate_type_select,
+      'program_details.company_name': company_name_controller.text.trim(),
+      'program_details.hmo': hmo_select,
+      'program_details.hmo_id': hmo_id_controller.text.trim(),
+      'program_details.hykau': hykau,
+      'program_details.hykau_others': hykau_controller.text.trim(),
     };
 
-    bool dt = await GymDatabaseHelpers.update_client_details(
-        widget.cl_id, client_update_details);
+    Map dt = await GymDatabaseHelpers.update_client_details(context, data: {
+      'data_type': 'profile',
+      'client_key': widget.cl_id,
+      'client_details': client_update_details
+    });
 
-    Navigator.pop(context);
-
-    if (!dt) {
+    if (!dt['status']) {
       Helpers.showToast(
         context: context,
         color: Colors.redAccent,
-        toastText: 'An Error occured, Try again!',
+        toastText: 'An Error occurred, Try again!',
         icon: Icons.error,
       );
       return false;
@@ -3786,10 +3829,11 @@ class SubscriptionDates extends StatelessWidget {
   final ClientSubModel client;
 
   String getDate(String data) {
+    if (data.isEmpty) return "";
     var date_data = data.split('/');
     DateTime date = DateTime(
-      int.parse(date_data[2]),
-      int.parse(date_data[1]),
+      (date_data.length > 2) ? int.parse(date_data[2]) : DateTime.now().year,
+      (date_data.length > 1) ? int.parse(date_data[1]) : DateTime.now().month,
       int.parse(date_data[0]),
     );
 
@@ -3803,8 +3847,8 @@ class SubscriptionDates extends StatelessWidget {
   bool check_date(String time) {
     var date_data = time.split('/');
     DateTime tm = DateTime(
-      int.parse(date_data[2]),
-      int.parse(date_data[1]),
+      (date_data.length > 2) ? int.parse(date_data[2]) : DateTime.now().year,
+      (date_data.length > 1) ? int.parse(date_data[1]) : DateTime.now().month,
       int.parse(date_data[0]),
     );
 
@@ -3813,6 +3857,7 @@ class SubscriptionDates extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserModel? active_user = AppData.get(context).active_user;
     return Dialog(
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
@@ -3915,9 +3960,11 @@ class SubscriptionDates extends StatelessWidget {
               // Gym Subscription
               GestureDetector(
                 onDoubleTap: () async {
-                  if (app_role != 'desk' && app_role != 'ict') return;
+                  if (active_user!.app_role != 'CSU' &&
+                      active_user.app_role != 'ICT') return;
 
-                  if (client.sub_status && app_role != 'ict') return;
+                  if (client.sub_status && active_user.app_role != 'ICT')
+                    return;
 
                   if (!client.sub_status && client.sub_date.isEmpty) {
                     Helpers.showToast(
@@ -3945,7 +3992,7 @@ class SubscriptionDates extends StatelessWidget {
                     context: context,
                     barrierDismissible: false,
                     builder: (context) => ConfirmDialog(
-                      title: 'Deactivate Subsciption',
+                      title: 'Deactivate Subscription',
                       subtitle:
                           'This action would terminate the current subscription plan of this client.\nWould you like to proceed?',
                     ),
@@ -4046,16 +4093,17 @@ class SubscriptionDates extends StatelessWidget {
               // personal training
               GestureDetector(
                 onDoubleTap: () async {
-                  if (app_role != 'desk' && app_role != 'ict') return;
+                  if (active_user!.app_role != 'CSU' &&
+                      active_user.app_role != 'ICT') return;
 
-                  if (client.pt_status && app_role != 'ict') return;
+                  if (client.pt_status && active_user.app_role != 'ICT') return;
 
                   var res = await showDialog(
                     context: context,
                     barrierDismissible: false,
                     builder: (context) => ConfirmDialog(
                       title: (!client.pt_status)
-                          ? 'Purchase Subsciption'
+                          ? 'Purchase Subscription'
                           : 'Deactivate Subscription',
                       subtitle: 'Would you like to proceed?',
                     ),
@@ -4161,16 +4209,17 @@ class SubscriptionDates extends StatelessWidget {
               // boxing
               GestureDetector(
                 onDoubleTap: () async {
-                  if (app_role != 'desk' && app_role != 'ict') return;
+                  if (active_user!.app_role != 'CSU' &&
+                      active_user!.app_role != 'ICT') return;
 
-                  if (client.boxing && app_role != 'ict') return;
+                  if (client.boxing && active_user!.app_role != 'ICT') return;
 
                   var res = await showDialog(
                     context: context,
                     barrierDismissible: false,
                     builder: (context) => ConfirmDialog(
                       title: (!client.boxing)
-                          ? 'Purchase Subsciption'
+                          ? 'Purchase Subscription'
                           : 'Deactivate Subscription',
                       subtitle: 'Would you like to proceed?',
                     ),
@@ -4299,7 +4348,8 @@ class SubscriptionDates extends StatelessWidget {
                             ],
                           ),
                         ),
-                  if (app_role == 'desk' || app_role == 'ict')
+                  if (active_user!.app_role == 'CSU' ||
+                      active_user!.app_role == 'ICT')
                     Expanded(
                       child: InkWell(
                         onTap: () async {

@@ -20,8 +20,6 @@ import 'package:heritage_soft/pages/gym/general_attendance_history_table.dart';
 import 'package:heritage_soft/pages/other/all_data.dart';
 import 'package:heritage_soft/pages/clinic/doctors_list.dart';
 import 'package:heritage_soft/pages/clinic/all_patient_list.dart';
-import 'package:heritage_soft/pages/clinic/patient_registration_page.dart';
-import 'package:heritage_soft/pages/gym/registration_page.dart';
 import 'package:heritage_soft/pages/staff/user_list.dart';
 import 'package:heritage_soft/widgets/app_bar.dart';
 import 'package:heritage_soft/widgets/manage_hmo_dialog.dart';
@@ -124,9 +122,10 @@ class _HomePageState extends State<HomePage> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Text(
-                            'HERITAGE PHYSIOTHERAPY CLINIC',
+                            "HERITAGE FITNESS & WELLNESS CENTRE",
+                            // 'HERITAGE PHYSIOTHERAPY CLINIC',
                             // current_page == 0
-                            //     ? 'HERITAGE FITNESS & WELLNESS CENTRE'
+                                // ? 'HERITAGE FITNESS & WELLNESS CENTRE'
                             //     : current_page == 1
                             //         ? 'HERITAGE PHYSIOTHERAPY CLINIC'
                             //         : 'DELIGHTSOME HERITAGE INTERNATIONAL',
@@ -191,7 +190,7 @@ class _HomePageState extends State<HomePage> {
         // slider
         Expanded(
           child: cs.CarouselSlider(
-            items: user!.full_access
+            items: user!.full_access || user.app_role == 'ICT'
                 ? [
                     full_access_tab_1(),
                     full_access_tab_2(),
@@ -199,13 +198,13 @@ class _HomePageState extends State<HomePage> {
                   ]
                 : (user.app_role == 'Admin' || user.app_role == 'Management')
                     ? [
-                        admin_tab_1(),
-                        // admin_tab_2(),
+                        full_access_tab_1(),
+                        full_access_tab_2(),
                       ]
                     : (user.app_role == 'CSU')
                         ? [
                             csu_page_0(),
-                            //  csu_page_1(),
+                            csu_page_1(),
                           ]
                         : [],
             carouselController: buttonCarouselController,
@@ -251,13 +250,12 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           runAlignment: WrapAlignment.center,
           children: [
+            ft_client_list(),
             pt_client_list(),
             doctors(),
-            accessories(),
+            data_report(),
             clinic_record(),
-            sales_record(),
-            restock_accessories_record(),
-            restock_accessories(),
+            manage_hmo(),
           ],
         ),
       ),
@@ -274,9 +272,11 @@ class _HomePageState extends State<HomePage> {
           runSpacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            // data_report(),
-
-            // manage_hmo(),
+            accessories(),
+            sales_record(),
+            restock_accessories_record(),
+            restock_accessories(),
+            birthday_list(),
           ],
         ),
       ),
@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             all_data(),
-            // data_report(),
+            data_report(),
             // birthday_list(),
             // ft_client_list(),
             pt_client_list(),
@@ -326,7 +326,7 @@ class _HomePageState extends State<HomePage> {
             // staff_attendance_history(),
             // guest_record(),
 
-            // manage_hmo(),
+            manage_hmo(),
             // manage_password(),
           ],
         ),
@@ -345,14 +345,13 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             all_data(),
-            // ft_client_list(),
+            ft_client_list(),
             pt_client_list(),
-            // data_report(),
+            data_report(),
             clinic_record(),
-
             staff_list(),
             doctors(),
-            // birthday_list(),
+            birthday_list(),
           ],
         ),
       ),
@@ -376,7 +375,7 @@ class _HomePageState extends State<HomePage> {
             restock_accessories(),
             restock_accessories_record(),
             sales_record(),
-            // manage_hmo(),
+            manage_hmo(),
             // manage_password(),
           ],
         ),
@@ -540,7 +539,6 @@ class _HomePageState extends State<HomePage> {
   Widget ft_client_list() {
     return InkWell(
       onTap: () {
-        return;
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ClientsList()),
@@ -1355,7 +1353,6 @@ class _HomePageState extends State<HomePage> {
   Widget manage_hmo() {
     return InkWell(
       onTap: () {
-        return;
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -1497,7 +1494,6 @@ class _HomePageState extends State<HomePage> {
   Widget birthday_list() {
     return InkWell(
       onTap: () {
-        return;
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => BirthdayList()));
       },
@@ -1562,7 +1558,6 @@ class _HomePageState extends State<HomePage> {
   Widget data_report() {
     return InkWell(
       onTap: () {
-        return;
         Navigator.push(
           context,
           MaterialPageRoute(

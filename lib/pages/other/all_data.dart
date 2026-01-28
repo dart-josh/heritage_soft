@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/user_models/doctor.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
@@ -10,6 +11,7 @@ import 'package:heritage_soft/pages/gym/clients_list.dart';
 import 'package:heritage_soft/pages/clinic/doctors_list.dart';
 import 'package:heritage_soft/pages/clinic/all_patient_list.dart';
 import 'package:heritage_soft/pages/staff/user_list.dart';
+import 'package:heritage_soft/utils/test.dart';
 import 'dart:ui' as ui;
 
 import 'package:intl/intl.dart';
@@ -26,10 +28,10 @@ class AllData extends StatefulWidget {
 class _AllDataState extends State<AllData> {
   cs.CarouselController buttonCarouselController = cs.CarouselController();
 
-  List<ClientListModel> all_gym_cl = [];
-  List<ClientListModel> active_gym_cl = [];
-  List<ClientListModel> expired_gym_cl = [];
-  List<ClientListModel> hmo_cl = [];
+  List<ClientModel> all_gym_cl = [];
+  List<ClientModel> active_gym_cl = [];
+  List<ClientModel> expired_gym_cl = [];
+  List<ClientModel> hmo_cl = [];
   List<HMO_Model> gym_hmos = [];
 
   List<PatientModel> all_physio_cl = [];
@@ -45,7 +47,15 @@ class _AllDataState extends State<AllData> {
 
   // get gym data
   get_gym_data() {
-    
+    all_gym_cl = AppData.get(context).gym_clients;
+
+    active_gym_cl =
+        all_gym_cl.where((element) => element.subStatus ?? false).toList();
+    expired_gym_cl =
+        all_gym_cl.where((element) => !(element.subStatus ?? false)).toList();
+
+    hmo_cl = all_gym_cl.where((element) => element.hmo != 'No HMO').toList();
+    gym_hmos = AppData.get(context).gym_hmo;
   }
 
   // get physio data
@@ -62,12 +72,14 @@ class _AllDataState extends State<AllData> {
 
     total_phy_session = 0;
     Provider.of<AppData>(context).doctors.forEach((el) {
-      total_phy_session += (el.my_patients.isNotEmpty) ? el.my_patients
-          .reduce((element, next) => MyPatientModel(
-                patient: el.my_patients[0].patient,
-                session_count: element.session_count + next.session_count,
-              ))
-          .session_count : 0;
+      total_phy_session += (el.my_patients.isNotEmpty)
+          ? el.my_patients
+              .reduce((element, next) => MyPatientModel(
+                    patient: el.my_patients[0].patient,
+                    session_count: element.session_count + next.session_count,
+                  ))
+              .session_count
+          : 0;
     });
   }
 
@@ -405,7 +417,7 @@ class _AllDataState extends State<AllData> {
     );
   }
 
-  // staf data
+  // staff data
   Widget top_box_staff() {
     return Container(
       height: 230,
@@ -526,7 +538,6 @@ class _AllDataState extends State<AllData> {
                   // client list
                   InkWell(
                     onTap: () {
-                      return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ClientsList()),

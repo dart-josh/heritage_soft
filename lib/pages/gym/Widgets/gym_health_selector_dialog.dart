@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:heritage_soft/datamodels/client_health_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client_health.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/widgets/options_dialog.dart';

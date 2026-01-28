@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:intl/intl.dart';
 

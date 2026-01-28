@@ -23,7 +23,7 @@ class GymIncomeModel {
     required this.extras,
   });
 
-  factory GymIncomeModel.fromJson(Map hist_json) =>
+  factory GymIncomeModel.fromMap(Map hist_json) =>
       GymIncomeModel(
         client_key: hist_json['client_key'] ?? '',
         hist_type: hist_json['hist_type'] ?? '',
@@ -39,6 +39,25 @@ class GymIncomeModel {
           if (hist_json['pt_status']) 'Personal Trainer'
         ],
       );
+
+      Map<String, dynamic> toJson() {
+  return {
+    'client_key': client_key,
+    'hist_type': hist_type,
+    'amount': amount,
+    'extras_amount': extras_amount,
+    'sub_amount_b4_discount': amt_b4_dis,
+    'sub_plan': sub_plan,
+    'sub_type': sub_type,
+    'sub_date': sub_date,
+    'exp_date': exp_date,
+
+    // 🔹 Flags used by backend to derive extras
+    'boxing': extras.contains('Boxing'),
+    'pt_status': extras.contains('Personal Trainer'),
+  };
+}
+
 }
 
 class Group_GymIncomeModel {

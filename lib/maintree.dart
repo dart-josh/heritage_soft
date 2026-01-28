@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/store_models/accessory.model.dart';
 import 'package:heritage_soft/datamodels/store_models/accessory_request.model.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/helpers/clinic_database_helpers.dart';
+import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/store_database_helpers.dart';
 import 'package:heritage_soft/helpers/server_helpers.dart';
 import 'package:heritage_soft/helpers/user_helpers.dart';
@@ -20,7 +22,7 @@ class MainTree extends StatefulWidget {
 class _MainTreeState extends State<MainTree> {
   UserModel? active_user;
 
-  initators() async {
+  initiators() async {
     active_user = AppData.get(context, listen: false).active_user ?? null;
     ServerHelpers.start_socket_listerners();
 
@@ -114,12 +116,46 @@ class _MainTreeState extends State<MainTree> {
     ServerHelpers.socket!.off('AccessoryRequestDA');
   }
 
+  //? GYM HMO
+  // update hmo from stream
+  dynamic update_gym_hmo(dynamic data) async {
+    HMO_Model hmo = HMO_Model.fromMap(data);
+
+    AppData.set(context).update_gym_hmo_by_id(hmo);
+  }
+
+  // remove hmo from stream
+  dynamic delete_gym_hmo(dynamic id) async {
+    AppData.set(context).delete_gym_hmo(id);
+  }
+
+  // start hmo listener
+  start_gym_hmo_listener() {
+    GymDatabaseHelpers.get_hmo(context);
+    ServerHelpers.socket!.on('GymHmo', (data) {
+      update_gym_hmo(data);
+    });
+    ServerHelpers.socket!.on('GymHmoD', (data) {
+      delete_gym_hmo(data);
+    });
+  }
+
+  // end hmo listener
+  end_gym_hmo_listener() {
+    ServerHelpers.socket!.off('GymHmo');
+    ServerHelpers.socket!.off('GymHmoD');
+  }
+
   @override
   void initState() {
-    initators();
+    initiators();
     start_accessory_listener();
     if (active_user?.app_role == 'CSU' || active_user?.full_access == true)
       start_accessory_request_listener();
+
+    if (active_user?.app_role != 'Doctor') {
+      start_gym_hmo_listener();
+    }
 
     super.initState();
   }
@@ -129,6 +165,10 @@ class _MainTreeState extends State<MainTree> {
     end_accessory_listener();
     if (active_user?.app_role == 'CSU' || active_user?.full_access == true)
       end_accessory_request_listener();
+
+    if (active_user?.app_role != 'Doctor') {
+      end_gym_hmo_listener();
+    }
 
     super.dispose();
   }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'dart:ui' as ui;
 
-import 'package:heritage_soft/datamodels/client_health_model.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client_health.model.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/renewal_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:intl/intl.dart';
@@ -534,7 +534,7 @@ class _ClientHealthRegistrationPageState
   TextEditingController bp_controller = TextEditingController();
   TextEditingController sugar_level_controller = TextEditingController();
 
-  // total cholestrol
+  // total cholesterol
   TextEditingController tC_observed_controller = TextEditingController();
   TextEditingController tC_normal_controller = TextEditingController();
   TextEditingController tC_remarks_controller = TextEditingController();
@@ -1339,7 +1339,7 @@ class _ClientHealthRegistrationPageState
     );
   }
 
-  // FUNCTION
+  //? FUNCTION
   // add objective
   void _obj_add() {
     // edit objective
@@ -1932,9 +1932,16 @@ class _ClientHealthRegistrationPageState
 
           if (conf != null) {
             if (conf) {
-              GymDatabaseHelpers.update_client_details(client!.key, {
-                'baseline_done': true,
-              });
+              GymDatabaseHelpers.update_client_details(
+                context,
+                data: {
+                  'data_type': 'baseline',
+                  'client_key': client!.key,
+                  'client_details': {
+                    'baseline_done': true,
+                  }
+                },
+              );
             }
 
             update_health_details(conf);
@@ -2253,13 +2260,12 @@ class _ClientHealthRegistrationPageState
     } else {
       Helpers.showLoadingScreen(context: context);
 
-      bool hi = await GymDatabaseHelpers.set_health_details(
-        client!.key,
-        health!.key,
-        h_data.toJson(),
-        {
-          'height': height_controller.text.trim(),
-          'weight': weight_controller.text.trim(),
+      bool hi = await GymDatabaseHelpers.update_health_details(
+        context,
+        data: {
+          'clKey': client!.key,
+          'healthKey': health!.key,
+          'data': h_data.toJson()
         },
       );
 
@@ -2269,7 +2275,7 @@ class _ClientHealthRegistrationPageState
         Helpers.showToast(
           context: context,
           color: Colors.redAccent,
-          toastText: 'An Error occured, Try again!',
+          toastText: 'An Error occurred, Try again!',
           icon: Icons.error,
         );
         return false;

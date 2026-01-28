@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/datamodels/hmo_model.dart';
 import 'package:heritage_soft/datamodels/password_model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
@@ -27,7 +28,7 @@ class AppData extends ChangeNotifier {
   UserModel? active_user;
   DoctorModel? active_doctor;
 
-  List<ClientListModel> clients = [];
+  List<ClientModel> gym_clients = [];
   List<ClientSignInModel> client_list = [];
 
   List<PatientModel> patients = [];
@@ -63,10 +64,7 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void update_gym_hmo(List<HMO_Model> value) {
-    gym_hmo = value;
-    notifyListeners();
-  }
+  
 
   void update_physio_hmo(List<HMO_Model> value) {
     physio_hmo = value;
@@ -130,15 +128,64 @@ class AppData extends ChangeNotifier {
 
 // ?
 
-  void update_clients(List<ClientListModel> value) {
-    clients = value;
+//? GYM
+
+  void update_all_clients(List<ClientModel> value) {
+    gym_clients = value;
     notifyListeners();
   }
 
-  void update_client_list(List<ClientSignInModel> value) {
-    client_list = value;
+  void update_client(ClientModel value) {
+    var g_cl = gym_clients.indexWhere((p) => p.key == value.key);
+
+    if (g_cl != -1) {
+      gym_clients[g_cl] = value;
+    } else {
+      gym_clients.add(value);
+    }
+
     notifyListeners();
   }
+
+  void delete_client(String value) {
+    var g_cl = gym_clients.indexWhere((p) => p.key == value);
+
+    if (g_cl != -1) {
+      gym_clients.removeAt(g_cl);
+    }
+
+    notifyListeners();
+  }
+
+  void update_gym_hmo(List<HMO_Model> value) {
+    gym_hmo = value;
+    notifyListeners();
+  }
+
+  void update_gym_hmo_by_id(HMO_Model value) {
+    var g_cl = gym_hmo.indexWhere((p) => p.key == value.key);
+
+    if (g_cl != -1) {
+      gym_hmo[g_cl] = value;
+    } else {
+      gym_hmo.add(value);
+    }
+
+    notifyListeners();
+  }
+
+  void delete_gym_hmo(String value) {
+    var g_cl = gym_hmo.indexWhere((p) => p.key == value);
+
+    if (g_cl != -1) {
+      gym_hmo.removeAt(g_cl);
+    }
+
+    notifyListeners();
+  }
+
+
+  // ?
 
   //? CLINIC
   void update_all_patients(List<PatientModel> value) {
@@ -204,7 +251,7 @@ class AppData extends ChangeNotifier {
   //?
 
   //? STORE
-  
+
   void update_accessories(List<AccessoryModel> value) {
     accessories = value;
     notifyListeners();
@@ -243,6 +290,8 @@ class AppData extends ChangeNotifier {
   }
 
   //?
+
+  //? USERS
 
   void update_active_user(UserModel value) {
     active_user = value;

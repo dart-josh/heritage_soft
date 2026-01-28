@@ -417,8 +417,8 @@ class AdminDatabaseHelpers {
         Map val = snapshot.value as Map;
         // print(val);
         val.forEach((key, val) {
-          GymIncomeModel inc = GymIncomeModel.fromJson(val);
-          gym_incomes.add(inc);
+          // GymIncomeModel inc = GymIncomeModel.fromJson(val);
+          // gym_incomes.add(inc);
         });
       }
 
@@ -434,95 +434,6 @@ class AdminDatabaseHelpers {
     String data = await rootBundle.loadString('assets/data.json');
     var jsonResult = json.decode(data);
     print(jsonResult);
-  }
-
-  // ! register cl
-  static register_client(context, ClientModel new_c) async {
-    // assign new key
-    var new_key = await GymDatabaseHelpers.assign_gym_registration_key();
-
-    // check client id to ensure no duplicates
-    List check_id = await GymDatabaseHelpers.check_gym_client_id(new_c.id!);
-
-    // check for errors
-    if (!check_id[0]) {
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: check_id[1],
-        icon: Icons.error,
-      );
-      return;
-    }
-
-    // var newcl = ClientModel(
-    //   key: new_key,
-    //   id: widget.cl_id,
-    //   reg_date: reg_date_controller.text.trim(),
-    //   user_status: true,
-    //   sub_type: sub_type_select,
-    //   sub_plan: package_select,
-    //   pt_plan: pt_plan,
-    //   sub_status: sub_status,
-    //   pt_status: pt,
-    //   sub_date: sub_dt,
-    //   pt_date: pt_dt,
-    //   boxing: boxing,
-    //   bx_date: bx_dt,
-    //   f_name: first_name_controller.text.trim(),
-    //   m_name: middle_name_controller.text.trim(),
-    //   l_name: last_name_controller.text.trim(),
-    //   user_image: '',
-    //   phone_1: phone_1_controller.text.trim(),
-    //   phone_2: phone_2_controller.text.trim(),
-    //   email: email_controller.text.trim(),
-    //   address: address_controller.text.trim(),
-    //   ig_user: ig_controller.text.trim(),
-    //   fb_user: fb_controller.text.trim(),
-    //   gender: gender_select,
-    //   dob: dob,
-    //   show_age: show_age,
-    //   occupation: occupation_select,
-    //   program_type_select: program_type_select,
-    //   corporate_type_select: corporate_type_select,
-    //   company_name: company_name_controller.text.trim(),
-    //   hmo: hmo_select,
-    //   hmo_id: hmo_id_controller.text.trim(),
-    //   hykau: hykau == 'Select' ? '' : hykau,
-    //   hykau_others: hykau_controller.text.trim(),
-    //   sub_paused: false,
-    //   paused_date: '',
-    //   sub_income: 0,
-    //   baseline_done: false,
-    //   physio_cl: false,
-    //   physio_key: '',
-    //   indemnity_verified: false,
-    //   max_days: week_days,
-    // );
-
-    var cl_map = new_c.toJson();
-
-    // register cleint
-    bool registration =
-        await GymDatabaseHelpers.register_gym_client(new_key, cl_map);
-
-    // check for errors
-    if (!registration) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: 'Error, Try again',
-        icon: Icons.error,
-      );
-      return;
-    }
-
-    // update last gym id
-    await GymDatabaseHelpers.update_last_gym_id(new_c.id!);
-
-    print(new_c.id!);
-    return true;
   }
 
   //

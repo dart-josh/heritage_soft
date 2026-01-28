@@ -4,21 +4,21 @@ import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:universal_html/html.dart' as html;
 
-class ClientindemnityVerification extends StatefulWidget {
+class ClientIndemnityVerification extends StatefulWidget {
   final String client_key;
 
-  const ClientindemnityVerification({
+  const ClientIndemnityVerification({
     super.key,
     required this.client_key,
   });
 
   @override
-  State<ClientindemnityVerification> createState() =>
-      _ClientindemnityVerificationState();
+  State<ClientIndemnityVerification> createState() =>
+      _ClientIndemnityVerificationState();
 }
 
-class _ClientindemnityVerificationState
-    extends State<ClientindemnityVerification> {
+class _ClientIndemnityVerificationState
+    extends State<ClientIndemnityVerification> {
   bool is_verified = false;
 
   String client_name = '';
@@ -28,25 +28,7 @@ class _ClientindemnityVerificationState
 
   bool page_done = false;
 
-  listen_to_verification() {
-    // GymDatabaseHelpers.get_client_details(widget.client_key).then((event) {
-    //   if (event.exists) {
-    //     is_verified = event.data()!['indemnity_verified'] ?? false;
-    //     client_name = '${event.data()!['f_name']} ${event.data()!['l_name']}';
-    //     user_exist = true;
-    //   } else {
-    //     user_exist = false;
-    //   }
-
-    //   if (is_verified) {
-    //     window.location.replace(indemnity_replace_url);
-    //   } else {
-    //     loading_user = false;
-
-    //     setState(() {});
-    //   }
-    // });
-  }
+  listen_to_verification() {}
 
   void verify_indemnity() async {
     if (!is_verified) {
@@ -60,13 +42,14 @@ class _ClientindemnityVerificationState
     }
 
     Helpers.showLoadingScreen(context: context);
-    bool ver = await GymDatabaseHelpers.verify_indemnity(widget.client_key);
+    bool ver = await GymDatabaseHelpers.verify_indemnity(context,
+        data: {'clKey': widget.client_key, 'indemnity_verified': true});
     Navigator.pop(context);
     if (!ver) {
       Helpers.showToast(
         context: context,
         color: Colors.red,
-        toastText: 'An error occured',
+        toastText: 'An error occurred',
         icon: Icons.error,
       );
       return;

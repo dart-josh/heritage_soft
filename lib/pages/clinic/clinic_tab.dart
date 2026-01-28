@@ -21,7 +21,7 @@ import 'package:heritage_soft/pages/clinic/request_accessories_page.dart';
 import 'package:heritage_soft/pages/clinic/treatment_tab.dart';
 import 'package:heritage_soft/pages/clinic/widgets/full_session_details.dart';
 import 'package:heritage_soft/pages/clinic/widgets/session_payment_dialog.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/options_dialog.dart';
 import 'package:heritage_soft/pages/clinic/widgets/physio_hmo_tag.dart';
 import 'package:heritage_soft/pages/clinic/widgets/session_plan_dialog.dart';

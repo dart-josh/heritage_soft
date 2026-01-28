@@ -981,23 +981,8 @@ class _DALState extends State<DAL> {
   }
 
   // map out client details
-  Future<Map> get_cl_details(String key) async {
-    return GymDatabaseHelpers.get_client_details(key).then((snap) {
-      // if (snap.exists) {
-      //   String fn = snap.data()!['f_name'];
-      //   String mn = snap.data()!['m_name'];
-      //   String ln = snap.data()!['l_name'];
-
-      //   Map details = {
-      //     'name': '$fn $mn $ln',
-      //     'sub_plan': snap.data()!['sub_plan'] ?? '',
-      //     'reg_date': snap.data()!['reg_date'] ?? '',
-      //     'renew_date': snap.data()!['renew_date'] ?? '',
-      //   };
-      //   return details;
-      // } else
-      return {};
-    });
+  get_cl_details(String key) async {
+    
   }
 
   // get attendance

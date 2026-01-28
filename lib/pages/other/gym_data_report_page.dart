@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -21,10 +21,10 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
   bool search_on = false;
   bool empty_search = false;
 
-  List<ClientListModel> registration = [];
-  List<ClientListModel> renewal = [];
+  List<ClientModel> registration = [];
+  List<ClientModel> renewal = [];
 
-  List<ClientListModel> search_client = [];
+  List<ClientModel> search_client = [];
 
   DateTime current_date = DateTime.now();
 
@@ -33,21 +33,21 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
   // check for data
   get_values() {
     registration = Provider.of<AppData>(context)
-        .clients
+        .gym_clients
         .where((element) =>
-            (element.reg_date.isNotEmpty &&
-            (check_date(getDate(element.reg_date)) == check_date(current_date))) || element.registration_dates.isNotEmpty &&
+            (element.regDate!.isNotEmpty &&
+            (check_date(getDate(element.regDate!)) == check_date(current_date))) || element.registrationDates!.isNotEmpty &&
               check_renewal_dates(
-                  element.registration_dates, check_date(current_date)))
+                  element.registrationDates!, check_date(current_date)))
         .toList();
 
     renewal = Provider.of<AppData>(context)
-        .clients
+        .gym_clients
         .where(
           (element) =>
-              element.renew_dates.isNotEmpty &&
+              element.renewDates!.isNotEmpty &&
               check_renewal_dates(
-                  element.renew_dates, check_date(current_date)),
+                  element.renewDates!, check_date(current_date)),
         )
         .toList();
 
@@ -251,7 +251,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
   }
 
   // list
-  Widget _list(List<ClientListModel> _list) {
+  Widget _list(List<ClientModel> _list) {
     return
         // empty serach
         search_on && search_client.isEmpty
@@ -315,8 +315,8 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
   }
 
   // client list tile
-  Widget list_tile(ClientListModel client) {
-    String cl_name = '${client.f_name} ${client.l_name}';
+  Widget list_tile(ClientModel client) {
+    String cl_name = '${client.fName} ${client.lName}';
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10),
@@ -355,7 +355,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
-                        child: client.user_image!.isEmpty
+                        child: client.userImage!.isEmpty
                             ? Image.asset(
                                 'images/icon/user-alt.png',
                                 width: 50,
@@ -364,7 +364,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
-                                  client.user_image!,
+                                  client.userImage!,
                                   height: 80,
                                   width: 80,
                                   fit: BoxFit.cover,
@@ -386,7 +386,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                             children: [
                               // id
                               Text(
-                                client.id!,
+                                client.clientId!,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 12,
@@ -397,7 +397,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                               Expanded(child: Container()),
 
                               // subscription plan
-                              client.sub_plan!.isNotEmpty
+                              client.subPlan!.isNotEmpty
                                   ? Container(
                                       decoration: BoxDecoration(
                                         borderRadius:
@@ -419,7 +419,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                                           ),
                                           SizedBox(width: 2),
                                           Text(
-                                            client.sub_plan!,
+                                            client.subPlan!,
                                             style: TextStyle(
                                               fontSize: 8,
                                               letterSpacing: 1,
@@ -455,7 +455,7 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                             width: 80,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
-                              color: Color(client.sub_status!
+                              color: Color(client.subStatus!
                                       ? 0xFF88ECA9
                                       : 0xFFFF5252)
                                   .withOpacity(0.67),
@@ -466,13 +466,13 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.circle,
-                                    color: Color(client.sub_status!
+                                    color: Color(client.subStatus!
                                         ? 0xFF19F763
                                         : 0xFFFF5252),
                                     size: 8),
                                 SizedBox(width: 6),
                                 Text(
-                                  client.sub_status! ? 'Active' : 'Inactive',
+                                  client.subStatus! ? 'Active' : 'Inactive',
                                   style: TextStyle(
                                       fontSize: 12, color: Colors.white),
                                 ),
@@ -502,18 +502,18 @@ class _GymDataReportPageState extends State<GymDataReportPage> {
       if (page == 0)
         search_client = registration
             .where((element) =>
-                element.f_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.m_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.l_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.id!.toLowerCase().contains(value.toLowerCase()))
+                element.fName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.mName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.lName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.clientId!.toLowerCase().contains(value.toLowerCase()))
             .toList();
       else
         search_client = renewal
             .where((element) =>
-                element.f_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.m_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.l_name!.toLowerCase().contains(value.toLowerCase()) ||
-                element.id!.toLowerCase().contains(value.toLowerCase()))
+                element.fName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.mName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.lName!.toLowerCase().contains(value.toLowerCase()) ||
+                element.clientId!.toLowerCase().contains(value.toLowerCase()))
             .toList();
     } else {
       search_on = false;

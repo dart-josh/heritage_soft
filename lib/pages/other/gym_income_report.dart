@@ -2,8 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/datamodels/income_model.dart';
 import 'package:heritage_soft/helpers/admin_database_helpers.dart';
+import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:intl/intl.dart';
 import 'package:month_year_picker2/month_year_picker2.dart';
@@ -30,50 +32,38 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
 
   List<Map> clients = [];
 
-  get_data({bool old = false, String date = ''}) async {
+  String dateTimeToYearMonth(DateTime date) {
+    final year = date.year.toString();
+    final month = date.month.toString().padLeft(2, '0'); // ensures 01, 02, etc.
+    return "$year-$month";
+  }
+
+  get_data(String month) async {
     income_list.clear();
     isLoading = true;
     setState(() {});
 
-    // 2024
-    if (old) {
-      clients = Provider.of<AppData>(context, listen: false)
-          .clients
-          .map((e) => {'key': e.key!, 'f_name': e.f_name, 'l_name': e.l_name})
-          .toList();
-
-      for (var client in clients) {
-        var res =
-            await AdminDatabaseHelpers.old_get_income_data(client['key'], date);
-
-        income_list += res;
-        setState(() {});
-      }
-    }
-
     // new
-    else {
-      var e_list = await AdminDatabaseHelpers.get_income_data();
-      var res = groupBy(
-          e_list,
-          (e) => DateFormat('MM/yyyy')
-              .format(DateFormat('dd/MM/yyyy').parse(e.sub_date)));
+    income_list = await GymDatabaseHelpers.get_gym_income(context, month);
+    // var res = groupBy(
+    //     e_list,
+    //     (e) => DateFormat('MM/yyyy')
+    //         .format(DateTime.parse(e.sub_date)));
 
-      res.forEach((key, value) {
-        record.add(Group_GymIncomeModel(month: key, record: value));
-      });
+    // res.forEach((key, value) {
+    //   record.add(Group_GymIncomeModel(month: key, record: value));
+    // });
 
-      var rec = record
-          .where((e) => e.month == DateFormat('MM/yyyy').format(current_date));
+    // var rec = record
+    //     .where((e) => e.month == DateFormat('MM/yyyy').format(current_date));
 
-      if (rec.isNotEmpty) {
-        income_list = rec.first.record;
-      } else {
-        income_list = [];
-      }
-    }
+    // if (rec.isNotEmpty) {
+    //   income_list = rec.first.record;
+    // } else {
+    //   income_list = [];
+    // }
 
-    record.sort((a, b) => a.month.compareTo(b.month));
+    // record.sort((a, b) => a.month.compareTo(b.month));
     income_list.sort((a, b) => a.sub_date.compareTo(b.sub_date));
 
     setState(() {
@@ -83,7 +73,8 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
 
   @override
   void initState() {
-    get_data();
+    final yearMonth = dateTimeToYearMonth(current_date);
+    get_data(yearMonth);
     super.initState();
   }
 
@@ -201,22 +192,8 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
                       current_date = date;
                     });
 
-                    if (date.year == 2024) {
-                      String date_s =
-                          '${current_date.year}-${current_date.month}';
-                      get_data(old: true, date: date_s);
-                    } else {
-                      var rec = record.where(
-                          (e) => e.month == DateFormat('MM/yyyy').format(date));
-
-                      if (rec.isNotEmpty) {
-                        income_list = rec.first.record;
-                      } else {
-                        income_list = [];
-                      }
-
-                      setState(() {});
-                    }
+                    final yearMonth = dateTimeToYearMonth(current_date);
+                    get_data(yearMonth);
                   }
                 },
                 child: Icon(Icons.calendar_today, color: Colors.white),
@@ -381,8 +358,8 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
                     : search_list.isNotEmpty
                         ? ListView.separated(
                             itemBuilder: (context, index) {
-                              int find = income_list.indexOf(
-                                  search_list[index]);
+                              int find =
+                                  income_list.indexOf(search_list[index]);
                               int? ind = find != -1 ? find : null;
                               return _tile(search_list[index],
                                   (ind != null ? ind + 1 : null));
@@ -395,8 +372,8 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
                         : income_list.isNotEmpty
                             ? ListView.separated(
                                 itemBuilder: (context, index) {
-                                  int find = income_list.indexOf(
-                                      income_list[index]);
+                                  int find =
+                                      income_list.indexOf(income_list[index]);
                                   int? ind = find != -1 ? find : null;
                                   return _tile(income_list[index],
                                       (ind != null ? ind + 1 : null));
@@ -470,7 +447,7 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
   // list tile
   Widget _tile(GymIncomeModel model, int? index) {
     var client = Provider.of<AppData>(context, listen: false)
-        .clients
+        .gym_clients
         .where((e) => e.key == model.client_key);
 
     return Container(
@@ -514,7 +491,7 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
               child: Center(
                 child: SelectableText(
                   (client.isNotEmpty)
-                      ? '${client.first.id?.toLowerCase().replaceAll('hfc-', '').replaceAll('-ft', '').replaceAll('-hm', '') ?? ''}'
+                      ? '${client.first.clientId?.toLowerCase().replaceAll('hfc-', '').replaceAll('-ft', '').replaceAll('-hm', '') ?? ''}'
                       : '',
                   style: TextStyle(
                     color: Colors.white70,
@@ -528,7 +505,7 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
             Expanded(
               child: SelectableText(
                 (client.isNotEmpty)
-                    ? '${client.first.f_name} ${client.first.l_name}'
+                    ? '${client.first.fName} ${client.first.lName}'
                     : 'User Not found',
                 style: TextStyle(
                   color: Colors.white,
@@ -606,7 +583,7 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
               width: 100,
               child: Center(
                 child: Text(
-                  model.sub_date,
+                  DateFormat('DD/MM/yyyy').format(DateTime.parse(model.sub_date)),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -652,17 +629,17 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
     if (value.isNotEmpty) {
       var data = income_list.where((e) =>
           (get_client_data(e.client_key)
-                  ?.f_name
+                  ?.fName
                   ?.toLowerCase()
                   .contains(value.toLowerCase().trim()) ??
               false) ||
           (get_client_data(e.client_key)
-                  ?.l_name
+                  ?.lName
                   ?.toLowerCase()
                   .contains(value.toLowerCase().trim()) ??
               false) ||
           (get_client_data(e.client_key)
-                  ?.id
+                  ?.clientId
                   ?.toLowerCase()
                   .contains(value.toLowerCase().trim()) ??
               false));
@@ -680,9 +657,9 @@ class _GymIncomeReportState extends State<GymIncomeReport> {
     if (!build) setState(() {});
   }
 
-  ClientListModel? get_client_data(String cl_key) {
+  ClientModel? get_client_data(String cl_key) {
     var client = Provider.of<AppData>(context, listen: false)
-        .clients
+        .gym_clients
         .where((e) => e.key == cl_key);
 
     return client.isNotEmpty ? client.first : null;

@@ -778,25 +778,25 @@ class _GAH_TState extends State<GAH_T> {
 
   // get client details
   get_clients() async {
-    var data = await GymDatabaseHelpers.ft_client_ref.get();
+    var data = [];
 
     clients.clear();
 
-    data.docs.forEach((element) {
-      String name =
-          '${element.data()['f_name']} ${element.data()['m_name']} ${element.data()['l_name']}';
+    // data.docs.forEach((element) {
+    //   String name =
+    //       '${element.data()['f_name']} ${element.data()['m_name']} ${element.data()['l_name']}';
 
-      UserM cl = UserM(
-        key: element.id,
-        id: element.data()['id'],
-        fullname: name,
-        f_name: element.data()['f_name'],
-        sub_plan: element.data()['sub_plan'],
-      );
+    //   UserM cl = UserM(
+    //     key: element.id,
+    //     id: element.data()['id'],
+    //     fullname: name,
+    //     f_name: element.data()['f_name'],
+    //     sub_plan: element.data()['sub_plan'],
+    //   );
 
-      clients.add(cl);
-      if (mounted) setState(() {});
-    });
+    //   clients.add(cl);
+    //   if (mounted) setState(() {});
+    // });
   }
 
   // get each day attendance

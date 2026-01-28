@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/helpers/utils.dart';
 import 'package:heritage_soft/pages/sign_in_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/enter_password_dialog.dart';
 import 'package:heritage_soft/widgets/loadingScreen.dart';
 import 'package:intl/intl.dart';

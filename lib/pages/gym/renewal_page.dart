@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
 import 'package:heritage_soft/pages/gym/indemnity_page.dart';
 import 'package:heritage_soft/pages/gym/print.page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
@@ -59,7 +60,7 @@ class _RenewalPageState extends State<RenewalPage> {
   List<String> sub_type_options = [
     'Individual',
     'Couples',
-    'Family',
+    // 'Family',
     'HMO Plan'
   ];
 
@@ -142,6 +143,7 @@ class _RenewalPageState extends State<RenewalPage> {
   }
 
   void init_values() {
+    var gym_hmo = AppData.get(context, listen: false).gym_hmo;
     if ((widget.details.sub_plan == 'HMO Plan' ||
             widget.details.sub_plan == 'HMO Hybrid') &&
         (widget.details.hmo_name != 'No HMO')) {
@@ -607,6 +609,7 @@ class _RenewalPageState extends State<RenewalPage> {
   // subscription area
   Widget subscription_area() {
     var value = NumberFormat('#,###');
+    var gym_hmo = AppData.get(context, listen: false).gym_hmo;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
@@ -732,61 +735,62 @@ class _RenewalPageState extends State<RenewalPage> {
                       package_select = val;
 
                       // family
-                      if (sub_type_select == 'Family') {
-                        if (package_select == 'Daily')
-                          amount_controller.text = '2,500';
-                        if (package_select == 'Weekly')
-                          amount_controller.text = '7,000';
-                        if (package_select == 'Fortnightly')
-                          amount_controller.text = '12,000';
-                        if (package_select == 'Monthly')
-                          amount_controller.text = '18,750';
-                        if (package_select == '2 Months')
-                          amount_controller.text = '37,500';
-                        if (package_select == 'Quarterly')
-                          amount_controller.text = '50,000';
-                        if (package_select == 'Half-Yearly')
-                          amount_controller.text = '95,000';
-                        if (package_select == 'Yearly')
-                          amount_controller.text = '175,000';
-                      }
+                      // if (sub_type_select == 'Family') {
+                      //   if (package_select == 'Daily')
+                      //     amount_controller.text = '2,500';
+                      //   if (package_select == 'Weekly')
+                      //     amount_controller.text = '7,000';
+                      //   if (package_select == 'Fortnightly')
+                      //     amount_controller.text = '12,000';
+                      //   if (package_select == 'Monthly')
+                      //     amount_controller.text = '18,750';
+                      //   if (package_select == '2 Months')
+                      //     amount_controller.text = '37,500';
+                      //   if (package_select == 'Quarterly')
+                      //     amount_controller.text = '50,000';
+                      //   if (package_select == 'Half-Yearly')
+                      //     amount_controller.text = '95,000';
+                      //   if (package_select == 'Yearly')
+                      //     amount_controller.text = '175,000';
+                      // }
+
                       // couples
-                      else if (sub_type_select == 'Couples') {
+                      if (sub_type_select == 'Couples') {
                         if (package_select == 'Daily')
-                          amount_controller.text = '2,750';
+                          amount_controller.text = '3,500';
                         if (package_select == 'Weekly')
-                          amount_controller.text = '7,500';
+                          amount_controller.text = '9,000';
                         if (package_select == 'Fortnightly')
-                          amount_controller.text = '13,000';
+                          amount_controller.text = '15,000';
                         if (package_select == 'Monthly')
-                          amount_controller.text = '19,000';
+                          amount_controller.text = '24,000';
                         if (package_select == '2 Months')
-                          amount_controller.text = '38,000';
+                          amount_controller.text = '48,000';
                         if (package_select == 'Quarterly')
-                          amount_controller.text = '52,500';
+                          amount_controller.text = '70,000';
                         if (package_select == 'Half-Yearly')
-                          amount_controller.text = '100,000';
+                          amount_controller.text = '135,000';
                         if (package_select == 'Yearly')
-                          amount_controller.text = '190,000';
+                          amount_controller.text = '265,000';
                       }
                       // individual
                       else {
                         if (package_select == 'Daily')
-                          amount_controller.text = '3,000';
+                          amount_controller.text = '4,000';
                         if (package_select == 'Weekly')
-                          amount_controller.text = '8,000';
+                          amount_controller.text = '10,000';
                         if (package_select == 'Fortnightly')
-                          amount_controller.text = '14,000';
+                          amount_controller.text = '16,000';
                         if (package_select == 'Monthly')
-                          amount_controller.text = '20,000';
+                          amount_controller.text = '25,000';
                         if (package_select == '2 Months')
-                          amount_controller.text = '40,000';
+                          amount_controller.text = '50,000';
                         if (package_select == 'Quarterly')
-                          amount_controller.text = '55,000';
+                          amount_controller.text = '70,000';
                         if (package_select == 'Half-Yearly')
-                          amount_controller.text = '105,000';
+                          amount_controller.text = '140,000';
                         if (package_select == 'Yearly')
-                          amount_controller.text = '200,000';
+                          amount_controller.text = '270,000';
                       }
 
                       if (widget.register) registration = true;
@@ -796,12 +800,12 @@ class _RenewalPageState extends State<RenewalPage> {
                       }
 
                       if (package_select == 'Boxing') {
-                        amount_controller.text = '15,000';
+                        amount_controller.text = '20,000';
                         boxing = false;
                       }
 
                       if (package_select == 'Table Tennis') {
-                        amount_controller.text = '10,000';
+                        amount_controller.text = '15,000';
                         registration = false;
                       }
 
@@ -1842,23 +1846,23 @@ class _RenewalPageState extends State<RenewalPage> {
           String pt_date =
               get_pt_date(sub_date_select, widget.details.pt_status);
           ned = {
-            'sub_plan': package_select,
-            'sub_type': sub_type_select,
-            'sub_status': true,
-            'sub_date': setdt,
-            'pt_plan': pt_plan,
-            'pt_status': true,
-            'pt_date': pt_date,
+            'sub_details.sub_plan': package_select,
+            'sub_details.sub_type': sub_type_select,
+            'sub_details.sub_status': true,
+            'sub_details.sub_date': setdt,
+            'sub_details.pt_plan': pt_plan,
+            'sub_details.pt_status': true,
+            'sub_details.pt_date': pt_date,
           };
         }
 
         // without pt
         else {
           ned = {
-            'sub_plan': package_select,
-            'sub_type': sub_type_select,
-            'sub_status': true,
-            'sub_date': setdt,
+            'sub_details.sub_plan': package_select,
+            'sub_details.sub_type': sub_type_select,
+            'sub_details.sub_status': true,
+            'sub_details.sub_date': setdt,
           };
         }
 
@@ -1866,8 +1870,8 @@ class _RenewalPageState extends State<RenewalPage> {
         if (boxing) {
           String bx_date = get_pt_date(sub_date_select, widget.details.boxing);
           var t = {
-            'boxing': true,
-            'bx_date': bx_date,
+            'sub_details.boxing': true,
+            'sub_details.bx_date': bx_date,
           };
 
           ned.addAll(t);
@@ -1902,7 +1906,8 @@ class _RenewalPageState extends State<RenewalPage> {
           ned.addAll({
             'renew_dates': (widget.details.renew_dates.isNotEmpty)
                 ? '${widget.details.renew_dates},${DateFormat('dd/MM/yyyy').format(DateTime.now())}'
-                : DateFormat('dd/MM/yyyy').format(DateTime.now())
+                : DateFormat('dd/MM/yyyy').format(DateTime.now()),
+            'registered': true,
           });
         } else {
           ned.addAll({
@@ -1914,12 +1919,12 @@ class _RenewalPageState extends State<RenewalPage> {
         }
 
         int inc = widget.details.sub_income + sub_amount;
-        var amt = {'sub_income': inc, 'sub_paused': false};
+        var amt = {'sub_income': inc, 'sub_details.sub_paused': false};
         ned.addAll(amt);
 
         String history_id = Helpers.generate_order_id();
 
-        Sub_History_Model subhist = Sub_History_Model(
+        Sub_History_Model sub_hist = Sub_History_Model(
           key: '',
           sub_plan: package_select,
           sub_type: sub_type_select,
@@ -1957,17 +1962,20 @@ class _RenewalPageState extends State<RenewalPage> {
               : 0,
         );
 
-        Helpers.showLoadingScreen(context: context);
-        bool res = await GymDatabaseHelpers.update_client_details(
-            widget.details.key, ned);
+        Map res = await GymDatabaseHelpers.update_client_details(
+          context,
+          data: {
+            'data_type': 'subscription',
+            'client_key': widget.details.key,
+            'client_details': ned
+          },
+        );
 
-        Navigator.pop(context);
-
-        if (!res) {
+        if (!res['status']) {
           Helpers.showToast(
             context: context,
             color: Colors.redAccent,
-            toastText: 'An Error occured, Try again!',
+            toastText: 'An Error occurred, Try again!',
             icon: Icons.error,
           );
           return;
@@ -1975,7 +1983,12 @@ class _RenewalPageState extends State<RenewalPage> {
 
         // add sub history
         GymDatabaseHelpers.add_to_sub_history(
-            widget.details.key, subhist.toJson());
+          context,
+          data: {
+            'client_key': widget.details.key,
+            'sub_details': sub_hist.toJson(),
+          },
+        );
 
         Helpers.showToast(
           context: context,

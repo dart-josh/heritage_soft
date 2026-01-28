@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:heritage_soft/datamodels/client_health_model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client_health.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/client_health_registration_page.dart';

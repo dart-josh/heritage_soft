@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:heritage_soft/datamodels/client_health_model.dart';
-import 'package:heritage_soft/datamodels/client_model.dart';
+import 'package:heritage_soft/appData.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client_health.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/helpers/gym_database_helpers.dart';
 import 'dart:ui' as ui;
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/gym/client_health_registration_page.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
 import 'package:heritage_soft/pages/gym/renewal_page.dart';
-import 'package:heritage_soft/widgets/confirm_dailog.dart';
+import 'package:heritage_soft/widgets/confirm_dialog.dart';
 import 'package:heritage_soft/widgets/image_box.dart';
 import 'package:heritage_soft/widgets/options_dialog.dart';
 import 'package:heritage_soft/widgets/select_form.dart';
 import 'package:heritage_soft/widgets/text_field.dart';
 import 'package:intl/intl.dart';
-import 'package:heritage_soft/helpers/admin_database_helpers.dart';
 
-class RegistrationPage extends StatefulWidget {
-  String cl_id;
-  RegistrationPage({super.key, required this.cl_id});
+class ClientRegistrationPage extends StatefulWidget {
+  ClientRegistrationPage({super.key});
 
   @override
-  State<RegistrationPage> createState() => _RegistrationPageState();
+  State<ClientRegistrationPage> createState() => _ClientRegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _ClientRegistrationPageState extends State<ClientRegistrationPage> {
   TextStyle labelStyle = TextStyle(
     color: Color(0xFFc3c3c3),
     fontSize: 11,
@@ -36,6 +35,24 @@ class _RegistrationPageState extends State<RegistrationPage> {
     fontWeight: FontWeight.bold,
     fontSize: 18,
   );
+
+  String client_id = '';
+
+  generate_client_id() async {
+    var res = await GymDatabaseHelpers.generate_client_id(context);
+    if (res != '') {
+      String id =
+          Helpers.generate_id(xx: 'gym', hmo: false, id: int.parse(res));
+      client_id = id;
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    generate_client_id();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -80,6 +97,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.85;
     double height = MediaQuery.of(context).size.height * 0.93;
+    var hmm = AppData.get(context).gym_hmo;
+    hmo = hmm.map((e) => e.hmo_name).toList();
     return Scaffold(
       body: Stack(
         children: [
@@ -169,9 +188,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   // main page
   Widget main_page() {
     if (hmo_select != 'No HMO') {
-      widget.cl_id = widget.cl_id.replaceAll('FT', 'HM');
+      client_id = client_id.replaceAll('FT', 'HM');
     } else {
-      widget.cl_id = widget.cl_id.replaceAll('HM', 'FT');
+      client_id = client_id.replaceAll('HM', 'FT');
     }
 
     return Padding(
@@ -309,7 +328,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
         // client id
         Text(
-          widget.cl_id,
+          client_id,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -381,7 +400,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   bool show_age = false;
 
-  List<String> hmo = gym_hmo.map((e) => e.hmo_name).toList();
+  List<String> hmo = [];
 
   //?
   bool old_cl = false;
@@ -1184,6 +1203,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
         bool? res = await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => ConfirmDialog(
             title: 'Submit details',
             subtitle: 'Are you sure you want to proceed?',
@@ -1218,37 +1238,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   // new firebase key
-  String new_key = '';
 
   // register client
   void register_client() async {
-    Helpers.showLoadingScreen(context: context);
-
-    // assign new key
-    if (new_key.isEmpty) {
-      new_key = await GymDatabaseHelpers.assign_gym_registration_key();
-    }
-
-    // check client id to ensure no duplicates
-    List check_id = await GymDatabaseHelpers.check_gym_client_id(widget.cl_id);
-
-    // check for errors
-    if (!check_id[0]) {
-      Navigator.pop(context);
-      Helpers.showToast(
-        context: context,
-        color: Colors.redAccent,
-        toastText: check_id[1],
-        icon: Icons.error,
-      );
-      return;
-    }
-
     // upload profile image
     if (image_file != null) {
-      imageUrl =
-          await AdminDatabaseHelpers.uploadFile(image_file!, new_key, true) ??
-              '';
+      // imageUrl =
+      //     await AdminDatabaseHelpers.uploadFile(image_file!, new_key, true) ??
+      //         '';
     }
 
     String dob = dob_controller.text.trim();
@@ -1265,62 +1262,61 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ? reg_date_controller.text.trim()
         : DateFormat('dd/MM/yyyy').format(DateTime.now());
 
-    var newcl = ClientModel(
-      key: new_key,
-      id: widget.cl_id,
-      reg_date: reg_date,
-      user_status: true,
-      sub_type: 'Individual',
-      //?
-      sub_plan: old_cl ? '--' : '',
-      pt_plan: '',
-      sub_status: false,
-      pt_status: false,
-      sub_date: '',
-      pt_date: '',
+    var newCl = ClientModel(
+      key: '',
+      clientId: client_id,
+      regDate: reg_date,
+      userStatus: true,
+      subType: 'Individual',
+      subPlan: old_cl ? '--' : '',
+      ptPlan: '',
+      subStatus: false,
+      ptStatus: false,
+      subDate: '',
+      ptDate: '',
       boxing: false,
-      bx_date: '',
-      f_name: first_name_controller.text.trim(),
-      m_name: middle_name_controller.text.trim(),
-      l_name: last_name_controller.text.trim(),
-      user_image: imageUrl,
-      phone_1: phone_1_controller.text.trim(),
-      phone_2: phone_2_controller.text.trim(),
+      bxDate: '',
+      fName: first_name_controller.text.trim(),
+      mName: middle_name_controller.text.trim(),
+      lName: last_name_controller.text.trim(),
+      userImage: imageUrl,
+      phone1: phone_1_controller.text.trim(),
+      phone2: phone_2_controller.text.trim(),
       email: email_controller.text.trim(),
       address: address_controller.text.trim(),
-      ig_user: ig_controller.text.trim(),
-      fb_user: fb_controller.text.trim(),
+      igUser: ig_controller.text.trim(),
+      fbUser: fb_controller.text.trim(),
       gender: gender_select,
       dob: dob,
-      show_age: show_age,
+      showAge: show_age,
       occupation: occupation_select,
-      program_type_select: program_type_select,
-      corporate_type_select: corporate_type_select,
-      company_name: company_name_controller.text.trim(),
+      programTypeSelect: program_type_select,
+      corporateTypeSelect: corporate_type_select,
+      companyName: company_name_controller.text.trim(),
       hmo: hmo_select,
-      hmo_id: hmo_id_controller.text.trim(),
+      hmoId: hmo_id_controller.text.trim(),
       hykau: hykau == 'Select' ? '' : hykau,
-      hykau_others: hykau_controller.text.trim(),
-      sub_paused: false,
-      paused_date: '',
-      sub_income: 0,
-      baseline_done: false,
-      physio_cl: false,
-      physio_key: '',
-      indemnity_verified: false,
-      renew_dates: '',
-      registration_dates: '',
+      hykauOthers: hykau_controller.text.trim(),
+      subPaused: false,
+      pausedDate: '',
+      subIncome: 0,
+      baselineDone: false,
+      physioCl: false,
+      physioKey: '',
+      indemnityVerified: false,
+      renewDates: '',
+      registrationDates: '',
       registered: old_cl,
     );
 
-    var cl_map = newcl.toJson();
-    
-    // register cleint
-    bool registration =
-        await GymDatabaseHelpers.register_gym_client(new_key, cl_map);
+    var cl_map = newCl.toJson();
+
+    // register client
+    Map registration = await GymDatabaseHelpers.register_client(context,
+        data: {'client_id': client_id, 'client_details': cl_map});
 
     // check for errors
-    if (!registration) {
+    if (!registration['status']) {
       Navigator.pop(context);
       Helpers.showToast(
         context: context,
@@ -1331,11 +1327,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    // update last gym id
-    GymDatabaseHelpers.update_last_gym_id(widget.cl_id);
+    ClientModel new_cl = registration['client'];
+    String new_key = new_cl.key ?? "";
 
-    // complete
-    Navigator.pop(context);
     Helpers.showToast(
       context: context,
       color: Colors.blue,
@@ -1356,22 +1350,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
       );
 
-      String name = '${newcl.f_name} ${newcl.l_name}';
+      String name = '${newCl.fName} ${newCl.lName}';
 
       RenewalModel newDet = RenewalModel(
         key: new_key,
-        id: newcl.id!,
-        reg_date: newcl.reg_date!,
-        user_image: newcl.user_image!,
+        id: newCl.clientId!,
+        reg_date: newCl.regDate!,
+        user_image: newCl.userImage!,
         name: name,
-        sub_plan: newcl.hmo != 'No HMO' ? 'HMO Plan' : newcl.sub_plan!,
-        pt_plan: newcl.pt_plan!,
-        pt_status: newcl.pt_status!,
-        boxing: newcl.boxing!,
-        sub_type: newcl.sub_type!,
-        hmo_name: newcl.hmo,
-        sub_income: newcl.sub_income,
-        program_type: newcl.program_type_select,
+        sub_plan: newCl.hmo != 'No HMO' ? 'HMO Plan' : newCl.subPlan!,
+        pt_plan: newCl.ptPlan!,
+        pt_status: newCl.ptStatus!,
+        boxing: newCl.boxing!,
+        sub_type: newCl.subType!,
+        hmo_name: newCl.hmo,
+        sub_income: newCl.subIncome,
+        program_type: newCl.programTypeSelect ?? "",
         renew_dates: '',
         registration_dates: '',
         sub_date: '',
@@ -1392,7 +1386,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       var conf2 = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BaselineFormDialog(cl_id: widget.cl_id),
+          builder: (context) => BaselineFormDialog(cl_id: client_id),
         ),
       );
 
@@ -1410,16 +1404,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
       if (conf2 != null) {
         // register health details
         if (conf2[0]) {
-          String name = '${newcl.f_name} ${newcl.l_name}';
+          String name = '${newCl.fName} ${newCl.lName}';
 
           HealthClientModel client = HealthClientModel(
-            key: newcl.key!,
-            id: widget.cl_id,
+            key: newCl.key!,
+            id: client_id,
             name: name,
-            user_image: newcl.user_image!,
+            user_image: newCl.userImage!,
             hmo: hmo_select,
             baseline_done: false,
-            program_type: newcl.program_type_select,
+            program_type: newCl.programTypeSelect ?? "",
           );
 
           HealthModel pty = HealthModel(
@@ -1484,19 +1478,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
         // skip (go to subscription page)
         else {
           RenewalModel newDet = RenewalModel(
-            key: newcl.key!,
-            id: newcl.id!,
+            key: new_key,
+            id: newCl.clientId!,
             reg_date: '',
-            user_image: newcl.user_image!,
-            name: '${newcl.f_name!} ${newcl.m_name!} ${newcl.l_name!}',
-            sub_plan: newcl.hmo == 'No HMO' ? '' : 'HMO Plan',
+            user_image: newCl.userImage!,
+            name: '${newCl.fName!} ${newCl.mName!} ${newCl.lName!}',
+            sub_plan: newCl.hmo == 'No HMO' ? '' : 'HMO Plan',
             pt_plan: '',
             pt_status: false,
             boxing: false,
-            sub_type: newcl.sub_type!,
-            hmo_name: newcl.hmo != 'No HMO' ? newcl.hmo : null,
+            sub_type: newCl.subType!,
+            hmo_name: newCl.hmo != 'No HMO' ? newCl.hmo : null,
             sub_income: 0,
-            program_type: newcl.program_type_select,
+            program_type: newCl.programTypeSelect ?? "",
             renew_dates: '',
             registration_dates: '',
             sub_date: '',

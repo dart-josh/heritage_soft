@@ -867,82 +867,82 @@ class _ClSignInPageState extends State<ClSignInPage> {
     var cl_key = widget.client.key;
 
     // mark attendance
-    GymDatabaseHelpers.mark_attendance(
-      in_out,
-      cl_key,
-      widget.client.last_activity['date_time'] ?? '',
-      duration: duration,
-      cl: widget.client,
-    );
+    // GymDatabaseHelpers.mark_attendance(
+    //   in_out,
+    //   cl_key,
+    //   widget.client.last_activity['date_time'] ?? '',
+    //   duration: duration,
+    //   cl: widget.client,
+    // );
 
-    // increase days checked in for hmo plan clients
-    if (in_out && widget.client.sub_plan == 'HMO Plan') {
-      int new_d = widget.client.days_in + 1;
-      GymDatabaseHelpers.update_client_details(cl_key, {'days_in': new_d});
-    }
+    // // increase days checked in for hmo plan clients
+    // if (in_out && widget.client.sub_plan == 'HMO Plan') {
+    //   int new_d = widget.client.days_in + 1;
+    //   GymDatabaseHelpers.update_client_details(cl_key, {'days_in': new_d});
+    // }
 
-    // resume sub if paused
-    if (in_out && widget.client.sub_paused) {
-      String ned = widget.client.sub_date;
-      Map nt = {'sub_paused': false};
+    // // resume sub if paused
+    // if (in_out && widget.client.sub_paused) {
+    //   String ned = widget.client.sub_date;
+    //   Map nt = {'sub_paused': false};
 
-      // sub plan
-      if (widget.client.sub_status && widget.client.sub_date.isNotEmpty) {
-        int sub_rem_days = getDate(widget.client.sub_date)
-            .difference(getDate(widget.client.paused_date))
-            .inDays;
+    //   // sub plan
+    //   if (widget.client.sub_status && widget.client.sub_date.isNotEmpty) {
+    //     int sub_rem_days = getDate(widget.client.sub_date)
+    //         .difference(getDate(widget.client.paused_date))
+    //         .inDays;
 
-        ned = DateFormat('dd/MM/yyyy')
-            .format(DateTime.now().add(Duration(days: sub_rem_days)));
+    //     ned = DateFormat('dd/MM/yyyy')
+    //         .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-        nt.addAll({'sub_date': ned});
-      }
+    //     nt.addAll({'sub_date': ned});
+    //   }
 
-      // boxing plan
-      if (widget.client.boxing && widget.client.bx_date.isNotEmpty) {
-        int sub_rem_days = getDate(widget.client.bx_date)
-            .difference(getDate(widget.client.paused_date))
-            .inDays;
+    //   // boxing plan
+    //   if (widget.client.boxing && widget.client.bx_date.isNotEmpty) {
+    //     int sub_rem_days = getDate(widget.client.bx_date)
+    //         .difference(getDate(widget.client.paused_date))
+    //         .inDays;
 
-        String ned = DateFormat('dd/MM/yyyy')
-            .format(DateTime.now().add(Duration(days: sub_rem_days)));
+    //     String ned = DateFormat('dd/MM/yyyy')
+    //         .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-        nt.addAll({'bx_date': ned});
-      }
+    //     nt.addAll({'bx_date': ned});
+    //   }
 
-      // pt plan
-      if (widget.client.pt_status && widget.client.pt_date.isNotEmpty) {
-        int sub_rem_days = getDate(widget.client.pt_date)
-            .difference(getDate(widget.client.paused_date))
-            .inDays;
+    //   // pt plan
+    //   if (widget.client.pt_status && widget.client.pt_date.isNotEmpty) {
+    //     int sub_rem_days = getDate(widget.client.pt_date)
+    //         .difference(getDate(widget.client.paused_date))
+    //         .inDays;
 
-        String ned = DateFormat('dd/MM/yyyy')
-            .format(DateTime.now().add(Duration(days: sub_rem_days)));
+    //     String ned = DateFormat('dd/MM/yyyy')
+    //         .format(DateTime.now().add(Duration(days: sub_rem_days)));
 
-        nt.addAll({'pt_date': ned});
-      }
+    //     nt.addAll({'pt_date': ned});
+    //   }
 
-      // update user
-      GymDatabaseHelpers.update_client_details(cl_key, nt);
+    //   // update user
+    //   GymDatabaseHelpers.update_client_details(cl_key, nt);
 
-      Sub_History_Model subhist = Sub_History_Model(
-        key: '',
-        sub_plan: widget.client.sub_plan,
-        sub_type: widget.client.sub_type,
-        sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-        exp_date: ned,
-        amount: 0,
-        extras_amount: 0,
-        boxing: false,
-        pt_status: false,
-        pt_plan: '',
-        hist_type: 'Subscription Resumed',
-        history_id: Helpers.generate_order_id(),
-      );
+    //   Sub_History_Model subhist = Sub_History_Model(
+    //     key: '',
+    //     sub_plan: widget.client.sub_plan,
+    //     sub_type: widget.client.sub_type,
+    //     sub_date: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+    //     exp_date: ned,
+    //     amount: 0,
+    //     extras_amount: 0,
+    //     boxing: false,
+    //     pt_status: false,
+    //     pt_plan: '',
+    //     hist_type: 'Subscription Resumed',
+    //     history_id: Helpers.generate_order_id(),
+    //   );
 
-      GymDatabaseHelpers.add_to_sub_history(
-          widget.client.key, subhist.toJson());
-    }
+    //   GymDatabaseHelpers.add_to_sub_history(
+    //       widget.client.key, subhist.toJson());
+    // }
 
     // remove sign in page
     Navigator.pop(context);

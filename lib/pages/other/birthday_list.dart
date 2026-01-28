@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/client_model.dart';
 import 'package:heritage_soft/datamodels/clinic_models/patient.model.dart';
+import 'package:heritage_soft/datamodels/gym_models/client.model.dart';
 import 'package:heritage_soft/datamodels/physio_client_model.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
-import 'package:heritage_soft/pages/gym/client_pofile_page.dart';
+import 'package:heritage_soft/pages/gym/client_profile_page.dart';
 import 'package:heritage_soft/pages/clinic/patient_pofile_page.dart';
 import 'package:heritage_soft/pages/clinic/widgets/physio_hmo_tag.dart';
 import 'package:intl/intl.dart';
@@ -27,8 +28,8 @@ class _BirthdayListState extends State<BirthdayList> {
   bool gym_emptySearch = false;
   bool physio_emptySearch = false;
 
-  List<ClientListModel> gym_client = [];
-  List<ClientListModel> search_gym_client = [];
+  List<ClientModel> gym_client = [];
+  List<ClientModel> search_gym_client = [];
 
   List<PatientModel> physio_clients = [];
   List<PatientModel> search_physio_clients = [];
@@ -36,7 +37,7 @@ class _BirthdayListState extends State<BirthdayList> {
   // check for birthdays
   get_values() {
     gym_client = Provider.of<AppData>(context, listen: false)
-        .clients
+        .gym_clients
         .where((element) =>
             element.dob!.isNotEmpty &&
             (element.dob == '/1900'
@@ -303,8 +304,8 @@ class _BirthdayListState extends State<BirthdayList> {
   }
 
   // client list tile
-  Widget gym_list_tile(ClientListModel client) {
-    String cl_name = '${client.f_name} ${client.l_name}';
+  Widget gym_list_tile(ClientModel client) {
+    String cl_name = '${client.fName} ${client.lName}';
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10),
@@ -343,7 +344,7 @@ class _BirthdayListState extends State<BirthdayList> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
-                        child: client.user_image!.isEmpty
+                        child: client.userImage!.isEmpty
                             ? Image.asset(
                                 'images/icon/user-alt.png',
                                 width: 50,
@@ -352,7 +353,7 @@ class _BirthdayListState extends State<BirthdayList> {
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
-                                  client.user_image!,
+                                  client.userImage!,
                                   height: 80,
                                   width: 80,
                                   fit: BoxFit.cover,
@@ -374,7 +375,7 @@ class _BirthdayListState extends State<BirthdayList> {
                             children: [
                               // id
                               Text(
-                                client.id!,
+                                client.clientId!,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 12,
@@ -385,7 +386,7 @@ class _BirthdayListState extends State<BirthdayList> {
                               Expanded(child: Container()),
 
                               // subscription plan
-                              client.sub_plan!.isNotEmpty
+                              client.subPlan!.isNotEmpty
                                   ? Container(
                                       decoration: BoxDecoration(
                                         borderRadius:
@@ -407,7 +408,7 @@ class _BirthdayListState extends State<BirthdayList> {
                                           ),
                                           SizedBox(width: 2),
                                           Text(
-                                            client.sub_plan!,
+                                            client.subPlan!,
                                             style: TextStyle(
                                               fontSize: 8,
                                               letterSpacing: 1,
@@ -443,7 +444,7 @@ class _BirthdayListState extends State<BirthdayList> {
                             width: 80,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(100),
-                              color: Color(client.sub_status!
+                              color: Color(client.subStatus!
                                       ? 0xFF88ECA9
                                       : 0xFFFF5252)
                                   .withOpacity(0.67),
@@ -454,13 +455,13 @@ class _BirthdayListState extends State<BirthdayList> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.circle,
-                                    color: Color(client.sub_status!
+                                    color: Color(client.subStatus!
                                         ? 0xFF19F763
                                         : 0xFFFF5252),
                                     size: 8),
                                 SizedBox(width: 6),
                                 Text(
-                                  client.sub_status! ? 'Active' : 'Inactive',
+                                  client.subStatus! ? 'Active' : 'Inactive',
                                   style: TextStyle(
                                       fontSize: 12, color: Colors.white),
                                 ),
@@ -720,16 +721,16 @@ class _BirthdayListState extends State<BirthdayList> {
     if (value.isNotEmpty) {
       search_gym_client = gym_client
           .where((element) =>
-              element.f_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.m_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.l_name!.toLowerCase().contains(value.toLowerCase()))
+              element.fName!.toLowerCase().contains(value.toLowerCase()) ||
+              element.mName!.toLowerCase().contains(value.toLowerCase()) ||
+              element.lName!.toLowerCase().contains(value.toLowerCase()))
           .toList();
 
       search_physio_clients = physio_clients
           .where((element) =>
-              element.f_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.m_name!.toLowerCase().contains(value.toLowerCase()) ||
-              element.l_name!.toLowerCase().contains(value.toLowerCase()))
+              element.f_name.toLowerCase().contains(value.toLowerCase()) ||
+              element.m_name.toLowerCase().contains(value.toLowerCase()) ||
+              element.l_name.toLowerCase().contains(value.toLowerCase()))
           .toList();
     } else {
       search_on = false;

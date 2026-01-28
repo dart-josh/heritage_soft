@@ -34,13 +34,13 @@ class _AllPatientListState extends State<AllPatientList> {
     AppData.set(context).delete_patient(id);
   }
 
-  initators() async {
+  initiators() async {
     await ClinicDatabaseHelpers.get_all_patients(context);
   }
 
   @override
   void initState() {
-    initators();
+    initiators();
     ServerHelpers.socket!.on('Patient', (data) {
       get_patients(data);
     });
