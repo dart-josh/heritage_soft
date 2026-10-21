@@ -87,6 +87,15 @@ class ClinicApi {
     );
   }
 
+  static Future get_attendance(BuildContext context) async {
+    return await DBHelpers.getDataFromServer(
+      context,
+      route: '${clinicUrl}/get_attendance',
+      // showLoading: true,
+      // showToast: true,
+    );
+  }
+
   // !
 
   // ! SETTERS
@@ -310,6 +319,20 @@ class ClinicApi {
         showLoading: showLoading,
         showToast: showToast);
   }
+
+  static Future add_attendance(
+    BuildContext context, {
+    required Map data,
+    bool showLoading = false,
+    bool showToast = false,
+  }) async {
+    return await DBHelpers.postDataToServer(context,
+        route: '${clinicUrl}/add_attendance',
+        data: data,
+        showLoading: showLoading,
+        showToast: showToast);
+  }
+
 // !
 
 // ! REMOVALS

@@ -4,6 +4,7 @@ import 'package:heritage_soft/appData.dart';
 import 'package:heritage_soft/datamodels/user_models/user.model.dart';
 import 'package:heritage_soft/global_variables.dart';
 import 'package:heritage_soft/pages/clinic/clinic_record_page.dart';
+import 'package:heritage_soft/pages/clinic/patient_attendance.dart';
 import 'package:heritage_soft/pages/store/accessories_list_page.dart';
 import 'package:heritage_soft/helpers/helper_methods.dart';
 import 'package:heritage_soft/pages/other/attendance_page.dart';
@@ -33,7 +34,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  cs.CarouselController buttonCarouselController = cs.CarouselController();
+  cs.CarouselSliderController buttonCarouselController = cs.CarouselSliderController();
 
   int current_page = 0;
 
@@ -255,7 +256,7 @@ class _HomePageState extends State<HomePage> {
             doctors(),
             data_report(),
             clinic_record(),
-            manage_hmo(),
+            pt_attendance(),
           ],
         ),
       ),
@@ -277,6 +278,7 @@ class _HomePageState extends State<HomePage> {
             restock_accessories_record(),
             restock_accessories(),
             birthday_list(),
+            manage_hmo(),
           ],
         ),
       ),
@@ -348,8 +350,9 @@ class _HomePageState extends State<HomePage> {
             ft_client_list(),
             pt_client_list(),
             data_report(),
-            clinic_record(),
             staff_list(),
+            pt_attendance(),
+            clinic_record(),
             doctors(),
             birthday_list(),
           ],
@@ -451,6 +454,72 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 20),
                   Text(
                     'Physio Client List',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      letterSpacing: 1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // physio attendance
+  Widget pt_attendance() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PatientAttendancePage()),
+        );
+      },
+      child: Container(
+        width: 220,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: Stack(
+          children: [
+            // background
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                'images/pt_clients.jpeg',
+                fit: BoxFit.cover,
+                width: 200,
+                height: 220,
+              ),
+            ),
+
+            // background cover box
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF01040A).withOpacity(0.53),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+
+            // main content
+            Positioned.fill(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people, size: 60, color: Colors.white),
+                  SizedBox(height: 20),
+                  Text(
+                    'Physio Attendance',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,

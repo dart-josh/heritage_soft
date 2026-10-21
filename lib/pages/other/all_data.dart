@@ -26,7 +26,7 @@ class AllData extends StatefulWidget {
 }
 
 class _AllDataState extends State<AllData> {
-  cs.CarouselController buttonCarouselController = cs.CarouselController();
+  cs.CarouselSliderController buttonCarouselController = cs.CarouselSliderController();
 
   List<ClientModel> all_gym_cl = [];
   List<ClientModel> active_gym_cl = [];
