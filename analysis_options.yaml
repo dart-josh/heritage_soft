@@ -11,6 +11,13 @@ analyzer:
   errors:
     invalid_use_of_protected_member: ignore
     must_be_immutable: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
